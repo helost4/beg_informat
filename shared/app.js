@@ -391,7 +391,9 @@ function sendToSheet(payload){
       setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 500);
     }
 
-    /* ⬇️ ОТПРАВКА ОЦЕНКИ ЗА ДЗ В ТАБЛИЦУ ⬇️ */
+   
+    });
+ /* ⬇️ ОТПРАВКА ОЦЕНКИ ЗА ДЗ В ТАБЛИЦУ ⬇️ */
     const studentName = (window.__student && window.__student.name) || 'Без имени';
     sendToSheet({
       studentName: studentName,
@@ -402,5 +404,4 @@ function sendToSheet(payload){
       maxScore: hwMax,
       grade: g,
       workType: 'homework'
-    });
 })();
