@@ -11,7 +11,7 @@
   }
 
   const student = JSON.parse(studentRaw);
-    // Делаем данные ученика доступными для остальной части app.js
+  // Делаем данные ученика доступными для остальной части app.js
   window.__student = student;
 
   // 2. Если класс ученика не совпадает с классом урока — редирект
@@ -23,11 +23,29 @@
 })();
 
 /* ============================================================
+   ОБЩАЯ ФУНКЦИЯ ОТПРАВКИ РЕЗУЛЬТАТА В GOOGLE ТАБЛИЦУ
+   Объявлена В НАЧАЛЕ, чтобы была доступна всем обработчикам
+   ============================================================ */
+function sendToSheet(payload){
+  if (typeof APPS_SCRIPT_URL === 'undefined' || !APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('ВАШ_ID')) {
+    console.warn('APPS_SCRIPT_URL не настроен — отправка пропущена');
+    return;
+  }
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(function() {
+    console.log('Результат отправлен:', payload);
+  }).catch(function(err) {
+    console.error('Ошибка отправки:', err);
+  });
+}
+
+/* ============================================================
    ОБЩАЯ ЛОГИКА ИНТЕРАКТИВНОГО УРОКА
-   Требует:
-     - глобальную LESSON_DATA (определяется в HTML урока)
-     - глобальную APPS_SCRIPT_URL (определяется в HTML урока)
-     - функцию renderMindMap (из mindmap.js)
    ============================================================ */
 
 const LEVEL_LABEL = {
@@ -46,6 +64,7 @@ const state       = {};
 /* ---------- Заголовки ---------- */
 document.getElementById('title').textContent    = LESSON_DATA.title;
 document.getElementById('subtitle').textContent = LESSON_DATA.subtitle;
+
 /* ---------- Отображение ФИО ученика в тесте ---------- */
 const nameDisplay = document.getElementById('studentNameDisplay');
 if (nameDisplay && window.__student) {
@@ -124,7 +143,7 @@ function launchConfetti(anchorEl) {
   }
 }
 
-/* ---------- Рендер заданий ---------- */
+/* ---------- Рендер заданий теста ---------- */
 const tasksEl = document.getElementById('tasks');
 TASKS.forEach((t,i)=>{
   const div = document.createElement('div');
@@ -145,7 +164,7 @@ TASKS.forEach((t,i)=>{
   tasksEl.appendChild(div);
 });
 
-/* ---------- Проверка ответа ---------- */
+/* ---------- Проверка ответа теста ---------- */
 tasksEl.addEventListener('click', e=>{
   const btn = e.target.closest('[data-check]');
   if (!btn) return;
@@ -187,23 +206,27 @@ function updateProgress(){
     `Проверено ${done} из ${TASKS.length} заданий · Баллы: ${got} / ${totalMax}`;
 }
 
-/* ---------- Итоговая оценка + отправка ---------- */
+/* ---------- Итоговая оценка за тест + отправка ---------- */
 document.getElementById('finish').addEventListener('click', function() {
-    const studentName = (window.__student && window.__student.name) || '';
-
-  if (!studentName) {
-    alert('Пожалуйста, введите фамилию и имя перед завершением.');
-    if (nameInput) nameInput.focus();
-    return;
-  }
-
-   const finishBtn = document.getElementById('finish');
+  // 1. Защита от повторного нажатия
+  const finishBtn = document.getElementById('finish');
   if (finishBtn.dataset.sent === '1') {
     alert('Результат уже отправлен.');
     return;
   }
+
+  // 2. Проверка ФИО из localStorage
+  const studentName = (window.__student && window.__student.name) || '';
+  if (!studentName) {
+    alert('Не найдены данные ученика. Войдите заново.');
+    return;
+  }
+
+  // 3. Блокируем кнопку
   finishBtn.dataset.sent = '1';
   finishBtn.disabled = true;
+
+  // 4. Считаем результат
   const got = Object.values(state).reduce((a, b) => a + b, 0);
   const pct = got / totalMax * 100;
 
@@ -213,6 +236,7 @@ document.getElementById('finish').addEventListener('click', function() {
   else if (pct >= 45) { g = 3; comment = 'Удовлетворительно. Стоит повторить тему.'; }
   else                { g = 2; comment = 'Попробуйте пройти урок ещё раз.'; }
 
+  // 5. Показываем оценку
   const box = document.getElementById('scoreBox');
   box.classList.remove('hidden');
   box.classList.add('pop-in');
@@ -232,14 +256,13 @@ document.getElementById('finish').addEventListener('click', function() {
 
   box.scrollIntoView({behavior:'smooth'});
 
-   
   if (g >= 4) {
     setTimeout(() => launchConfetti(gradeEl), 200);
     setTimeout(() => launchConfetti(gradeEl), 500);
     setTimeout(() => launchConfetti(gradeEl), 800);
   }
 
-   /* Отправка результата теста в таблицу */
+  // 6. Отправка в таблицу
   sendToSheet({
     studentName: studentName,
     className: LESSON_DATA.className || '',
@@ -251,40 +274,21 @@ document.getElementById('finish').addEventListener('click', function() {
     workType: 'test'
   });
 });
-/* ============================================================
-   ОБЩАЯ ФУНКЦИЯ ОТПРАВКИ РЕЗУЛЬТАТА В GOOGLE ТАБЛИЦУ
-   ============================================================ */
-function sendToSheet(payload){
-  if (typeof APPS_SCRIPT_URL === 'undefined' || !APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('ВАШ_ID')) {
-    console.warn('APPS_SCRIPT_URL не настроен — отправка пропущена');
-    return;
-  }
 
-  fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
-  }).then(function() {
-    console.log('Результат отправлен:', payload);
-  }).catch(function(err) {
-    console.error('Ошибка отправки:', err);
-  });
-}
 /* ============================================================
    ДОМАШНЕЕ ЗАДАНИЕ (автопроверка)
    ============================================================ */
 (function initHomework(){
   const hwData = LESSON_DATA.homework;
-  if (!hwData || !hwData.length) return;   // если ДЗ не задано — ничего не делаем
+  if (!hwData || !hwData.length) return;
 
   const hwTasksEl = document.getElementById('homeworkTasks');
   if (!hwTasksEl) return;
 
   const hwState = {};
-  const hwMax = hwData.length * 1;          // каждое задание = 1 балл
+  const hwMax = hwData.length * 1;   // каждое задание = 1 балл
 
-  /* ---------- Рендер заданий ---------- */
+  /* ---------- Рендер заданий ДЗ ---------- */
   hwData.forEach(function(t, i){
     const div = document.createElement('div');
     div.className = 'task easy';
@@ -307,7 +311,7 @@ function sendToSheet(payload){
     hwTasksEl.appendChild(div);
   });
 
-  /* ---------- Проверка одного задания ---------- */
+  /* ---------- Проверка одного задания ДЗ ---------- */
   hwTasksEl.addEventListener('click', function(e){
     const btn = e.target.closest('[data-hw-check]');
     if (!btn) return;
@@ -353,17 +357,17 @@ function sendToSheet(payload){
       `Проверено ${done} из ${hwData.length} заданий · Баллы: ${got} / ${hwMax}`;
   }
 
-  /* ---------- Итог ДЗ ---------- */
+  /* ---------- Итог ДЗ + отправка ---------- */
   document.getElementById('hwFinish').addEventListener('click', function(){
-       // Защита от повторного нажатия
-  const btn = document.getElementById('hwFinish');
-  if (btn.dataset.sent === '1') {
-    alert('Результат уже отправлен. Перезагрузите страницу, чтобы пройти заново.');
-    return;
-  }
-  btn.dataset.sent = '1';
-  btn.disabled = true;
-  btn.textContent = 'Результат отправлен ✓';
+    const btn = document.getElementById('hwFinish');
+
+    // 1. Защита от повторного нажатия
+    if (btn.dataset.sent === '1') {
+      alert('Результат уже отправлен. Перезагрузите страницу, чтобы пройти заново.');
+      return;
+    }
+
+    // 2. Считаем результат
     const got = Object.values(hwState).reduce((a, b) => a + b, 0);
     const pct = got / hwMax * 100;
 
@@ -373,6 +377,7 @@ function sendToSheet(payload){
     else if (pct >= 45) { g = 3; comment = 'Удовлетворительно. Стоит перечитать теорию.'; }
     else                { g = 2; comment = 'Попробуйте выполнить домашнее задание ещё раз.'; }
 
+    // 3. Показываем оценку на экране
     const box = document.getElementById('hwScoreBox');
     box.classList.remove('hidden');
     box.classList.add('pop-in');
@@ -386,7 +391,13 @@ function sendToSheet(payload){
       setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 200);
       setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 500);
     }
-     /* ⬇️ ОТПРАВКА ОЦЕНКИ ЗА ДЗ В ТАБЛИЦУ ⬇️ */
+
+    // 4. Блокируем кнопку
+    btn.dataset.sent = '1';
+    btn.disabled = true;
+    btn.textContent = 'Результат отправлен ✓';
+
+    // 5. Отправка в Google Таблицу
     const studentName = (window.__student && window.__student.name) || 'Без имени';
     sendToSheet({
       studentName: studentName,
@@ -397,5 +408,6 @@ function sendToSheet(payload){
       maxScore: hwMax,
       grade: g,
       workType: 'homework'
+    });
   });
-})();
+})();   // ← ЗАКРЫВАЕТ initHomework — этой строки не хватало!
