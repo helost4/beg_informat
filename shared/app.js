@@ -197,6 +197,13 @@ document.getElementById('finish').addEventListener('click', function() {
     return;
   }
 
+   const finishBtn = document.getElementById('finish');
+  if (finishBtn.dataset.sent === '1') {
+    alert('Результат уже отправлен.');
+    return;
+  }
+  finishBtn.dataset.sent = '1';
+  finishBtn.disabled = true;
   const got = Object.values(state).reduce((a, b) => a + b, 0);
   const pct = got / totalMax * 100;
 
@@ -231,30 +238,38 @@ document.getElementById('finish').addEventListener('click', function() {
     setTimeout(() => launchConfetti(gradeEl), 800);
   }
 
-  /* Отправка в Google Таблицу */
-  if (typeof APPS_SCRIPT_URL !== 'undefined' && APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes('ВАШ_ID')) {
-    const payload = {
-      studentName: studentName,
-      className: LESSON_DATA.className || '',
-      lesson: LESSON_DATA.title,
-      variant: variantKey,
-      score: got,
-      maxScore: totalMax,
-      grade: g
-    };
-
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    }).then(function() {
-      console.log('Результат отправлен:', payload);
-    }).catch(function(err) {
-      console.error('Ошибка отправки:', err);
-    });
-  }
+   /* Отправка результата теста в таблицу */
+  sendToSheet({
+    studentName: studentName,
+    className: LESSON_DATA.className || '',
+    lesson: LESSON_DATA.title,
+    variant: variantKey,
+    score: got,
+    maxScore: totalMax,
+    grade: g,
+    workType: 'test'
+  });
 });
+/* ============================================================
+   ОБЩАЯ ФУНКЦИЯ ОТПРАВКИ РЕЗУЛЬТАТА В GOOGLE ТАБЛИЦУ
+   ============================================================ */
+function sendToSheet(payload){
+  if (typeof APPS_SCRIPT_URL === 'undefined' || !APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('ВАШ_ID')) {
+    console.warn('APPS_SCRIPT_URL не настроен — отправка пропущена');
+    return;
+  }
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(function() {
+    console.log('Результат отправлен:', payload);
+  }).catch(function(err) {
+    console.error('Ошибка отправки:', err);
+  });
+}
 /* ============================================================
    ДОМАШНЕЕ ЗАДАНИЕ (автопроверка)
    ============================================================ */
@@ -339,6 +354,15 @@ document.getElementById('finish').addEventListener('click', function() {
 
   /* ---------- Итог ДЗ ---------- */
   document.getElementById('hwFinish').addEventListener('click', function(){
+       // Защита от повторного нажатия
+  const btn = document.getElementById('hwFinish');
+  if (btn.dataset.sent === '1') {
+    alert('Результат уже отправлен. Перезагрузите страницу, чтобы пройти заново.');
+    return;
+  }
+  btn.dataset.sent = '1';
+  btn.disabled = true;
+  btn.textContent = 'Результат отправлен ✓';
     const got = Object.values(hwState).reduce((a, b) => a + b, 0);
     const pct = got / hwMax * 100;
 
@@ -362,4 +386,21 @@ document.getElementById('finish').addEventListener('click', function() {
       setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 500);
     }
   });
+       if (g >= 4) {
+      setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 200);
+      setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 500);
+    }
+
+    /* ⬇️ ОТПРАВКА ОЦЕНКИ ЗА ДЗ В ТАБЛИЦУ ⬇️ */
+    const studentName = (window.__student && window.__student.name) || 'Без имени';
+    sendToSheet({
+      studentName: studentName,
+      className: LESSON_DATA.className || '',
+      lesson: LESSON_DATA.title,
+      variant: 'HW',
+      score: got,
+      maxScore: hwMax,
+      grade: g,
+      workType: 'homework'
+    });
 })();
