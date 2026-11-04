@@ -232,6 +232,18 @@ document.getElementById('finish').addEventListener('click', function() {
 
   box.scrollIntoView({behavior:'smooth'});
 
+   /* ⬇️ ОТПРАВКА ОЦЕНКИ ЗА ДЗ В ТАБЛИЦУ ⬇️ */
+    const studentName = (window.__student && window.__student.name) || 'Без имени';
+    sendToSheet({
+      studentName: studentName,
+      className: LESSON_DATA.className || '',
+      lesson: LESSON_DATA.title,
+      variant: 'HW',
+      score: got,
+      maxScore: hwMax,
+      grade: g,
+      workType: 'homework'
+
   if (g >= 4) {
     setTimeout(() => launchConfetti(gradeEl), 200);
     setTimeout(() => launchConfetti(gradeEl), 500);
@@ -390,19 +402,5 @@ function sendToSheet(payload){
       setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 200);
       setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 500);
     }
-   
-/* ⬇️ ОТПРАВКА ОЦЕНКИ ЗА ДЗ В ТАБЛИЦУ ⬇️ */
-    const studentName = (window.__student && window.__student.name) || 'Без имени';
-    sendToSheet({
-      studentName: studentName,
-      className: LESSON_DATA.className || '',
-      lesson: LESSON_DATA.title,
-      variant: 'HW',
-      score: got,
-      maxScore: hwMax,
-      grade: g,
-      workType: 'homework'
-   
     });
- 
 })();
