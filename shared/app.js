@@ -45,6 +45,63 @@ function sendToSheet(payload){
 }
 
 /* ============================================================
+   РАЗБОР ЗАДАЧ ПО ШАБЛОНУ
+   ============================================================ */
+(function initSolutions(){
+  const data = LESSON_DATA.solutions;
+  if (!data || !data.length) return;
+
+  const container = document.getElementById('solutionsList');
+  if (!container) return;
+
+  data.forEach(function(item, i){
+    const card = document.createElement('div');
+    card.className = 'solution-card' + (i === 0 ? ' open' : '');
+
+    const stepsHTML = item.template.map(function(s){ return `<li>${s}</li>`; }).join('');
+
+    card.innerHTML = `
+      <div class="solution-head">
+        <span>${item.title}</span>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="solution-body">
+        <div class="solution-task"><b>Условие:</b> ${item.task}</div>
+
+        <button class="solution-reveal-btn" data-reveal="${i}">
+          👁 Показать решение
+        </button>
+
+        <div class="solution-steps" id="solSteps${i}">
+          <div class="solution-template">
+            <b>Шаблон решения:</b>
+            <ol>${stepsHTML}</ol>
+          </div>
+          <div class="solution-answer">
+            <span class="icon">✅</span>
+            <span>Ответ: ${item.answer}</span>
+          </div>
+          <div class="solution-hint">${item.hint}</div>
+        </div>
+      </div>`;
+
+    container.appendChild(card);
+
+    // Раскрытие/сворачивание карточки
+    card.querySelector('.solution-head').addEventListener('click', function(){
+      card.classList.toggle('open');
+    });
+
+    // Кнопка «Показать решение»
+    card.querySelector('[data-reveal]').addEventListener('click', function(){
+      const steps = document.getElementById('solSteps' + i);
+      steps.classList.add('revealed');
+      this.style.display = 'none';
+    });
+  });
+})();
+
+/* ============================================================
    ГЕЙМИФИКАЦИЯ: уровни, XP, значки
    ============================================================ */
 const GAME = {
@@ -182,6 +239,7 @@ document.querySelectorAll('.tab').forEach(tab=>{
 
     document.getElementById('theorySection').classList.toggle('hidden',   t!=='theory');
     document.getElementById('mindmapSection').classList.toggle('hidden',  t!=='mindmap');
+    document.getElementById('solutionsSection').classList.toggle('hidden', t!=='solutions');
     document.getElementById('testSection').classList.toggle('hidden',     t!=='test');
     document.getElementById('finishCard').classList.toggle('hidden',      t!=='test');
     document.getElementById('homeworkSection').classList.toggle('hidden', t!=='homework');
