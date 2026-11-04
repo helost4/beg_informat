@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мои уроки · Информатика</title>
+<link rel="stylesheet" href="shared/style.css">
+<style>
+  .lessons-wrap{max-width:900px;margin:40px auto;padding:0 20px;}
+  .lessons-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px;}
+  .lessons-header h1{margin:0;font-size:1.6rem;background:linear-gradient(90deg,#3b82f6,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .student-badge{background:#eff6ff;border:2px solid #3b82f6;border-radius:12px;padding:10px 16px;font-weight:600;color:#1e293b;}
+  .lesson-card{display:block;background:#fff;border-radius:14px;padding:16px 20px;margin-bottom:12px;
+    text-decoration:none;color:#1e293b;border-left:4px solid #3b82f6;box-shadow:0 4px 12px rgba(0,0,0,.06);transition:.2s;}
+  .lesson-card:hover{transform:translateX(4px);box-shadow:0 8px 20px rgba(59,130,246,.2);border-left-color:#ec4899;}
+  .lesson-card .tag{font-size:.8rem;color:#64748b;display:block;margin-top:4px;}
+  .logout-btn{background:#fff;border:2px solid #ef4444;color:#ef4444;border-radius:10px;padding:8px 16px;cursor:pointer;font-weight:600;}
+  .logout-btn:hover{background:#fef2f2;}
+  .no-lessons{background:#fffbeb;border:2px solid #f59e0b;border-radius:12px;padding:20px;color:#92400e;}
+</style>
+</head>
+<body>
+<div class="lessons-wrap">
+  <div class="lessons-header">
+    <h1>📚 Мои уроки</h1>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="student-badge" id="studentBadge"></div>
+      <button class="logout-btn" id="logoutBtn">Выйти</button>
+    </div>
+  </div>
+
+  <div id="lessonsList"></div>
+</div>
+
+<script>
+/* ---------- Проверка входа ---------- */
+const studentRaw = localStorage.getItem('student');
+if (!studentRaw) {
+  window.location.href = 'login.html';
+}
+
+const student = JSON.parse(studentRaw);
+document.getElementById('studentBadge').textContent =
+  `👤 ${student.name} · ${student.class}`;
+
+/* ---------- Выход ---------- */
+document.getElementById('logoutBtn').addEventListener('click', function(){
+  localStorage.removeItem('student');
+  window.location.href = 'login.html';
+});
+
+/* ---------- Справочник всех уроков по классам ---------- */
+const LESSONS_CATALOG = {
+  "5 класс": [
+    { file: "5-class/lesson-08-tekst.html", title: "Текст как форма представления информации", tag: "§ 8" },
+    // добавляйте сюда остальные уроки 5 класса
+  ],
+  "6 класс": [
+    // { file: "6-class/lesson-01-obekty.html", title: "Объекты окружающего мира", tag: "§ 1" },
+  ],
+  "7 класс": [
+    // { file: "7-class/lesson-01-informaciya-svoystva.html", title: "Информация и её свойства", tag: "§ 1.1" },
+  ],
+  "8 класс": [],
+  "9 класс": [],
+  "10 класс": [],
+  "11 класс": []
+};
+
+/* ---------- Рендер уроков своего класса ---------- */
+const list = LESSONS_CATALOG[student.class] || [];
+const container = document.getElementById('lessonsList');
+
+if (!list.length) {
+  container.innerHTML = `
+    <div class="no-lessons">
+      ⚠️ Для ${student.class} пока нет уроков. Обратитесь к учителю.
+    </div>`;
+} else {
+  list.forEach(function(lesson){
+    const a = document.createElement('a');
+    a.className = 'lesson-card';
+    a.href = lesson.file;
+    a.innerHTML = `${lesson.title}<span class="tag">${lesson.tag}</span>`;
+    container.appendChild(a);
+  });
+}
+</script>
+</body>
+</html>
