@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практическая работа · Текст и компьютер — 5 класс</title>
+<link rel="stylesheet" href="../shared/style.css">
+<style>
+  .practice-wrap{max-width:900px;margin:24px auto;padding:0 20px;}
+
+  .practice-header{
+    background:linear-gradient(135deg,#eff6ff,#fdf4ff,#f0fdf4);
+    border-radius:20px;padding:28px;margin-bottom:24px;
+    border:2px solid #c7d2fe;text-align:center;
+  }
+  .practice-header h1{
+    margin:0 0 8px;font-size:1.8rem;
+    background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .practice-header .meta{color:#64748b;font-size:.95rem;}
+
+  .step{
+    background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;
+    box-shadow:0 6px 20px rgba(59,130,246,.1);border:1px solid #e2e8f0;
+  }
+  .step-num{
+    display:inline-block;width:42px;height:42px;line-height:42px;
+    text-align:center;border-radius:50%;font-weight:900;font-size:1.2rem;
+    background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;
+    margin-right:12px;vertical-align:middle;
+  }
+  .step h2{display:inline-block;vertical-align:middle;margin:0 0 12px;font-size:1.25rem;color:#1e293b;}
+
+  .step p{margin:10px 0;line-height:1.6;color:#334155;}
+  .step ul, .step ol{margin:10px 0;padding-left:26px;line-height:1.7;color:#334155;}
+  .step li{margin:6px 0;}
+
+  .callout{
+    border-radius:12px;padding:14px 18px;margin:14px 0;
+    font-size:.95rem;line-height:1.5;
+  }
+  .callout.tip{background:#eff6ff;border-left:4px solid #3b82f6;color:#1e40af;}
+  .callout.warn{background:#fffbeb;border-left:4px solid #f59e0b;color:#92400e;}
+  .callout.ok{background:#f0fdf4;border-left:4px solid #22c55e;color:#15803d;}
+
+  .kbd{
+    display:inline-block;padding:2px 8px;border-radius:6px;
+    background:#f1f5f9;border:1px solid #cbd5e1;border-bottom-width:2px;
+    font-family:monospace;font-size:.9rem;color:#1e293b;
+  }
+
+  /* Визуальные схемы */
+  .visual{
+    background:#f8fafc;border-radius:14px;padding:20px;margin:16px 0;
+    text-align:center;border:2px dashed #cbd5e1;
+  }
+  .visual .caption{font-size:.85rem;color:#64748b;margin-top:10px;}
+
+  /* Иллюстрация окна Writer */
+  .writer-window{
+    background:#fff;border-radius:10px;overflow:hidden;
+    box-shadow:0 4px 16px rgba(0,0,0,.12);max-width:640px;margin:0 auto;
+    border:1px solid #cbd5e1;
+  }
+  .writer-titlebar{
+    background:linear-gradient(90deg,#1e40af,#3b82f6);color:#fff;
+    padding:8px 14px;font-size:.85rem;font-weight:600;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .writer-titlebar .dots{display:flex;gap:6px;}
+  .writer-titlebar .dots span{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.5);}
+  .writer-toolbar{
+    background:#f1f5f9;padding:8px 12px;display:flex;gap:6px;
+    border-bottom:1px solid #e2e8f0;flex-wrap:wrap;
+  }
+  .writer-toolbar .tool{
+    background:#fff;border:1px solid #cbd5e1;border-radius:6px;
+    padding:4px 10px;font-size:.8rem;color:#334155;font-weight:600;
+  }
+  .writer-ruler{
+    background:#fef3c7;height:16px;border-bottom:1px solid #fcd34d;
+    display:flex;align-items:center;padding:0 8px;font-size:.6rem;color:#92400e;
+    justify-content:space-between;
+  }
+  .writer-page{
+    background:#fff;padding:20px 24px;min-height:140px;
+    font-family:'Times New Roman',serif;font-size:1rem;line-height:1.6;
+    color:#1e293b;
+  }
+  .writer-page h4{margin:0 0 8px;font-family:'Segoe UI',sans-serif;font-size:1.1rem;color:#1e40af;}
+  .writer-status{
+    background:#f1f5f9;padding:4px 12px;font-size:.75rem;color:#64748b;
+    border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;
+  }
+
+  /* Пример готового текста */
+  .example-text{
+    background:#fff;border:2px solid #e2e8f0;border-radius:12px;
+    padding:20px 26px;margin:16px 0;
+    font-family:'Times New Roman',serif;font-size:1rem;line-height:1.7;color:#1e293b;
+  }
+  .example-text h3{
+    font-family:'Segoe UI',sans-serif;color:#3b82f6;margin:0 0 10px;font-size:1.15rem;
+  }
+  .example-text .center{text-align:center;}
+  .example-text .bold{font-weight:700;}
+  .example-text .italic{font-style:italic;}
+  .example-text .underline{text-decoration:underline;}
+
+  /* Чек-лист */
+  .checklist{
+    background:#f0fdf4;border-radius:14px;padding:20px;margin:20px 0;
+    border:2px solid #bbf7d0;
+  }
+  .checklist h3{margin:0 0 12px;color:#15803d;font-size:1.1rem;}
+  .checklist label{
+    display:flex;align-items:center;gap:10px;padding:8px 0;
+    cursor:pointer;font-size:.95rem;color:#166534;
+  }
+  .checklist input[type=checkbox]{
+    width:20px;height:20px;accent-color:#22c55e;cursor:pointer;
+  }
+
+  /* Отправка */
+  .send-block{
+    background:linear-gradient(135deg,#eff6ff,#fdf4ff);
+    border-radius:16px;padding:24px;margin-top:24px;
+    border:2px solid #c7d2fe;
+  }
+  .send-block h2{margin:0 0 14px;color:#3b82f6;font-size:1.25rem;}
+  .send-block label{display:block;font-weight:700;margin:14px 0 6px;color:#1e293b;}
+  .send-block input{
+    width:100%;padding:12px 14px;border-radius:10px;
+    border:2px solid #e2e8f0;font-size:1rem;outline:none;
+  }
+  .send-block input:focus{border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.15);}
+  .send-block .mailto-btn{
+    display:inline-block;margin-top:18px;padding:14px 30px;
+    border-radius:12px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);
+    color:#fff;font-weight:700;font-size:1rem;text-decoration:none;
+    box-shadow:0 6px 18px rgba(59,130,246,.35);transition:.2s;
+  }
+  .send-block .mailto-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(139,92,246,.45);}
+  .send-block .muted{margin-top:10px;}
+</style>
+</head>
+<body>
+
+<div class="practice-wrap">
+
+  <div class="practice-header">
+    <h1>🖥 Практическая работа</h1>
+    <div class="meta">5 класс · «Текст и компьютер» · LibreOffice Writer</div>
+    <p style="margin:14px 0 0;color:#334155;line-height:1.6;">
+      Вы создадите текстовый документ в LibreOffice Writer, оформите его по образцу,
+      сохраните и отправите на почту учителя.
+    </p>
+  </div>
+
+  <!-- ================== ШАГ 1 ================== -->
+  <div class="step">
+    <span class="step-num">1</span><h2>Откройте LibreOffice Writer</h2>
+    <p>Запустите программу одним из способов:</p>
+    <ul>
+      <li>Нажмите <span class="kbd">Пуск</span> → найдите <b>LibreOffice Writer</b> → откройте.</li>
+      <li>Или дважды кликните по значку <b>Writer</b> на рабочем столе (если он есть).</li>
+    </ul>
+
+    <div class="visual">
+      <div class="writer-window">
+        <div class="writer-titlebar">
+          <span>Безымянный 1 — LibreOffice Writer</span>
+          <div class="dots"><span></span><span></span><span></span></div>
+        </div>
+        <div class="writer-toolbar">
+          <span class="tool">Файл</span>
+          <span class="tool">Правка</span>
+          <span class="tool">Вид</span>
+          <span class="tool">Вставка</span>
+          <span class="tool">Формат</span>
+          <span class="tool">Таблица</span>
+        </div>
+        <div class="writer-ruler">
+          <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+        </div>
+        <div class="writer-page">
+          <p style="color:#94a3b8;font-style:italic;">Здесь вы будете набирать текст…</p>
+        </div>
+        <div class="writer-status">
+          <span>Страница 1 из 1</span>
+          <span>Символов: 0</span>
+        </div>
+      </div>
+      <div class="caption">Так выглядит окно LibreOffice Writer</div>
+    </div>
+
+    <div class="callout tip">
+      💡 <b>Совет:</b> если окно открылось не на весь экран — нажмите квадратик в правом верхнем углу, чтобы развернуть.
+    </div>
+  </div>
+
+  <!-- ================== ШАГ 2 ================== -->
+  <div class="step">
+    <span class="step-num">2</span><h2>Наберите текст</h2>
+    <p>Наберите текст <b>ровно такой, как в примере</b>. Следите за пробелами и знаками препинания.</p>
+
+    <div class="example-text">
+      <h3 class="center">Мой первый текст</h3>
+      <p>Я учусь в <span class="bold">5 классе</span>. На уроке информатики мы узнали, что <span class="italic">текст</span> — это информация, записанная с помощью символов.</p>
+      <p>Компьютер помогает <span class="underline">создавать</span>, редактировать и хранить тексты. Для этого используют <span class="bold">текстовые процессоры</span>, например LibreOffice Writer.</p>
+      <p>Я умею набирать текст, исправлять ошибки и сохранять документ.</p>
+    </div>
+
+    <div class="callout warn">
+      ⚠️ <b>Правила набора:</b>
+      <ul style="margin:8px 0 0;">
+        <li>После знака препинания — <b>один пробел</b>, перед ним — нет.</li>
+        <li>Между словами — <b>ровно один пробел</b>.</li>
+        <li>Каждое новое предложение начинается с <b>заглавной буквы</b>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ================== ШАГ 3 ================== -->
+  <div class="step">
+    <span class="step-num">3</span><h2>Оформите заголовок</h2>
+    <p>Сделайте заголовок «Мой первый текст» крупным, жирным и по центру:</p>
+    <ol>
+      <li>Выделите строку с заголовком (кликните в начало, зажмите <span class="kbd">Shift</span> и кликните в конец).</li>
+      <li>Нажмите кнопку <b>«По центру»</b> на панели инструментов (или <span class="kbd">Ctrl+E</span>).</li>
+      <li>Нажмите кнопку <b>«Полужирный»</b> <b>Ж</b> (или <span class="kbd">Ctrl+B</span>).</li>
+      <li>Увеличьте размер шрифта: выберите <b>16</b> или <b>18</b> в поле размера шрифта.</li>
+    </ol>
+
+    <div class="visual">
+      <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+        <span class="tool" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;font-weight:700;color:#334155;">Ж</span>
+        <span class="tool" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;font-style:italic;color:#334155;">К</span>
+        <span class="tool" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;text-decoration:underline;color:#334155;">Ч</span>
+        <span class="tool" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;color:#334155;">≡</span>
+        <span class="tool" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;color:#334155;">16</span>
+      </div>
+      <div class="caption">Кнопки: Ж — жирный, К — курсив, Ч — подчёркнутый, ≡ — выравнивание, 16 — размер шрифта</div>
+    </div>
+  </div>
+
+  <!-- ================== ШАГ 4 ================== -->
+  <div class="step">
+    <span class="step-num">4</span><h2>Выделите ключевые слова</h2>
+    <p>В основном тексте выделите слова так, как в примере:</p>
+    <ul>
+      <li><b>«5 классе»</b> — полужирным (<span class="kbd">Ctrl+B</span>).</li>
+      <li><i>«текст»</i> — курсивом (<span class="kbd">Ctrl+I</span>).</li>
+      <li><u>«создавать»</u> — подчёркнутым (<span class="kbd">Ctrl+U</span>).</li>
+      <li><b>«текстовые процессоры»</b> — полужирным.</li>
+    </ul>
+
+    <div class="callout ok">
+      ✅ <b>Проверьте себя:</b> в примере выше ровно 4 выделенных фрагмента. Если у вас столько же — всё верно.
+    </div>
+  </div>
+
+  <!-- ================== ШАГ 5 ================== -->
+  <div class="step">
+    <span class="step-num">5</span><h2>Проверьте орфографию</h2>
+    <p>LibreOffice Writer подчёркивает слова с ошибками <b>красной волнистой линией</b>.</p>
+    <ol>
+      <li>Кликните <b>правой кнопкой</b> по подчёркнутому слову.</li>
+      <li>В меню выберите правильный вариант написания (если он есть).</li>
+      <li>Или нажмите <b>«Добавить в словарь»</b>, если слово верное, но программа его не знает.</li>
+    </ol>
+
+    <div class="callout tip">
+      💡 <b>Совет:</b> если подчёркнуто всё подряд — проверьте, что в настройках выбран <b>русский язык</b> (внизу окна, в строке состояния).
+    </div>
+  </div>
+
+  <!-- ================== ШАГ 6 ================== -->
+  <div class="step">
+    <span class="step-num">6</span><h2>Сохраните документ</h2>
+    <ol>
+      <li>Нажмите <span class="kbd">Ctrl+S</span> или меню <b>Файл → Сохранить</b>.</li>
+      <li>В окне сохранения выберите папку <b>«Документы»</b> или <b>«Рабочий стол»</b>.</li>
+      <li>В поле «Имя файла» введите: <b>Фамилия_Имя_5класс</b> (например, <b>Иванов_Иван_5класс</b>).</li>
+      <li>Нажмите <b>«Сохранить»</b>.</li>
+      <li>Если появится окно «Использовать формат ODF?» — нажмите <b>«Использовать формат ODF»</b>.</li>
+    </ol>
+
+    <div class="callout warn">
+      ⚠️ <b>Важно:</b> имя файла должно быть на латинице или кириллице <b>без пробелов</b> — используйте нижнее подчёркивание <span class="kbd">_</span>.
+    </div>
+  </div>
+
+  <!-- ================== ШАГ 7 ================== -->
+  <div class="step">
+    <span class="step-num">7</span><h2>Проверьте себя по чек-листу</h2>
+
+    <div class="checklist">
+      <h3>✅ Чек-лист готовности</h3>
+      <label><input type="checkbox" data-check> Заголовок «Мой первый текст» — по центру, жирный, размер 16–18</label>
+      <label><input type="checkbox" data-check> Текст набран без ошибок, пробелы по правилам</label>
+      <label><input type="checkbox" data-check> Слово «5 классе» — жирным</label>
+      <label><input type="checkbox" data-check> Слово «текст» — курсивом</label>
+      <label><input type="checkbox" data-check> Слово «создавать» — подчёркнутым</label>
+      <label><input type="checkbox" data-check> Слово «текстовые процессоры» — жирным</label>
+      <label><input type="checkbox" data-check> Документ сохранён с именем Фамилия_Имя_5класс</label>
+      <label><input type="checkbox" data-check> Я знаю, что 1 байт = 8 бит</label>
+    </div>
+
+    <div class="callout ok" id="checklistDone" style="display:none;">
+      🎉 <b>Отлично!</b> Все пункты выполнены. Теперь отправьте работу учителю.
+    </div>
+  </div>
+
+  <!-- ================== ОТПРАВКА ================== -->
+  <div class="send-block">
+    <h2>📧 Отправьте работу учителю</h2>
+    <p style="color:#334155;line-height:1.6;">
+      Прикрепите сохранённый файл к письму и отправьте на почту учителя.
+      Впишите своё имя — оно попадёт в тему письма.
+    </p>
+
+    <label for="studentName">Ваши фамилия и имя:</label>
+    <input type="text" id="studentName" placeholder="Например: Иванов Иван">
+
+    <a href="#" class="mailto-btn" id="sendBtn">📨 Открыть почтовую программу</a>
+    <div class="muted" style="font-size:.85rem;">
+      Откроется ваша почтовая программа с уже заполненной темой письма.
+      Останется прикрепить файл и нажать «Отправить».
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   НАСТРОЙКИ: почта учителя
+   ============================================================ */
+const TEACHER_EMAIL = 'helost@ya.ru';   // ← ЗАМЕНИТЕ на настоящий адрес
+const SUBJECT_PREFIX = 'Практическая работа «Текст и компьютер» — 5 класс';
+
+/* ---------- Чек-лист: показать сообщение, когда всё отмечено ---------- */
+const checkboxes = document.querySelectorAll('[data-check]');
+const doneMsg = document.getElementById('checklistDone');
+
+checkboxes.forEach(cb => {
+  cb.addEventListener('change', function(){
+    const all = Array.from(checkboxes).every(c => c.checked);
+    doneMsg.style.display = all ? 'block' : 'none';
+    if (all) doneMsg.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+});
+
+/* ---------- Кнопка «Открыть почтовую программу» ---------- */
+document.getElementById('sendBtn').addEventListener('click', function(e){
+  e.preventDefault();
+
+  const name = document.getElementById('studentName').value.trim();
+  if (!name) {
+    alert('Пожалуйста, введите фамилию и имя.');
+    document.getElementById('studentName').focus();
+    return;
+  }
+
+  const subject = encodeURIComponent(`${SUBJECT_PREFIX} · ${name}`);
+  const body = encodeURIComponent(
+    `Здравствуйте!\n\n` +
+    `Отправляю практическую работу «Текст и компьютер».\n\n` +
+    `Ученик: ${name}\n` +
+    `Класс: 5\n` +
+    `Дата: ${new Date().toLocaleDateString('ru-RU')}\n\n` +
+    `Файл с работой прикреплён к письму.\n\n` +
+    `С уважением,\n${name}`
+  );
+
+  const mailto = `mailto:${TEACHER_EMAIL}?subject=${subject}&body=${body}`;
+  window.location.href = mailto;
+});
+</script>
+</body>
+</html>
