@@ -45,6 +45,72 @@ function sendToSheet(payload){
 }
 
 /* ============================================================
+   ГЕЙМИФИКАЦИЯ: уровни, XP, значки
+   ============================================================ */
+const GAME = {
+  xp: 0,
+  maxXP: 100,
+  levels: [
+    { name: '🥉 Новичок',        threshold: 0,  badge: 'badgeBronze' },
+    { name: '🥈 Писарь',          threshold: 40, badge: 'badgeSilver' },
+    { name: '🥇 Мастер текста',   threshold: 75, badge: 'badgeGold'   }
+  ],
+  currentLevel: 0
+};
+
+function updateGameUI(){
+  const xpFill = document.getElementById('xpBarFill');
+  const xpPoints = document.getElementById('xpPoints');
+  const xpLevelName = document.getElementById('xpLevelName');
+  if (!xpFill) return;
+
+  // Определяем текущий уровень
+  let level = 0;
+  for (let i = GAME.levels.length - 1; i >= 0; i--) {
+    if (GAME.xp >= GAME.levels[i].threshold) { level = i; break; }
+  }
+
+  // Повышение уровня — показать уведомление
+  if (level > GAME.currentLevel) {
+    GAME.currentLevel = level;
+    showLevelUp(GAME.levels[level].name);
+    launchConfetti(document.getElementById('xpPanel'));
+  }
+
+  // Обновляем полосу и текст
+  const pct = Math.min(100, (GAME.xp / GAME.maxXP) * 100);
+  xpFill.style.width = pct + '%';
+  xpPoints.textContent = `${GAME.xp} / ${GAME.maxXP} XP`;
+  xpLevelName.textContent = GAME.levels[level].name;
+
+  // Разблокируем значки
+  GAME.levels.forEach((lvl, i) => {
+    const el = document.getElementById(lvl.badge);
+    if (el) {
+      if (i <= level) el.classList.add('unlocked');
+      else el.classList.remove('unlocked');
+    }
+  });
+}
+
+function showLevelUp(levelName){
+  const toast = document.createElement('div');
+  toast.className = 'levelup-toast';
+  toast.innerHTML = `🎉 Новый уровень!<div class="sub">${levelName}</div>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 100);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 600);
+  }, 3000);
+}
+
+function addXP(points){
+  GAME.xp = Math.min(GAME.maxXP, GAME.xp + points);
+  updateGameUI();
+}
+
+/* ============================================================
    ОБЩАЯ ЛОГИКА ИНТЕРАКТИВНОГО УРОКА
    ============================================================ */
 
