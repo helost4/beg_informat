@@ -245,3 +245,139 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:30px;pad
 }
 .goal-tag.goal{background:#3b82f6;}
 .goal-tag.tasks{background:#ec4899;}
+/* ============ ГЕЙМИФИКАЦИЯ ============ */
+.xp-panel{
+  background: linear-gradient(135deg, #f0f9ff, #fdf4ff);
+  border: 2px solid #c7d2fe;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.xp-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.xp-level-name{
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #3b82f6;
+}
+.xp-points{
+  font-weight: 700;
+  color: #64748b;
+  font-size: .9rem;
+}
+.xp-bar-bg{
+  height: 14px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.xp-bar-fill{
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #22c55e, #3b82f6, #8b5cf6);
+  border-radius: 8px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.xp-badges{
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.badge-slot{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #e2e8f0;
+  color: #94a3b8;
+  font-size: .8rem;
+  font-weight: 600;
+  transition: .3s;
+  filter: grayscale(1);
+  opacity: .6;
+}
+.badge-slot.unlocked{
+  filter: none;
+  opacity: 1;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  box-shadow: 0 2px 8px rgba(245,158,11,.3);
+}
+.badge-slot .badge-icon{
+  font-size: 1.2rem;
+}
+/* Всплывающее уведомление о новом уровне */
+.levelup-toast{
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: #fff;
+  padding: 16px 32px;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 1.2rem;
+  box-shadow: 0 12px 40px rgba(59,130,246,.5);
+  z-index: 10000;
+  transition: transform .5s cubic-bezier(.34,1.56,.64,1);
+  text-align: center;
+}
+.levelup-toast.show{
+  transform: translateX(-50%) translateY(0);
+}
+.levelup-toast .sub{
+  font-size: .85rem;
+  font-weight: 500;
+  opacity: .9;
+  margin-top: 4px;
+}
+/* Прогресс-кольцо в оценке */
+.grade-ring{
+  width: 120px;
+  height: 120px;
+  margin: 12px auto;
+  position: relative;
+}
+.grade-ring svg{
+  transform: rotate(-90deg);
+}
+.grade-ring .ring-bg{
+  fill: none;
+  stroke: #e2e8f0;
+  stroke-width: 10;
+}
+.grade-ring .ring-fill{
+  fill: none;
+  stroke: url(#ringGrad);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 283;
+  transition: stroke-dashoffset 1s ease;
+}
+.grade-ring .ring-text{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.8rem;
+  color: #1e293b;
+}
+.grade-ring .ring-text small{
+  font-size: .7rem;
+  font-weight: 600;
+  color: #64748b;
+}
