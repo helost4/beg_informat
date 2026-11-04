@@ -1,1 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Компьютерные сети. Адресация — 10 класс</title>
+<link rel="stylesheet" href="../shared/style.css">
+<style>
+  /* Специфичные стили для 10 класса (схемы, таблицы) */
+  .ip-visual {
+    background: #1e293b; color: #fff; padding: 20px; border-radius: 12px;
+    font-family: monospace; font-size: 1.1rem; text-align: center; margin: 16px 0;
+    overflow-x: auto;
+  }
+  .ip-visual .network-part { color: #3b82f6; font-weight: bold; }
+  .ip-visual .host-part { color: #ec4899; font-weight: bold; }
+  .ip-visual .mask-one { color: #22c55e; }
+  .ip-visual .mask-zero { color: #ef4444; }
+  
+  .converter-box {
+    background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px;
+    padding: 16px; margin: 16px 0;
+  }
+  .converter-box input {
+    width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #94a3b8;
+    font-size: 1rem; margin-bottom: 10px; font-family: monospace;
+  }
+  .converter-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .converter-row input { flex: 1; min-width: 200px; }
+  .converter-res {
+    background: #e0f2fe; padding: 10px; border-radius: 8px; font-weight: bold;
+    color: #0369a1; font-family: monospace; display: none; margin-top: 10px;
+  }
+  
+  .table-mask {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+  }
+  .table-mask th, .table-mask td {
+    border: 1px solid #cbd5e1; padding: 8px; text-align: center;
+  }
+  .table-mask th { background: #f1f5f9; color: #1e293b; }
+  .table-mask tr:nth-child(even) { background: #f8fafc; }
+</style>
+</head>
+<body>
 
+<!-- Фоновые эмодзи -->
+<div class="bubble-field" aria-hidden="true">
+  <span class="bubble" style="top:10%; left:5%;  animation-delay:0s;">🌐</span>
+  <span class="bubble" style="top:25%; left:90%; animation-delay:1s;">💻</span>
+  <span class="bubble" style="top:60%; left:8%;  animation-delay:2s;">🔗</span>
+  <span class="bubble" style="top:80%; left:85%; animation-delay:1.5s;">🛜</span>
+  <span class="bubble" style="top:40%; left:50%; animation-delay:.5s;">🔢</span>
+  <span class="bubble" style="top:90%; left:45%; animation-delay:2.5s;">📡</span>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="hero-emoji">🧑‍💻</div>
+    <h1 id="title"></h1>
+    <div class="sub" id="subtitle"></div>
+    <div class="variant-badge" id="variantBadge"></div>
+  </header>
+
+  <!-- ГЕЙМИФИКАЦИЯ -->
+  <div class="xp-panel" id="xpPanel">
+    <div class="xp-header">
+      <span class="xp-level-name" id="xpLevelName">🥉 Новичок</span>
+      <span class="xp-points" id="xpPoints">0 / 100 XP</span>
+    </div>
+    <div class="xp-bar-bg">
+      <div class="xp-bar-fill" id="xpBarFill"></div>
+    </div>
+    <div class="xp-badges">
+      <div class="badge-slot" id="badgeBronze">
+        <span class="badge-icon">🥉</span> Новичок
+      </div>
+      <div class="badge-slot" id="badgeSilver">
+        <span class="badge-icon">🥈</span> Сетевик
+      </div>
+      <div class="badge-slot" id="badgeGold">
+        <span class="badge-icon">🥇</span> Админ
+      </div>
+    </div>
+  </div>
+
+  <div class="section-tabs">
+    <button class="tab active" data-tab="theory">📚 Теория</button>
+    <button class="tab" data-tab="mindmap">🧠 Карта</button>
+    <button class="tab" data-tab="solutions">📐 Разбор задач</button>
+    <button class="tab" data-tab="test">✏️ Тест ЕГЭ</button>
+    <button class="tab" data-tab="homework">🏠 Домашнее задание</button>
+  </div>
+
+  <!-- ТЕОРИЯ -->
+  <div class="card" id="theorySection">
+    <div id="lessonGoals">
+      <h2><span class="icon">🎯</span> Цель и задачи урока</h2>
+      <div style="margin-bottom:14px;">
+        <span class="goal-tag goal">ЦЕЛЬ</span>
+        <div id="goalText" style="font-size:1rem;line-height:1.5;color:#1e293b;"></div>
+      </div>
+      <div>
+        <span class="goal-tag tasks">ЗАДАЧИ</span>
+        <ul id="tasksList" style="margin:8px 0 0;padding-left:22px;line-height:1.7;color:#334155;"></ul>
+      </div>
+    </div>
+
+    <h2><span class="icon">💡</span> Ключевые понятия темы</h2>
+    <div id="theoryList"></div>
+
+    <!-- Интерактивный калькулятор -->
+    <div class="card" style="margin-top: 20px; background: #eff6ff;">
+      <h3>🧮 Быстрый калькулятор (перевод чисел)</h3>
+      <p class="muted">Поможет при решении задач на маски и IP-адреса.</p>
+      <div class="converter-box">
+        <div class="converter-row">
+          <input type="number" id="convDec" placeholder="Десятичное число (0-255)">
+          <input type="text" id="convBin" placeholder="Двоичное (8 бит)">
+        </div>
+        <div class="converter-res" id="convRes"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ИНТЕЛЛЕКТ-КАРТА -->
+  <div class="card hidden" id="mindmapSection">
+    <h2><span class="icon">🧠</span> Интеллект-карта</h2>
+    <p class="muted" style="margin:-8px 0 14px">Кликните по узлу, чтобы раскрыть/свернуть ветвь</p>
+    <div id="mindmapBox"></div>
+  </div>
+
+  <!-- РАЗБОР ЗАДАЧ -->
+  <div class="card hidden" id="solutionsSection">
+    <h2><span class="icon">📐</span> Разбор задач по шаблону</h2>
+    <p class="muted" style="margin:-8px 0 16px">Разберите каждую задачу по шагам. Попробуйте решить сами, затем нажмите «Показать решение».</p>
+    <div id="solutionsList"></div>
+  </div>
+
+  <!-- ТЕСТ -->
+  <div class="card hidden" id="testSection">
+    <h2><span class="icon">🎯</span> Проверочный тест</h2>
+    <div id="studentInfo" style="background:#eff6ff;border-radius:12px;padding:16px;margin-bottom:18px;border:2px solid #3b82f6;">
+      <div style="font-weight:700;color:#1e293b;">
+        👤 Ученик: <span id="studentNameDisplay">—</span>
+      </div>
+      <div class="muted" style="margin-top:6px;font-size:.85rem;">
+        ФИО подставлено из вашего входа и будет отправлено в журнал учителя.
+      </div>
+    </div>
+    <div class="muted">Прогресс выполнения</div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="muted" id="progTxt">0 из 0 заданий</div>
+    <div id="tasks" style="margin-top:18px"></div>
+  </div>
+
+  <!-- ДОМАШНЕЕ ЗАДАНИЕ -->
+  <div class="card hidden" id="homeworkSection">
+    <h2><span class="icon">🏠</span> Домашнее задание</h2>
+    <p class="muted" style="margin:-8px 0 16px">
+      Задания для отработки навыков дома.
+    </p>
+    <div id="homeworkTasks"></div>
+    <div class="progress" style="margin-top:18px"><div id="hwBar"></div></div>
+    <div class="muted" id="hwProgTxt">0 из 0 заданий</div>
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn" id="hwFinish">Проверить домашнее задание</button>
+    </div>
+    <div class="score-box hidden" id="hwScoreBox" style="margin-top:20px">
+      <div class="muted">Результат домашнего задания</div>
+      <div id="hwFinalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div class="grade" id="hwGrade"></div>
+      <div class="muted" id="hwComment" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- ИТОГИ ТЕСТА -->
+  <div class="card hidden" id="finishCard" style="text-align:center">
+    <button class="btn" id="finish">Завершить урок и получить оценку</button>
+    <div class="score-box hidden" id="scoreBox">
+      <div class="muted">Ваш результат</div>
+      <div id="finalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div style="font-size:3rem;margin:8px 0;" id="finalEmoji"></div>
+      <div class="grade-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#ec4899"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="60" cy="60" r="45"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="45"/>
+        </svg>
+        <div class="ring-text">
+          <span id="ringPercent">0%</span>
+          <small>выполнено</small>
+        </div>
+      </div>
+      <div class="grade" id="finalGrade"></div>
+      <div class="muted" id="finalComment" style="margin-top:10px"></div>
+      <button class="btn ghost" style="margin-top:20px" onclick="location.reload()">🔄 Пройти другой вариант</button>
+    </div>
+  </div>
+
+  <footer>УМК К.Ю. Полякова · Интерактивный урок (ЕГЭ №10)</footer>
+</div>
+
+<script>
+/* ============================================================
+   ДАННЫЕ УРОКА
+   ============================================================ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDCZW3hZ1tGvpm6Fu38UokMecG5cXQMldPwaiEPVyh8KSnVsoDQ_ZS7IdR8JMLvGli/exec'; // Замените на свой URL
+
+const LESSON_DATA = {
+  title: "Сеть. IP-адреса. Маски",
+  subtitle: "10 класс · УМК Полякова К.Ю. · Подготовка к ЕГЭ (Задание 10)",
+  className: "10 класс",
+
+  goal: "Сформировать системное представление о компьютерных сетях, принципах IP-адресации и масках подсетей. Научиться решать задачи базового и повышенного уровня (ЕГЭ №10).",
+
+  tasks: [
+    "Познакомиться с понятиями IP-адрес, маска сети, адрес сети.",
+    "Научиться переводить числа из десятичной в двоичную систему и обратно.",
+    "Освоить алгоритм нахождения адреса сети по IP-адресу и маске.",
+    "Решить задачи базового уровня (нахождение адреса сети и номера компьютера)."
+  ],
+
+  theory: [
+    {
+      title: "🌐 Компьютерные сети и IP-адреса",
+      image: "🌐 💻 🛜",
+      body: `<p><b>Компьютерная сеть</b> — это группа компьютеров, соединенных линиями связи и обменивающихся информацией.</p>
+             <p>Каждый компьютер в сети Интернет имеет уникальный адрес — <b>IP-адрес</b> (Internet Protocol).</p>
+             <p>IP-адрес (IPv4) состоит из <b>32 бит</b>. Для удобства его записывают в виде 4 чисел (октетов), разделенных точками. Каждое число может быть от 0 до 255.</p>
+             <p>Пример: <code>192.168.85.210</code></p>
+             <p>В двоичном виде это: <code>11000000.10101000.01010101.11010010</code></p>`
+    },
+    {
+      title: "🎭 Что такое маска сети?",
+      image: "🎭 🔢 🛡️",
+      body: `<p><b>Маска подсети</b> — это 32-битное число, которое показывает, какая часть IP-адреса относится к адресу сети, а какая — к адресу компьютера (узла) внутри этой сети.</p>
+             <p>В маске сначала идут <b>единицы</b>, а потом <b>нули</b> (не может быть наоборот).</p>
+             <ul>
+               <li><b>1</b> в маске — биты IP-адреса относятся к <b style="color: #3b82f6;">адресу сети</b>.</li>
+               <li><b>0</b> в маске — биты IP-адреса относятся к <b style="color: #ec4899;">адресу узла (компьютера)</b>.</li>
+             </ul>
+             <div class="ip-visual">
+               IP: &nbsp; <span class="network-part">11000000.10101000.01010101</span> . <span class="host-part">11010010</span><br>
+               Маска: <span class="mask-one">11111111.11111111.11111111</span> . <span class="mask-zero">00000000</span>
+             </div>
+             <p>В данном примере маска <code>255.255.255.0</code>. Первые 24 бита — это адрес сети, последние 8 бит — адрес компьютера.</p>`
+    },
+    {
+      title: "🧮 Адрес сети: операция логическое И",
+      image: "🧮 ⚙️ ➕",
+      body: `<p>Чтобы найти <b>адрес сети</b>, нужно применить поразрядную операцию <b>логическое «И» (AND)</b> к IP-адресу и маске.</p>
+             <ul>
+               <li><code>1 & 1 = 1</code></li>
+               <li><code>1 & 0 = 0</code></li>
+               <li><code>0 & 1 = 0</code></li>
+               <li><code>0 & 0 = 0</code></li>
+             </ul>
+             <p>Простыми словами: если бит маски равен <code>1</code>, мы <b>оставляем</b> бит IP-адреса без изменений. Если бит маски равен <code>0</code>, мы <b>заменяем</b> его на <code>0</code>.</p>
+             <p>В десятичном виде: мы «обнуляем» те числа IP-адреса, где маска равна 0, и оставляем без изменений там, где маска равна 255.</p>`
+    },
+    {
+      title: "📏 Допустимые значения маски",
+      image: "📏 0️⃣1️⃣ 🔢",
+      body: `<p>Так как в маске сначала идут единицы, а потом нули, то каждый байт маски может принимать только ограниченный набор значений.</p>
+             <table class="table-mask">
+               <tr><th>Двоичный вид</th><th>Десятичный вид</th><th>Кол-во единиц</th></tr>
+               <tr><td>00000000</td><td><b>0</b></td><td>0</td></tr>
+               <tr><td>10000000</td><td><b>128</b></td><td>1</td></tr>
+               <tr><td>11000000</td><td><b>192</b></td><td>2</td></tr>
+               <tr><td>11100000</td><td><b>224</b></td><td>3</td></tr>
+               <tr><td>11110000</td><td><b>240</b></td><td>4</td></tr>
+               <tr><td>11111000</td><td><b>248</b></td><td>5</td></tr>
+               <tr><td>11111100</td><td><b>252</b></td><td>6</td></tr>
+               <tr><td>11111110</td><td><b>254</b></td><td>7</td></tr>
+               <tr><td>11111111</td><td><b>255</b></td><td>8</td></tr>
+             </table>
+             <p>Эти значения нужно знать наизусть или уметь быстро получать (255 минус степень двойки).</p>`
+    }
+  ],
+
+  mindmap: {
+    center: "Сети и маски",
+    branches: [
+      { text: "IP-адрес", color: "#3b82f6", children: ["32 бита", "4 октета", "0...255", "Уникален"] },
+      { text: "Маска", color: "#ec4899", children: ["Единицы → сеть", "Нули → узел", "255.255.192.0", "Допустимые байты"] },
+      { text: "Действия", color: "#22c55e", children: ["IP & Маска = Адрес сети", "Адрес узла = IP - Адрес сети", "Кол-во адресов = 2^N"] },
+      { text: "Перевод", color: "#f59e0b", children: ["Деление на 2", "Степени двойки", "Таблица байтов"] }
+    ]
+  },
+
+  solutions: [
+    {
+      title: "Задача 1. Нахождение адреса сети (базовый уровень)",
+      task: "IP-адрес узла: 217.8.244.3\nМаска: 255.255.252.0\nНайдите адрес сети.",
+      template: [
+        "1. Переводим последние два байта IP и маски в двоичную систему (первые два байта маски 255, значит IP не меняется).",
+        "IP: 244 = 11110100₂, 3 = 00000011₂",
+        "Маска: 252 = 11111100₂, 0 = 00000000₂",
+        "2. Применяем операцию И (AND) побитово:",
+        "244 & 252: 11110100 & 11111100 = 11110100 = 244",
+        "3 & 0: 00000011 & 00000000 = 00000000 = 0",
+        "3. Собираем адрес сети: 217.8.244.0"
+      ],
+      answer: "217.8.244.0",
+      hint: "Там, где в маске 255, IP-адрес не меняется. Где 0 — обнуляется. Где 252 (11111100) — обнуляются последние 2 бита."
+    },
+    {
+      title: "Задача 2. Номер компьютера в сети",
+      task: "Маска подсети: 255.255.255.240\nIP-адрес компьютера: 162.198.0.44\nНайдите номер компьютера в сети.",
+      template: [
+        "1. Номер компьютера — это те биты IP-адреса, которые соответствуют нулям в маске.",
+        "2. Первые три байта маски равны 255, значит они относятся к сети. Берем только последний байт.",
+        "Маска: 240 = 11110000₂",
+        "IP: 44 = 00101100₂",
+        "3. Выделяем биты, где в маске нули (последние 4 бита):",
+        "В IP-адресе это 1100₂",
+        "4. Переводим 1100₂ в десятичную: 8 + 4 = 12"
+      ],
+      answer: "12",
+      hint: "Номер компьютера — это остаток. Можно найти так: 44 - (44 & 240). Или просто взять нулевые биты маски."
+    },
+    {
+      title: "Задача 3. Количество компьютеров в сети",
+      task: "Маска сети: 255.255.252.0\nСколько различных адресов компьютеров допускает эта маска? (Не считая адрес сети и широковещательный).",
+      template: [
+        "1. Количество адресов компьютеров определяется количеством нулей в маске.",
+        "2. Маска 255.255.252.0. Первые два байта — 255 (16 нулей нет, 16 единиц).",
+        "3. Переводим 252 и 0 в двоичную:",
+        "252 = 11111100₂ (2 нуля)",
+        "0 = 00000000₂ (8 нулей)",
+        "4. Всего нулей: 2 + 8 = 10.",
+        "5. Общее количество адресов = 2¹⁰ = 1024.",
+        "6. По условию два адреса (адрес сети и широковещательный) не используются: 1024 - 2 = 1022."
+      ],
+      answer: "1022",
+      hint: "Формула: 2^(кол-во нулей) - 2. Количество нулей можно найти, зная количество единиц: N = 32 - (кол-во единиц)."
+    }
+  ],
+
+  variants: {
+    A: [
+      { level:"easy", weight:1, type:"choice", q:"Сколько бит в IPv4 адресе?", options:["16","32","64","128"], answer:1, exp:"IPv4 состоит из 32 бит (4 байта)." },
+      { level:"easy", weight:1, type:"choice", q:"Какая из записей является правильной маской сети?", options:["255.255.255.128","255.255.128.255","128.255.255.255","255.0.255.0"], answer:0, exp:"В маске сначала идут единицы, потом нули. 255.255.255.128 = 111...110000000, это верно." },
+      { level:"medium", weight:2, type:"text", q:"IP-адрес: 192.168.1.10. Маска: 255.255.255.0. Запишите адрес сети (4 числа через точку).", answer:"192.168.1.0", exp:"Маска 255.255.255.0 означает, что последний байт обнуляется: 10 & 0 = 0." },
+      { level:"medium", weight:2, type:"text", q:"Маска: 255.255.255.192. Сколько бит отведено под номер компьютера (узла)?", answer:"6", exp:"192 = 11000000₂. В последнем байте 6 нулей, значит 6 бит." },
+      { level:"hard", weight:3, type:"text", q:"IP-адрес: 10.8.248.131. Маска: 255.255.224.0. Запишите адрес сети.", answer:"10.8.224.0", exp:"248 = 11111000₂, 224 = 11100000₂. 11111000 & 11100000 = 11100000₂ = 224." }
+    ],
+    B: [
+      { level:"easy", weight:1, type:"choice", q:"Что означает единица в маске подсети?", options:["Адрес узла","Адрес сети","Свободный бит","Конец адреса"], answer:1, exp:"Единичные биты маски указывают на часть IP-адреса, относящуюся к сети." },
+      { level:"easy", weight:1, type:"choice", q:"Какое максимальное число может стоять в одном октете IP-адреса?", options:["32","128","255","256"], answer:2, exp:"Октет состоит из 8 бит, максимум 11111111₂ = 255." },
+      { level:"medium", weight:2, type:"text", q:"IP-адрес: 217.8.244.3. Маска: 255.255.252.0. Запишите адрес сети.", answer:"217.8.244.0", exp:"244 = 11110100₂, 252 = 11111100₂. 11110100 & 11111100 = 11110100 (244)." },
+      { level:"medium", weight:2, type:"text", q:"IP-адрес: 162.198.0.44. Маска: 255.255.255.240. Чему равен номер компьютера в сети?", answer:"12", exp:"Маска 240 = 11110000. Последние 4 бита IP: 44 = 00101100. Берем 1100₂ = 12." },
+      { level:"hard", weight:3, type:"text", q:"Маска: 255.255.252.0. Сколько компьютеров (узлов) можно подключить к этой сети?", answer:"1022", exp:"252 (2 нуля) + 0 (8 нулей) = 10 нулей. 2^10 = 1024. 1024 - 2 = 1022." }
+    ],
+    C: [
+      { level:"easy", weight:1, type:"choice", q:"По какой формуле вычисляется адрес сети?", options:["IP + Маска","IP & Маска","IP | Маска","IP - Маска"], answer:1, exp:"Адрес сети вычисляется поразрядной конъюнкцией (И) IP-адреса и маски." },
+      { level:"easy", weight:1, type:"choice", q:"Укажите правильный адрес сети для IP 192.168.10.5 с маской 255.255.255.0.", options:["192.168.10.0","192.168.0.0","192.0.0.0","192.168.10.255"], answer:0, exp:"Обнуляется только последний октет: 5 & 0 = 0." },
+      { level:"medium", weight:2, type:"text", q:"Сколько нулей в двоичной записи маски 255.255.240.0?", answer:"12", exp:"В 240 4 нуля, в 0 еще 8. Итого 4 + 8 = 12 нулей." },
+      { level:"medium", weight:2, type:"text", q:"IP-адрес: 10.8.248.131. Маска: 255.255.240.0. Запишите адрес сети.", answer:"10.8.240.0", exp:"248 = 11111000, 240 = 11110000. 11111000 & 11110000 = 11110000 = 240." },
+      { level:"hard", weight:3, type:"text", q:"Маска: 255.255.255.248. Сколько различных адресов компьютеров допускает эта маска (без адреса сети и широковещательного)?", answer:"6", exp:"В последнем байте 3 нуля. 2^3 = 8 адресов. 8 - 2 = 6 адресов." }
+    ]
+  },
+
+  homework: [
+    {
+      type: "text",
+      q: "Для узла с IP-адресом 124.128.112.142 адрес сети равен 124.128.64.0. Чему равен третий слева байт маски? (Запишите десятичное число).",
+      answer: "192",
+      exp: "112 = 01110000, 64 = 01000000. Чтобы получить 64 из 112, нужно обнулить младшие 6 бит (маска 11000000 = 192)."
+    },
+    {
+      type: "text",
+      q: "Маска подсети 255.255.255.224 и IP-адрес 162.198.0.157. Найдите номер компьютера в сети.",
+      answer: "29",
+      exp: "224 = 11100000. Берем последние 5 бит IP-адреса 157 = 10011101. Нулевые биты маски: 11101₂ = 16 + 8 + 4 + 1 = 29."
+    },
+    {
+      type: "choice",
+      q: "Какое из значений не может быть частью маски подсети?",
+      options: ["128", "192", "224", "250"],
+      answer: 3,
+      exp: "250 = 11111010. После первых единиц идет ноль, а потом опять единица. В маске так быть не может."
+    }
+  ]
+};
+
+/* ============================================================
+   ВСТРОЕННЫЙ КАЛЬКУЛЯТОР (СПЕЦИАЛЬНО ДЛЯ ЭТОГО УРОКА)
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  const decInput = document.getElementById('convDec');
+  const binInput = document.getElementById('convBin');
+  const resBlock = document.getElementById('convRes');
+
+  if (decInput && binInput) {
+    decInput.addEventListener('input', () => {
+      let val = parseInt(decInput.value);
+      if (isNaN(val) || val < 0 || val > 255) {
+        binInput.value = '';
+        return;
+      }
+      binInput.value = val.toString(2).padStart(8, '0');
+      updateRes(val);
+    });
+
+    binInput.addEventListener('input', () => {
+      let val = binInput.value.replace(/[^01]/g, '');
+      binInput.value = val.slice(0, 8);
+      if (!val) return;
+      let dec = parseInt(val, 2);
+      decInput.value = dec;
+      updateRes(dec);
+    });
+
+    function updateRes(val) {
+      resBlock.style.display = 'block';
+      resBlock.textContent = `Вес единиц: ${(val.toString(2).match(/1/g) || []).length} ед. | Дополнение до 255: ${255 - val}`;
+    }
+  }
+});
+</script>
+
+<!-- Подключение общих скриптов -->
+<script src="../shared/mindmap.js"></script>
+<script src="../shared/app.js"></script>
+
+</body>
+</html>
