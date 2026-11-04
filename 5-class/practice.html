@@ -309,74 +309,10 @@
     </div>
 
     <div class="callout ok" id="checklistDone" style="display:none;">
-      🎉 <b>Отлично!</b> Все пункты выполнены. Теперь отправьте работу учителю.
+      🎉 <b>Отлично!</b> Все пункты выполнены. Теперь покажите работу работу учителю.
     </div>
   </div>
 
-  <!-- ================== ОТПРАВКА ================== -->
-  <div class="send-block">
-    <h2>📧 Отправьте работу учителю</h2>
-    <p style="color:#334155;line-height:1.6;">
-      Прикрепите сохранённый файл к письму и отправьте на почту учителя.
-      Впишите своё имя — оно попадёт в тему письма.
-    </p>
-
-    <label for="studentName">Ваши фамилия и имя:</label>
-    <input type="text" id="studentName" placeholder="Например: Иванов Иван">
-
-    <a href="#" class="mailto-btn" id="sendBtn">📨 Открыть почтовую программу</a>
-    <div class="muted" style="font-size:.85rem;">
-      Откроется ваша почтовая программа с уже заполненной темой письма.
-      Останется прикрепить файл и нажать «Отправить».
-    </div>
-  </div>
-
-</div>
-
-<script>
-/* ============================================================
-   НАСТРОЙКИ: почта учителя
-   ============================================================ */
-const TEACHER_EMAIL = 'helost@ya.ru';   // ← ЗАМЕНИТЕ на настоящий адрес
-const SUBJECT_PREFIX = 'Практическая работа «Текст и компьютер» — 5 класс';
-
-/* ---------- Чек-лист: показать сообщение, когда всё отмечено ---------- */
-const checkboxes = document.querySelectorAll('[data-check]');
-const doneMsg = document.getElementById('checklistDone');
-
-checkboxes.forEach(cb => {
-  cb.addEventListener('change', function(){
-    const all = Array.from(checkboxes).every(c => c.checked);
-    doneMsg.style.display = all ? 'block' : 'none';
-    if (all) doneMsg.scrollIntoView({behavior:'smooth', block:'center'});
-  });
-});
-
-/* ---------- Кнопка «Открыть почтовую программу» ---------- */
-document.getElementById('sendBtn').addEventListener('click', function(e){
-  e.preventDefault();
-
-  const name = document.getElementById('studentName').value.trim();
-  if (!name) {
-    alert('Пожалуйста, введите фамилию и имя.');
-    document.getElementById('studentName').focus();
-    return;
-  }
-
-  const subject = encodeURIComponent(`${SUBJECT_PREFIX} · ${name}`);
-  const body = encodeURIComponent(
-    `Здравствуйте!\n\n` +
-    `Отправляю практическую работу «Текст и компьютер».\n\n` +
-    `Ученик: ${name}\n` +
-    `Класс: 5\n` +
-    `Дата: ${new Date().toLocaleDateString('ru-RU')}\n\n` +
-    `Файл с работой прикреплён к письму.\n\n` +
-    `С уважением,\n${name}`
-  );
-
-  const mailto = `mailto:${TEACHER_EMAIL}?subject=${subject}&body=${body}`;
-  window.location.href = mailto;
-});
-</script>
+ </script>
 </body>
 </html>
