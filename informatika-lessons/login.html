@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вход · Интерактивные уроки информатики</title>
+<link rel="stylesheet" href="shared/style.css">
+<style>
+  .login-wrap{max-width:460px;margin:80px auto;padding:0 20px;}
+  .login-card{background:#fff;border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(59,130,246,.18);border:1px solid #e2e8f0;}
+  .login-card h1{font-size:1.6rem;text-align:center;margin:0 0 8px;background:linear-gradient(90deg,#3b82f6,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .login-card .sub{text-align:center;margin-bottom:24px;}
+  .login-card label{display:block;font-weight:700;margin:16px 0 6px;color:#1e293b;font-size:.95rem;}
+  .login-card input, .login-card select{width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e2e8f0;font-size:1rem;outline:none;background:#fff;}
+  .login-card input:focus, .login-card select:focus{border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.15);}
+  .login-card .btn{width:100%;margin-top:24px;}
+  .login-error{background:#fee2e2;color:#b91c1c;padding:10px 14px;border-radius:10px;margin-top:14px;font-size:.9rem;display:none;}
+  .login-error.show{display:block;}
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <h1>🧑‍🎓 Вход ученика</h1>
+    <p class="sub muted">Введите свои данные, чтобы увидеть уроки своего класса</p>
+
+    <form id="loginForm" autocomplete="off">
+      <label for="loginName">Фамилия и имя</label>
+      <input type="text" id="loginName" placeholder="Например: Иванов Иван" required>
+
+      <label for="loginClass">Класс</label>
+      <select id="loginClass" required>
+        <option value="">— выберите класс —</option>
+        <option value="5 класс">5 класс</option>
+        <option value="6 класс">6 класс</option>
+        <option value="7 класс">7 класс</option>
+        <option value="8 класс">8 класс</option>
+        <option value="9 класс">9 класс</option>
+        <option value="10 класс">10 класс</option>
+        <option value="11 класс">11 класс</option>
+      </select>
+
+      <div class="login-error" id="loginError"></div>
+
+      <button type="submit" class="btn">Войти →</button>
+    </form>
+  </div>
+</div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+
+  const name = document.getElementById('loginName').value.trim();
+  const cls  = document.getElementById('loginClass').value;
+  const err  = document.getElementById('loginError');
+
+  if (name.length < 3) {
+    err.textContent = 'Введите фамилию и имя (минимум 3 символа).';
+    err.classList.add('show');
+    return;
+  }
+  if (!cls) {
+    err.textContent = 'Выберите класс.';
+    err.classList.add('show');
+    return;
+  }
+
+  // Сохраняем ученика в localStorage
+  const student = {
+    name: name,
+    class: cls,
+    loginAt: new Date().toISOString()
+  };
+  localStorage.setItem('student', JSON.stringify(student));
+
+  // Переходим к списку уроков
+  window.location.href = 'lessons.html';
+});
+</script>
+</body>
+</html>
