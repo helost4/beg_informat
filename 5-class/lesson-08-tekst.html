@@ -26,6 +26,28 @@
     <div class="variant-badge" id="variantBadge"></div>
   </header>
 
+    <!-- ГЕЙМИФИКАЦИЯ -->
+  <div class="xp-panel" id="xpPanel">
+    <div class="xp-header">
+      <span class="xp-level-name" id="xpLevelName">🥉 Новичок</span>
+      <span class="xp-points" id="xpPoints">0 / 100 XP</span>
+    </div>
+    <div class="xp-bar-bg">
+      <div class="xp-bar-fill" id="xpBarFill"></div>
+    </div>
+    <div class="xp-badges">
+      <div class="badge-slot" id="badgeBronze">
+        <span class="badge-icon">🥉</span> Новичок
+      </div>
+      <div class="badge-slot" id="badgeSilver">
+        <span class="badge-icon">🥈</span> Писарь
+      </div>
+      <div class="badge-slot" id="badgeGold">
+        <span class="badge-icon">🥇</span> Мастер текста
+      </div>
+    </div>
+  </div>
+
   <div class="section-tabs">
     <button class="tab active" data-tab="theory">📚 Теория</button>
     <button class="tab" data-tab="mindmap">🧠 Карта</button>
@@ -107,6 +129,22 @@
       <div class="muted">Ваш результат</div>
       <div id="finalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
       <div style="font-size:3rem;margin:8px 0;" id="finalEmoji"></div>
+            <div class="grade-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#ec4899"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="60" cy="60" r="45"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="45"/>
+        </svg>
+        <div class="ring-text">
+          <span id="ringPercent">0%</span>
+          <small>выполнено</small>
+        </div>
+      </div>
       <div class="grade" id="finalGrade"></div>
       <div class="muted" id="finalComment" style="margin-top:10px"></div>
       <button class="btn ghost" style="margin-top:20px" onclick="location.reload()">🔄 Пройти другой вариант</button>
