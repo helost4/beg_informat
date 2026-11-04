@@ -253,6 +253,8 @@ tasksEl.addEventListener('click', e=>{
     res.innerHTML = `✔ Верно! +${t.weight} балл(ов).<div class="exp">${t.exp}</div>`;
     state[i] = t.weight;
     launchConfetti(btn);
+     // ⬇️ ГЕЙМИФИКАЦИЯ: +XP за правильный ответ
+    addXP(t.weight * 3);   // 1 балл = 3 XP, 2 балла = 6 XP, 3 балла = 9 XP
   } else {
     res.className='result bad';
     res.innerHTML = `✖ Неверно.<div class="exp">${t.exp}</div>`;
@@ -312,6 +314,15 @@ document.getElementById('finish').addEventListener('click', function() {
   gradeEl.textContent = g;
   gradeEl.classList.add('pop-in');
   document.getElementById('finalComment').textContent = comment;
+     // ⬇️ ГЕЙМИФИКАЦИЯ: прогресс-кольцо
+  const ringFill = document.getElementById('ringFill');
+  const ringPercent = document.getElementById('ringPercent');
+  if (ringFill && ringPercent) {
+    const circumference = 283; // 2 * π * 45 ≈ 283
+    const offset = circumference - (pct / 100) * circumference;
+    ringFill.style.strokeDashoffset = offset;
+    ringPercent.textContent = Math.round(pct) + '%';
+  }
 
   const emojiMap = { 5: '🏆', 4: '🌟', 3: '👍', 2: '💪' };
   const finalEmojiEl = document.getElementById('finalEmoji');
@@ -404,6 +415,8 @@ document.getElementById('finish').addEventListener('click', function() {
       res.innerHTML = `✔ Верно! +1 балл.<div class="exp">${t.exp}</div>`;
       hwState[i] = 1;
       launchConfetti(btn);
+       // ⬇️ ГЕЙМИФИКАЦИЯ: +XP за ДЗ
+      addXP(4);   // 4 XP за каждое задание ДЗ
     } else {
       res.className = 'result bad';
       res.innerHTML = `✖ Неверно.<div class="exp">${t.exp}</div>`;
