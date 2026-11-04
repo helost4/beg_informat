@@ -381,3 +381,104 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:30px;pad
   font-weight: 600;
   color: #64748b;
 }
+/* ============ РАЗБОР ЗАДАЧ ============ */
+.solution-card{
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: .3s;
+}
+.solution-card:hover{border-color: #3b82f6;}
+.solution-head{
+  padding: 16px 20px;
+  background: linear-gradient(90deg, #eff6ff, #fdf4ff);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: #1e293b;
+}
+.solution-head .arrow{transition:.3s;font-size:1.1rem;color:#3b82f6;}
+.solution-card.open .arrow{transform:rotate(180deg);}
+.solution-body{
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .4s ease;
+  padding: 0 20px;
+}
+.solution-card.open .solution-body{
+  max-height: 800px;
+  padding: 16px 20px;
+}
+.solution-task{
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font-size: .95rem;
+  color: #78350f;
+}
+.solution-task b{color: #92400e;}
+.solution-template{
+  background: #f0fdf4;
+  border-left: 4px solid #22c55e;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  line-height: 1.7;
+  font-size: .95rem;
+  color: #14532d;
+}
+.solution-template ol{
+  margin: 8px 0 0;
+  padding-left: 22px;
+}
+.solution-template li{margin: 4px 0;}
+.solution-answer{
+  background: #eff6ff;
+  border: 2px solid #3b82f6;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.solution-answer .icon{font-size:1.3rem;}
+.solution-hint{
+  background: #fef2f2;
+  border-left: 4px solid #ef4444;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: .9rem;
+  color: #7f1d1d;
+}
+.solution-hint::before{content: "💡 ";font-weight:700;}
+.solution-reveal-btn{
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: 2px solid #3b82f6;
+  background: #fff;
+  color: #3b82f6;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .2s;
+  margin-bottom: 12px;
+}
+.solution-reveal-btn:hover{background: #eff6ff;}
+.solution-steps{
+  display: none;
+}
+.solution-steps.revealed{
+  display: block;
+  animation: fadeInUp .5s ease both;
+}
