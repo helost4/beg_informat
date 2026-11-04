@@ -398,9 +398,4 @@ function sendToSheet(payload){
       setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 500);
     }
   });
-       if (g >= 4) {
-      setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 200);
-      setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 500);
-    }
-    });
 })();
