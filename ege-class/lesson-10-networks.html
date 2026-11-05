@@ -1,1 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тренажер ЕГЭ. Сети</title>
+<link rel="stylesheet" href="../shared/style.css">
+<style>
+  /* Стили для тренажера */
+  .trainer-box {
+    background: #fff; border-radius: 16px; padding: 24px;
+    box-shadow: 0 6px 20px rgba(59,130,246,.1); border: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+  }
+  .trainer-question {
+    font-size: 1.1rem; font-weight: 600; margin-bottom: 16px;
+    white-space: pre-wrap; /* чтобы сохранялись переносы строк */
+  }
+  .trainer-input {
+    width: 100%; padding: 12px; font-size: 1rem; border: 2px solid #cbd5e1;
+    border-radius: 8px; margin-bottom: 16px;
+  }
+  .trainer-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .level-indicator {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    font-weight: bold; font-size: 0.85rem; margin-bottom: 10px;
+  }
+  .lvl-1 { background: #dcfce7; color: #15803d; }
+  .lvl-2 { background: #fef3c7; color: #b45309; }
+  .lvl-3 { background: #fee2e2; color: #b91c1c; }
+  
+  .progress-track {
+    height: 8px; background: #e2e8f0; border-radius: 4px; margin-top: 16px;
+  }
+  .progress-fill {
+    height: 100%; background: #3b82f6; border-radius: 4px; width: 0%; transition: width 0.3s;
+  }
+</style>
+</head>
+<body>
 
+<div class="bubble-field" aria-hidden="true">
+  <span class="bubble" style="top:10%; left:5%;">🏆</span>
+  <span class="bubble" style="top:30%; left:90%;">🥇</span>
+  <span class="bubble" style="top:70%; left:15%;">📈</span>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="hero-emoji">🧑‍💻</div>
+    <h1 id="title">Тренажер ЕГЭ: Сети</h1>
+    <div class="sub" id="subtitle">10-11 класс · Подготовка к ЕГЭ</div>
+  </header>
+
+  <div class="section-tabs">
+    <button class="tab active" data-tab="theory">📚 Теория</button>
+    <button class="tab" data-tab="trainer">🏆 Тренажер</button>
+  </div>
+
+  <!-- ТЕОРИЯ -->
+  <div class="card" id="theorySection">
+    <h2>Теория по сетям</h2>
+    <p>Здесь будет ваш теоретический блок (можно скопировать из предыдущего урока).</p>
+    <a href="#" id="startTrainerBtn" class="btn" style="margin-top: 20px;">Перейти к тренажеру →</a>
+  </div>
+
+  <!-- ТРЕНАЖЕР -->
+  <div class="card hidden" id="trainerSection">
+    <div id="trainerIntro">
+      <h2>Добро пожаловать в тренажер!</h2>
+      <p>Тренажер состоит из 3 уровней сложности. Задания идут от простого к сложному.</p>
+      <ul>
+        <li>🟢 <b>Уровень 1</b> — Базовые понятия (5 задач)</li>
+        <li>🟡 <b>Уровень 2</b> — Вычисления (3 задачи)</li>
+        <li>🔴 <b>Уровень 3</b> — Сложные задачи (2 задачи)</li>
+      </ul>
+      <button class="btn" id="startLevel1">Начать Уровень 1</button>
+    </div>
+
+    <div id="trainerPlay" class="hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <span class="level-indicator" id="levelBadge">Уровень 1</span>
+        <span style="font-weight:bold; color:#64748b;" id="taskCounter">Задача 1 / 5</span>
+      </div>
+      
+      <div class="trainer-box">
+        <div class="trainer-question" id="trainerQuestion">Текст вопроса</div>
+        <input type="text" class="trainer-input" id="trainerInput" placeholder="Введите ответ...">
+        
+        <div class="trainer-footer">
+          <button class="btn" id="checkTrainerBtn">Проверить</button>
+          <div id="trainerFeedback" style="font-weight:bold;"></div>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="trainerProgress"></div></div>
+      </div>
+      
+      <div id="trainerResultBox" class="hidden" style="text-align:center; padding: 20px;">
+        <h2 style="color:#22c55e;">Уровень пройден!</h2>
+        <p>Правильных ответов: <span id="correctCount">0</span> из <span id="totalCount">0</span></p>
+        <button class="btn" id="nextLevelBtn">Перейти на следующий уровень</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   НАСТРОЙКИ (ЗАМЕНИТЕ URL НА НОВУЮ ТАБЛИЦУ)
+   ============================================================ */
+const APPS_SCRIPT_URL_TRAINER = 'https://script.google.com/macros/s/ВАШ_НОВЫЙ_ID/exec';
+
+/* ============================================================
+   ЛОГИКА ТРЕНАЖЕРА
+   ============================================================ */
+let allTasks = {};
+let currentLevel = 1;
+let currentTaskIndex = 0;
+let currentTasksList = [];
+let correctAnswers = 0;
+
+// Загрузка задач из JSON
+fetch('tasks.json')
+  .then(res => res.json())
+  .then(data => { allTasks = data; })
+  .catch(err => console.error("Ошибка загрузки задач:", err));
+
+// Переключение вкладок
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const t = tab.dataset.tab;
+    document.getElementById('theorySection').classList.toggle('hidden', t !== 'theory');
+    document.getElementById('trainerSection').classList.toggle('hidden', t !== 'trainer');
+  });
+});
+
+document.getElementById('startTrainerBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  document.querySelector('[data-tab="trainer"]').click();
+});
+
+// Запуск тренажера
+function startLevel(level) {
+  currentLevel = level;
+  currentTaskIndex = 0;
+  correctAnswers = 0;
+  
+  // Выбираем список задач для текущего уровня
+  const key = 'level' + level;
+  currentTasksList = allTasks[key] || [];
+  
+  if (currentTasksList.length === 0) {
+    alert("Задачи для этого уровня не найдены.");
+    return;
+  }
+
+  // Настройка интерфейса
+  document.getElementById('trainerIntro').classList.add('hidden');
+  document.getElementById('trainerResultBox').classList.add('hidden');
+  document.getElementById('trainerPlay').classList.remove('hidden');
+  
+  const badge = document.getElementById('levelBadge');
+  badge.textContent = `Уровень ${level}`;
+  badge.className = 'level-indicator lvl-' + level;
+
+  loadTask();
+}
+
+function loadTask() {
+  if (currentTaskIndex >= currentTasksList.length) {
+    finishLevel();
+    return;
+  }
+
+  const task = currentTasksList[currentTaskIndex];
+  document.getElementById('trainerQuestion').innerText = task.q;
+  document.getElementById('trainerInput').value = '';
+  document.getElementById('trainerFeedback').innerText = '';
+  document.getElementById('trainerInput').disabled = false;
+  document.getElementById('checkTrainerBtn').disabled = false;
+  
+  document.getElementById('taskCounter').innerText = `Задача ${currentTaskIndex + 1} / ${currentTasksList.length}`;
+  
+  // Обновляем прогресс-бар
+  const progress = (currentTaskIndex / currentTasksList.length) * 100;
+  document.getElementById('trainerProgress').style.width = progress + '%';
+}
+
+document.getElementById('checkTrainerBtn').addEventListener('click', () => {
+  const task = currentTasksList[currentTaskIndex];
+  const userAnswer = document.getElementById('trainerInput').value.trim();
+  const feedback = document.getElementById('trainerFeedback');
+  
+  // Простое сравнение (можно усложнить, если нужно игнорировать регистр)
+  if (userAnswer.toLowerCase() === task.answer.toLowerCase()) {
+    feedback.innerText = "✅ Верно! " + task.exp;
+    feedback.style.color = "#22c55e";
+    correctAnswers++;
+  } else {
+    feedback.innerText = `❌ Неверно. Правильный ответ: ${task.answer}. ` + task.exp;
+    feedback.style.color = "#ef4444";
+  }
+  
+  // Блокируем ввод до следующего шага
+  document.getElementById('trainerInput').disabled = true;
+  document.getElementById('checkTrainerBtn').disabled = true;
+  
+  // Создаем кнопку "Далее"
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'btn ghost';
+  nextBtn.style.marginTop = '10px';
+  nextBtn.innerText = 'Следующая задача →';
+  nextBtn.onclick = () => {
+    nextBtn.remove();
+    currentTaskIndex++;
+    loadTask();
+  };
+  feedback.appendChild(document.createElement('br'));
+  feedback.appendChild(nextBtn);
+});
+
+function finishLevel() {
+  document.getElementById('trainerPlay').classList.add('hidden');
+  document.getElementById('trainerResultBox').classList.remove('hidden');
+  
+  document.getElementById('correctCount').innerText = correctAnswers;
+  document.getElementById('totalCount').innerText = currentTasksList.length;
+  
+  const nextBtn = document.getElementById('nextLevelBtn');
+  if (currentLevel < 3) {
+    nextBtn.style.display = 'inline-block';
+    nextBtn.innerText = `Перейти на Уровень ${currentLevel + 1}`;
+    nextBtn.onclick = () => startLevel(currentLevel + 1);
+  } else {
+    nextBtn.style.display = 'inline-block';
+    nextBtn.innerText = 'Завершить тренажер';
+    nextBtn.onclick = () => {
+      alert('Вы прошли все уровни! Результат отправлен учителю.');
+      // Отправка данных
+      sendTrainerResult();
+      // Возврат в начало
+      document.getElementById('trainerResultBox').classList.add('hidden');
+      document.getElementById('trainerIntro').classList.remove('hidden');
+    };
+  }
+}
+
+document.getElementById('startLevel1').addEventListener('click', () => startLevel(1));
+
+// Функция отправки в Google Таблицу
+function sendTrainerResult() {
+  if (!APPS_SCRIPT_URL_TRAINER || APPS_SCRIPT_URL_TRAINER.includes('ВАШ_НОВЫЙ_ID')) return;
+  
+  const studentName = (window.__student && window.__student.name) || 'Аноним';
+  
+  const payload = {
+    studentName: studentName,
+    className: '10-11 класс',
+    lesson: 'Тренажер Сети',
+    variant: 'Trainer',
+    score: correctAnswers,
+    maxScore: currentTasksList.length, // (условно, для последнего уровня)
+    grade: '', // Можно выставить оценку по итогам всех уровней
+    workType: 'trainer'
+  };
+
+  fetch(APPS_SCRIPT_URL_TRAINER, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).catch(err => console.error('Ошибка отправки:', err));
+}
+</script>
+</body>
+</html>
