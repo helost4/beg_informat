@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <title>Интерактивные уроки информатики</title>
-</head>
-<body>
-<script>
-  // Если ученик уже вошёл — сразу к урокам, иначе на вход
+  <script>
+  // Проверяем, есть ли данные ученика в памяти браузера
   if (localStorage.getItem('student')) {
     window.location.href = 'lessons.html';
   } else {
     window.location.href = 'login.html';
   }
 </script>
+</head>
+<body>
+<p>Загрузка...</p>
 </body>
 </html>
