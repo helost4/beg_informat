@@ -40,7 +40,8 @@ if (!studentRaw) {
 } else {
 const student = JSON.parse(studentRaw);
 document.getElementById('studentBadge').textContent =
-  `👤 ${student.name} · ${student.class}`+ (student.track === 'ege' ? ' · Подготовка к ЕГЭ' : '');;
+  `👤 ${student.name} · ${student.class}`+ (student.track === 'ege' ? ' · Подготовка к ЕГЭ' : '');
+  
 
 /* ---------- Выход ---------- */
 document.getElementById('logoutBtn').addEventListener('click', function(){
@@ -101,6 +102,7 @@ if (!list.length) {
     a.innerHTML = `${lesson.title}<span class="tag">${lesson.tag}</span>`;
     container.appendChild(a);
   });
+ }
 }
 </script>
 </body>
