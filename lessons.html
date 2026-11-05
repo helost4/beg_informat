@@ -68,6 +68,19 @@ const LESSONS_CATALOG = {
   ],
   "11 класс": []
 };
+  const CATALOG_EGE = {
+  // Тренажеры по подготовке к ЕГЭ можно давать всем старшим классам
+  "10 класс": [
+    { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
+  ],
+  "11 класс": [
+    { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
+  ],
+  // Если 9-классник захочет попробовать, можно разрешить
+  "9 класс": [
+    { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
+  ]
+};
 
 /* ---------- Рендер уроков своего класса ---------- */
 const list = LESSONS_CATALOG[student.class] || [];
