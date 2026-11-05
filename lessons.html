@@ -82,6 +82,28 @@ const LESSONS_CATALOG = {
   ]
 };
 
+  /* ---------- Проверка входа ---------- */
+const studentRaw = localStorage.getItem('student');
+if (!studentRaw) {
+  window.location.href = 'login.html';
+}
+
+const student = JSON.parse(studentRaw);
+document.getElementById('studentBadge').textContent = 
+  `👤 ${student.name} · ${student.class}` + (student.track === 'ege' ? ' · Подготовка к ЕГЭ' : '');
+
+/* ---------- Выход ---------- */
+document.getElementById('logoutBtn').addEventListener('click', function(){
+  localStorage.removeItem('student');
+  window.location.href = 'login.html';
+});
+
+/* ---------- Выбор каталога на основе профиля ---------- */
+let activeCatalog = CATALOG_STANDARD;
+if (student.track === 'ege') {
+  activeCatalog = CATALOG_EGE;
+}
+
 /* ---------- Рендер уроков своего класса ---------- */
 const list = LESSONS_CATALOG[student.class] || [];
 const container = document.getElementById('lessonsList');
