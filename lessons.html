@@ -81,12 +81,6 @@ const LESSONS_CATALOG = {
   ]
 };
 
-/* ---------- Выход ---------- */
-document.getElementById('logoutBtn').addEventListener('click', function(){
-  localStorage.removeItem('student');
-  window.location.href = 'login.html';
-});
-
 /* ---------- Выбор каталога на основе профиля ---------- */
 let activeCatalog = (student.track === 'ege') ? CATALOG_EGE : CATALOG_STANDARD;
 
