@@ -40,6 +40,27 @@
         <option value="11 класс">11 класс</option>
       </select>
 
+            <label for="loginClass">Класс</label>
+      <select id="loginClass" required>
+        <option value="">— выберите класс —</option>
+        <option value="5 класс">5 класс</option>
+        <option value="6 класс">6 класс</option>
+        <option value="7 класс">7 класс</option>
+        <option value="8 класс">8 класс</option>
+        <option value="9 класс">9 класс</option>
+        <option value="10 класс">10 класс</option>
+        <option value="11 класс">11 класс</option>
+      </select>
+
+      <!-- ⬇️ ДОБАВЛЯЕМ ВЫБОР ПРОФИЛЯ ⬇️ -->
+      <label for="loginTrack">Направление обучения</label>
+      <select id="loginTrack" required>
+        <option value="standard">Обычные уроки</option>
+        <option value="ege">Подготовка к ЕГЭ (Тренажеры и разборы)</option>
+      </select>
+
+      <div class="login-error" id="loginError"></div>
+
       <div class="login-error" id="loginError"></div>
 
       <button type="submit" class="btn">Войти →</button>
@@ -53,6 +74,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e){
 
   const name = document.getElementById('loginName').value.trim();
   const cls  = document.getElementById('loginClass').value;
+  const track = document.getElementById('loginTrack').value; // получаем профиль
   const err  = document.getElementById('loginError');
 
   if (name.length < 3) {
@@ -70,6 +92,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e){
   const student = {
     name: name,
     class: cls,
+    track: track,
     loginAt: new Date().toISOString()
   };
   localStorage.setItem('student', JSON.stringify(student));
