@@ -1,1 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кодирование информации — 5 класс</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
 
+<!-- Фоновые эмодзи -->
+<div class="bubble-field" aria-hidden="true">
+  <span class="bubble" style="top:8%;  left:5%;  animation-delay:0s;">🔤</span>
+  <span class="bubble" style="top:20%; left:88%; animation-delay:1s;">💻</span>
+  <span class="bubble" style="top:55%; left:3%;  animation-delay:2s;">🔢</span>
+  <span class="bubble" style="top:72%; left:92%; animation-delay:1.5s;">🔠</span>
+  <span class="bubble" style="top:35%; left:50%; animation-delay:.5s;">🔣</span>
+  <span class="bubble" style="top:85%; left:40%; animation-delay:2.5s;">🤫</span>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="hero-emoji">🧑‍🎓</div>
+    <h1 id="title"></h1>
+    <div class="sub" id="subtitle"></div>
+    <div class="variant-badge" id="variantBadge"></div>
+  </header>
+
+  <!-- ГЕЙМИФИКАЦИЯ -->
+  <div class="xp-panel" id="xpPanel">
+    <div class="xp-header">
+      <span class="xp-level-name" id="xpLevelName">🥉 Новичок</span>
+      <span class="xp-points" id="xpPoints">0 / 100 XP</span>
+    </div>
+    <div class="xp-bar-bg">
+      <div class="xp-bar-fill" id="xpBarFill"></div>
+    </div>
+    <div class="xp-badges">
+      <div class="badge-slot" id="badgeBronze">
+        <span class="badge-icon">🥉</span> Новичок
+      </div>
+      <div class="badge-slot" id="badgeSilver">
+        <span class="badge-icon">🥈</span> Шифровальщик
+      </div>
+      <div class="badge-slot" id="badgeGold">
+        <span class="badge-icon">🥇</span> Криптограф
+      </div>
+    </div>
+  </div>
+
+  <div class="section-tabs">
+    <button class="tab active" data-tab="theory">📚 Теория</button>
+    <button class="tab" data-tab="mindmap">🧠 Карта</button>
+    <button class="tab" data-tab="solutions">📐 Разбор задач</button>
+    <button class="tab" data-tab="test">✏️ Тест</button>
+    <button class="tab" data-tab="homework">🏠 Домашнее задание</button>
+  </div>
+
+  <!-- ТЕОРИЯ -->
+  <div class="card" id="theorySection">
+    <div id="lessonGoals">
+      <h2><span class="icon">🎯</span> Цель и задачи урока</h2>
+      <div style="margin-bottom:14px;">
+        <span class="goal-tag goal">ЦЕЛЬ</span>
+        <div id="goalText" style="font-size:1rem;line-height:1.5;color:#1e293b;"></div>
+      </div>
+      <div>
+        <span class="goal-tag tasks">ЗАДАЧИ</span>
+        <ul id="tasksList" style="margin:8px 0 0;padding-left:22px;line-height:1.7;color:#334155;"></ul>
+      </div>
+    </div>
+
+    <h2><span class="icon">💡</span> Ключевые понятия темы</h2>
+    <div id="theoryList"></div>
+  </div>
+
+  <!-- ИНТЕЛЛЕКТ-КАРТА -->
+  <div class="card hidden" id="mindmapSection">
+    <h2><span class="icon">🧠</span> Интеллект-карта темы</h2>
+    <p class="muted" style="margin:-8px 0 14px">Кликните по узлу, чтобы раскрыть/свернуть ветвь</p>
+    <div id="mindmapBox"></div>
+  </div>
+
+  <!-- РАЗБОР ЗАДАЧ -->
+  <div class="card hidden" id="solutionsSection">
+    <h2><span class="icon">📐</span> Разбор задач по шаблону</h2>
+    <p class="muted" style="margin:-8px 0 16px">Разберите каждую задачу по шагам. Попробуйте решить сами, затем нажмите «Показать решение».</p>
+    <div id="solutionsList"></div>
+  </div>
+
+  <!-- ТЕСТ -->
+  <div class="card hidden" id="testSection">
+    <h2><span class="icon">🎯</span> Проверочный тест</h2>
+    <div id="studentInfo" style="background:#eff6ff;border-radius:12px;padding:16px;margin-bottom:18px;border:2px solid #3b82f6;">
+      <div style="font-weight:700;color:#1e293b;">
+        👤 Ученик: <span id="studentNameDisplay">—</span>
+      </div>
+      <div class="muted" style="margin-top:6px;font-size:.85rem;">
+        ФИО подставлено из вашего входа и будет отправлено в журнал учителя.
+      </div>
+    </div>
+    <div class="muted">Прогресс выполнения</div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="muted" id="progTxt">0 из 0 заданий</div>
+    <div id="tasks" style="margin-top:18px"></div>
+  </div>
+
+  <!-- ДОМАШНЕЕ ЗАДАНИЕ -->
+  <div class="card hidden" id="homeworkSection">
+    <h2><span class="icon">🏠</span> Домашнее задание</h2>
+    <p class="muted" style="margin:-8px 0 16px">Выполните задания дома. Проверка автоматическая.</p>
+    <div id="homeworkTasks"></div>
+    <div class="progress" style="margin-top:18px"><div id="hwBar"></div></div>
+    <div class="muted" id="hwProgTxt">0 из 0 заданий</div>
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn" id="hwFinish">Проверить домашнее задание</button>
+    </div>
+    <div class="score-box hidden" id="hwScoreBox" style="margin-top:20px">
+      <div class="muted">Результат домашнего задания</div>
+      <div id="hwFinalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div class="grade" id="hwGrade"></div>
+      <div class="muted" id="hwComment" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- ИТОГИ ТЕСТА -->
+  <div class="card hidden" id="finishCard" style="text-align:center">
+    <button class="btn" id="finish">Завершить урок и получить оценку</button>
+    <div class="score-box hidden" id="scoreBox">
+      <div class="muted">Ваш результат</div>
+      <div id="finalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div style="font-size:3rem;margin:8px 0;" id="finalEmoji"></div>
+      <div class="grade-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#ec4899"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="60" cy="60" r="45"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="45"/>
+        </svg>
+        <div class="ring-text">
+          <span id="ringPercent">0%</span>
+          <small>выполнено</small>
+        </div>
+      </div>
+      <div class="grade" id="finalGrade"></div>
+      <div class="muted" id="finalComment" style="margin-top:10px"></div>
+      <button class="btn ghost" style="margin-top:20px" onclick="location.reload()">🔄 Пройти другой вариант</button>
+    </div>
+  </div>
+
+  <footer>УМК Л.Л. Босовой · Интерактивный урок с самопроверкой</footer>
+</div>
+
+<script>
+/* ============================================================
+   ДАННЫЕ УРОКА
+   ============================================================ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDCZW3hZ1tGvpm6Fu38UokMecG5cXQMldPwaiEPVyh8KSnVsoDQ_ZS7IdR8JMLvGli/exec';
+
+const LESSON_DATA = {
+  title: "Кодирование информации",
+  subtitle: "5 класс · УМК Босовой · § 7",
+  className: "5 класс",
+
+  goal: "Сформировать представление о кодировании как способе представления информации, научиться пользоваться простыми кодами.",
+
+  tasks: [
+    "Познакомиться с понятием «код» и «кодирование».",
+    "Узнать, зачем люди придумали кодирование информации.",
+    "Научиться декодировать сообщения, записанные с помощью азбуки Морзе и других простых кодов.",
+    "Закрепить умение переводить текст в цифровой код и обратно."
+  ],
+
+  theory: [
+    {
+      title: "🔐 Что такое код и кодирование?",
+      image: "🔐 ➡️ 🔤",
+      body: `<p><b>Код</b> — это система условных знаков (символов) для представления информации.</p>
+             <p><b>Кодирование</b> — это процесс представления информации с помощью кода.</p>
+             <p>Люди постоянно используют коды: буквы (для текста), цифры (для чисел), ноты (для музыки), дорожные знаки (для правил).</p>
+             <p>Зачем нужно кодирование?</p>
+             <ul>
+               <li>Чтобы <b>скрыть</b> информацию (шифрование, секретные сообщения).</li>
+               <li>Чтобы <b>записать</b> информацию на носитель (текст, звук, видео).</li>
+               <li>Чтобы <b>передать</b> информацию на расстояние (телеграф, интернет).</li>
+               <li>Чтобы <b>обработать</b> информацию на компьютере (компьютеры понимают только двоичный код).</li>
+             </ul>`
+    },
+    {
+      title: "📡 Азбука Морзе",
+      image: "📡 ⚫ ➖",
+      body: `<p>Один из самых известных способов кодирования — <b>азбука Морзе</b>. Каждая буква кодируется комбинацией точек (коротких сигналов) и тире (длинных).</p>
+             <p>Пример:</p>
+             <ul>
+               <li><b>А</b> = <code>. -</code> (точка-тире)</li>
+               <li><b>Б</b> = <code>- . . .</code></li>
+               <li><b>В</b> = <code>. - -</code></li>
+               <li><b>SOS</b> = <code>. . . - - - . . .</code></li>
+             </ul>
+             <p>Азбука Морзе использовалась для передачи сообщений по радио и телеграфу.</p>`
+    },
+    {
+      title: "💻 Двоичное кодирование в компьютере",
+      image: "💻 0️⃣1️⃣",
+      body: `<p>Компьютер — это электронное устройство, которое понимает только сигналы «есть ток» (1) и «нет тока» (0).</p>
+             <p>Поэтому вся информация в компьютере кодируется с помощью двух символов: <b>0</b> и <b>1</b>. Это называется <b>двоичным кодом</b>.</p>
+             <p>Любая информация (текст, картинка, звук) внутри компьютера превращается в последовательность нулей и единиц.</p>
+             <p>Например, буква <b>А</b> в компьютере может кодироваться как <code>11000000</code>, а буква <b>Б</b> как <code>11000001</code>.</p>`
+    },
+    {
+      title: "🔠 Шифры и тайные языки",
+      image: "🤫 🕵️ 🔠",
+      body: `<p>Кодирование часто используется для <b>шифрования</b> — чтобы сообщение не смог прочитать посторонний.</p>
+             <p><b>Шифр Цезаря:</b> каждая буква заменяется на следующую за ней в алфавите.</p>
+             <p>Пример: слово <b>КОТ</b> превращается в <b>ЛПУ</b> (К→Л, О→П, Т→У).</p>
+             <p>Чтобы расшифровать, нужно применить обратное действие (сдвиг назад).</p>`
+    }
+  ],
+
+  mindmap: {
+    center: "Кодирование",
+    branches: [
+      { text: "Зачем?", color: "#3b82f6", children: ["Скрыть", "Записать", "Передать", "Обработать"] },
+      { text: "Примеры кодов", color: "#ec4899", children: ["Буквы", "Цифры", "Азбука Морзе", "Двоичный код"] },
+      { text: "Устройства", color: "#22c55e", children: ["Компьютер", "Телеграф", "Телефон"] },
+      { text: "Действия", color: "#f59e0b", children: ["Кодирование", "Декодирование", "Шифрование"] }
+    ]
+  },
+
+  solutions: [
+    {
+      title: "Задача 1. Азбука Морзе",
+      task: "Запишите слово «МАМА» с помощью азбуки Морзе, если:\nМ = - -\nА = . -",
+      template: [
+        "1. Смотрим на код каждой буквы в слове.",
+        "2. Буква М: - -",
+        "3. Буква А: . -",
+        "4. Соединяем коды в том порядке, в котором идут буквы: М ( - - ), А ( . - ), М ( - - ), А ( . - ).",
+        "5. Между кодами букв обычно ставят пробел.",
+        "6. Получаем: <b>- - . - - - . -</b>"
+      ],
+      answer: "- - . - - - . -",
+      hint: "Просто выпишите коды букв друг за другом в нужном порядке."
+    },
+    {
+      title: "Задача 2. Шифр Цезаря",
+      task: "Расшифруйте слово «МЁУП», если известно, что при шифровании каждая буква сдвигалась на 1 вперед по алфавиту.",
+      template: [
+        "1. Вспомним алфавит: А Б В Г Д Е Ё Ж З И Й К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я.",
+        "2. Правило шифрования: каждая буква заменена на следующую.",
+        "3. Чтобы расшифровать, делаем шаг назад:",
+        "М → Л",
+        "Ё → Е",
+        "У → Т",
+        "П → О",
+        "4. Получаем слово: <b>ЛЕТО</b>."
+      ],
+      answer: "ЛЕТО",
+      hint: "Найдите каждую букву в алфавите и возьмите ту, что стоит перед ней."
+    }
+  ],
+
+  variants: {
+    A: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что такое кодирование информации?",
+        options:["Процесс представления информации с помощью кода","Игра в прятки","Способ хранения книг","Вид спорта"],
+        answer:0, exp:"Кодирование — это представление информации с помощью системы условных знаков." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Какие символы используются для двоичного кодирования в компьютере?",
+        options:["Буквы А и Б","0 и 1","Точка и тире","Плюс и минус"],
+        answer:1, exp:"Компьютер работает с двоичным кодом (0 и 1)." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какой код использует точки и тире?",
+        options:["Шифр Цезаря","Азбука Морзе","Двоичный код","Дорожные знаки"],
+        answer:1, exp:"Азбука Морзе кодирует буквы комбинациями точек и тире." },
+      { level:"medium", weight:2, type:"text",
+        q:"Если буква А = . -, а буква Б = - . . ., запишите код слова «АБ» (через пробел).",
+        answer:". - - . . .", exp:"Сначала код А (. -), потом код Б (- . . .)." },
+      { level:"hard", weight:3, type:"text",
+        q:"Слово закодировано шифром Цезаря (сдвиг на 1 вперед). Получилось «ЛПУ». Какое слово было зашифровано?",
+        answer:"КОТ", exp:"Л→К, П→О, У→Т. Получается КОТ." }
+    ],
+    B: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Зачем люди придумали кодирование?",
+        options:["Чтобы запутать всех","Чтобы удобнее хранить, передавать и обрабатывать информацию","Чтобы усложнить жизнь","Просто так"],
+        answer:1, exp:"Кодирование помогает хранить, передавать и обрабатывать информацию." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Что означает слово SOS в азбуке Морзе?",
+        options:["Спасение","Привет","Пока","Спасибо"],
+        answer:0, exp:"SOS — международный сигнал бедствия." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какой код понимает компьютер?",
+        options:["Азбуку Морзе","Шифр Цезаря","Двоичный (0 и 1)","Русский алфавит"],
+        answer:2, exp:"Процессор компьютера понимает только двоичный код." },
+      { level:"medium", weight:2, type:"text",
+        q:"При кодировании каждая буква заменяется на следующую (А→Б, Б→В). Закодируйте слово «ДОМ».",
+        answer:"ЕПН", exp:"Д→Е, О→П, М→Н." },
+      { level:"hard", weight:3, type:"text",
+        q:"Какое слово зашифровано, если каждая буква заменена на следующую за ней (сдвиг 1), и получилось «СПС»?",
+        answer:"РОР", exp:"С→Р, П→О, С→Р." }
+    ],
+    C: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что такое код?",
+        options:["Система условных знаков для представления информации","Название игры","Способ приготовления пищи","Тип файла"],
+        answer:0, exp:"Код — это система условных знаков." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Сколько символов используется в двоичном коде?",
+        options:["1","2","10","33"],
+        answer:1, exp:"В двоичном коде используются два символа: 0 и 1." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Расшифруйте код Морзе: . - . (если А = . -, И = . ., Н = - .)",
+        options:["А","И","Н","Не знаю"],
+        answer:0, exp:"Точка-тире — это буква А." },
+      { level:"medium", weight:2, type:"text",
+        q:"Если А=1, Б=2, В=3, Г=4, запишите код слова «БАГ».",
+        answer:"214", exp:"Б=2, А=1, Г=4." },
+      { level:"hard", weight:3, type:"text",
+        q:"Слово закодировано числами (А=1, Б=2, ..., Я=33). Получилось: 5 15 13. Какое это слово?",
+        answer:"ДОМ", exp:"5=Д, 15=О, 13=М." }
+    ]
+  },
+
+  homework: [
+    {
+      type: "choice",
+      q: "Какое из этих действий является кодированием?",
+      options: ["Перевод текста на азбуку Морзе", "Чтение книги", "Просмотр фильма", "Игра в футбол"],
+      answer: 0,
+      exp: "Перевод текста в другой код (Морзе) — это кодирование."
+    },
+    {
+      type: "text",
+      q: "Закодируйте слово «УРА» по правилу: каждая буква заменяется на следующую (У→Ф, Р→С, А→Б).",
+      answer: "ФСБ",
+      exp: "У→Ф, Р→С, А→Б. Получаем ФСБ."
+    },
+    {
+      type: "text",
+      q: "Сколько символов в двоичном коде? (введите цифру)",
+      answer: "2",
+      exp: "В двоичном коде используются символы 0 и 1."
+    }
+  ]
+};
+</script>
+
+<!-- Подключение общих скриптов -->
+<script src="../shared/mindmap.js"></script>
+<script src="../shared/app.js"></script>
+
+</body>
+</html>
