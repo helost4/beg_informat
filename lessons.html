@@ -39,6 +39,7 @@ if (!studentRaw) {
   window.location.href = 'login.html';
 } else {
 const student = JSON.parse(studentRaw);
+  
 document.getElementById('studentBadge').textContent =
   `👤 ${student.name} · ${student.class}`+ (student.track === 'ege' ? ' · Подготовка к ЕГЭ' : '');
   
@@ -86,7 +87,7 @@ const LESSONS_CATALOG = {
 let activeCatalog = (student.track === 'ege') ? CATALOG_EGE : CATALOG_STANDARD;
 
 /* ---------- Рендер уроков своего класса ---------- */
-const list = LESSONS_CATALOG[student.class] || [];
+const list = activeCatalog[student.class] || [];
 const container = document.getElementById('lessonsList');
 
 if (!list.length) {
