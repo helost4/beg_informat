@@ -1,4 +1,35 @@
 /* ============================================================
+   ПЛАВАЮЩАЯ НАВИГАЦИЯ (Главная и Выйти)
+   ============================================================ */
+(function injectNav() {
+  // Чтобы на странице входа/выбора уроков не было этой панели
+  if (window.location.pathname.includes('login.html') || window.location.pathname.includes('lessons.html')) {
+    return;
+  }
+
+  const nav = document.createElement('div');
+  nav.className = 'floating-nav';
+
+  // Кнопка "Главная"
+  const homeBtn = document.createElement('a');
+  homeBtn.className = 'floating-btn home';
+  homeBtn.href = '../lessons.html'; // путь на уровень выше (из папки с уроком в корень)
+  homeBtn.innerHTML = '🏠 Главная';
+
+  // Кнопка "Выйти"
+  const logoutBtn = document.createElement('button');
+  logoutBtn.className = 'floating-btn logout';
+  logoutBtn.innerHTML = '🚪 Выйти';
+  logoutBtn.onclick = function() {
+    localStorage.removeItem('student');
+    window.location.href = '../login.html';
+  };
+
+  nav.appendChild(homeBtn);
+  nav.appendChild(logoutBtn);
+  document.body.appendChild(nav);
+})();
+/* ============================================================
    ЗАЩИТА: Только для профиля ЕГЭ
    ============================================================ */
 (function checkEgeAccess(){
