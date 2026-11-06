@@ -62,13 +62,6 @@
    ОБЩАЯ ФУНКЦИЯ ОТПРАВКИ РЕЗУЛЬТАТА В GOOGLE ТАБЛИЦУ
    ============================================================ */
 function sendToSheet(payload){
-  // ... дальше ваш код функции sendToSheet без изменений ...
-
-/* ============================================================
-   ОБЩАЯ ФУНКЦИЯ ОТПРАВКИ РЕЗУЛЬТАТА В GOOGLE ТАБЛИЦУ
-   Объявлена В НАЧАЛЕ, чтобы была доступна всем обработчикам
-   ============================================================ */
-function sendToSheet(payload){
   if (typeof APPS_SCRIPT_URL === 'undefined' || !APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('ВАШ_ID')) {
     console.warn('APPS_SCRIPT_URL не настроен — отправка пропущена');
     return;
@@ -163,26 +156,22 @@ function updateGameUI(){
   const xpLevelName = document.getElementById('xpLevelName');
   if (!xpFill) return;
 
-  // Определяем текущий уровень
   let level = 0;
   for (let i = GAME.levels.length - 1; i >= 0; i--) {
     if (GAME.xp >= GAME.levels[i].threshold) { level = i; break; }
   }
 
-  // Повышение уровня — показать уведомление
   if (level > GAME.currentLevel) {
     GAME.currentLevel = level;
     showLevelUp(GAME.levels[level].name);
     launchConfetti(document.getElementById('xpPanel'));
   }
 
-  // Обновляем полосу и текст
   const pct = Math.min(100, (GAME.xp / GAME.maxXP) * 100);
   xpFill.style.width = pct + '%';
   xpPoints.textContent = `${GAME.xp} / ${GAME.maxXP} XP`;
   xpLevelName.textContent = GAME.levels[level].name;
 
-  // Разблокируем значки
   GAME.levels.forEach((lvl, i) => {
     const el = document.getElementById(lvl.badge);
     if (el) {
@@ -212,32 +201,27 @@ function addXP(points){
 /* ============================================================
    ОБЩАЯ ЛОГИКА ИНТЕРАКТИВНОГО УРОКА
    ============================================================ */
-
 const LEVEL_LABEL = {
   easy:  "🟢 Простое · 1 балл",
   medium:"🟡 Среднее · 2 балла",
   hard:  "🔴 Сложное · 3 балла"
 };
 
-/* ---------- Состояние ---------- */
 const variantKeys = Object.keys(LESSON_DATA.variants);
 const variantKey  = variantKeys[Math.floor(Math.random()*variantKeys.length)];
 const TASKS       = LESSON_DATA.variants[variantKey];
 const totalMax    = TASKS.reduce((s,t)=>s+t.weight,0);
 const state       = {};
 
-/* ---------- Заголовки ---------- */
 document.getElementById('title').textContent    = LESSON_DATA.title;
 document.getElementById('subtitle').textContent = LESSON_DATA.subtitle;
 
-/* ---------- Отображение ФИО ученика в тесте ---------- */
 const nameDisplay = document.getElementById('studentNameDisplay');
 if (nameDisplay && window.__student) {
   nameDisplay.textContent = window.__student.name + ' · ' + window.__student.class;
 }
 document.getElementById('variantBadge').textContent = `Вариант ${variantKey}`;
 
-/* ---------- Цель и задачи ---------- */
 const goalEl = document.getElementById('goalText');
 if (goalEl) goalEl.textContent = LESSON_DATA.goal || '';
 
@@ -250,7 +234,6 @@ if (tasksUl && LESSON_DATA.tasks) {
   });
 }
 
-/* ---------- Теория ---------- */
 const theoryList = document.getElementById('theoryList');
 LESSON_DATA.theory.forEach((item,i)=>{
   const el = document.createElement('div');
@@ -267,12 +250,10 @@ LESSON_DATA.theory.forEach((item,i)=>{
   theoryList.appendChild(el);
 });
 
-/* ---------- Интеллект-карта ---------- */
 if (typeof renderMindMap === 'function') {
   renderMindMap(LESSON_DATA.mindmap, document.getElementById('mindmapBox'));
 }
 
-/* ---------- Вкладки ---------- */
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -290,7 +271,6 @@ document.querySelectorAll('.tab').forEach(tab=>{
   });
 });
 
-/* ---------- Конфетти ---------- */
 function launchConfetti(anchorEl) {
   const colors = ['#3b82f6','#8b5cf6','#ec4899','#f59e0b','#22c55e','#ef4444'];
   const rect = anchorEl.getBoundingClientRect();
@@ -309,7 +289,6 @@ function launchConfetti(anchorEl) {
   }
 }
 
-/* ---------- Рендер заданий теста ---------- */
 const tasksEl = document.getElementById('tasks');
 TASKS.forEach((t,i)=>{
   const div = document.createElement('div');
@@ -330,7 +309,6 @@ TASKS.forEach((t,i)=>{
   tasksEl.appendChild(div);
 });
 
-/* ---------- Проверка ответа теста ---------- */
 tasksEl.addEventListener('click', e=>{
   const btn = e.target.closest('[data-check]');
   if (!btn) return;
@@ -353,8 +331,7 @@ tasksEl.addEventListener('click', e=>{
     res.innerHTML = `✔ Верно! +${t.weight} балл(ов).<div class="exp">${t.exp}</div>`;
     state[i] = t.weight;
     launchConfetti(btn);
-     // ⬇️ ГЕЙМИФИКАЦИЯ: +XP за правильный ответ
-    addXP(t.weight * 3);   // 1 балл = 3 XP, 2 балла = 6 XP, 3 балла = 9 XP
+    addXP(t.weight * 3);
   } else {
     res.className='result bad';
     res.innerHTML = `✖ Неверно.<div class="exp">${t.exp}</div>`;
@@ -374,27 +351,22 @@ function updateProgress(){
     `Проверено ${done} из ${TASKS.length} заданий · Баллы: ${got} / ${totalMax}`;
 }
 
-/* ---------- Итоговая оценка за тест + отправка ---------- */
 document.getElementById('finish').addEventListener('click', function() {
-  // 1. Защита от повторного нажатия
   const finishBtn = document.getElementById('finish');
   if (finishBtn.dataset.sent === '1') {
     alert('Результат уже отправлен.');
     return;
   }
 
-  // 2. Проверка ФИО из localStorage
   const studentName = (window.__student && window.__student.name) || '';
   if (!studentName) {
     alert('Не найдены данные ученика. Войдите заново.');
     return;
   }
 
-  // 3. Блокируем кнопку
   finishBtn.dataset.sent = '1';
   finishBtn.disabled = true;
 
-  // 4. Считаем результат
   const got = Object.values(state).reduce((a, b) => a + b, 0);
   const pct = got / totalMax * 100;
 
@@ -404,7 +376,6 @@ document.getElementById('finish').addEventListener('click', function() {
   else if (pct >= 45) { g = 3; comment = 'Удовлетворительно. Стоит повторить тему.'; }
   else                { g = 2; comment = 'Попробуйте пройти урок ещё раз.'; }
 
-  // 5. Показываем оценку
   const box = document.getElementById('scoreBox');
   box.classList.remove('hidden');
   box.classList.add('pop-in');
@@ -414,11 +385,11 @@ document.getElementById('finish').addEventListener('click', function() {
   gradeEl.textContent = g;
   gradeEl.classList.add('pop-in');
   document.getElementById('finalComment').textContent = comment;
-     // ⬇️ ГЕЙМИФИКАЦИЯ: прогресс-кольцо
+  
   const ringFill = document.getElementById('ringFill');
   const ringPercent = document.getElementById('ringPercent');
   if (ringFill && ringPercent) {
-    const circumference = 283; // 2 * π * 45 ≈ 283
+    const circumference = 283;
     const offset = circumference - (pct / 100) * circumference;
     ringFill.style.strokeDashoffset = offset;
     ringPercent.textContent = Math.round(pct) + '%';
@@ -439,7 +410,6 @@ document.getElementById('finish').addEventListener('click', function() {
     setTimeout(() => launchConfetti(gradeEl), 800);
   }
 
-  // 6. Отправка в таблицу
   sendToSheet({
     studentName: studentName,
     className: LESSON_DATA.className || '',
@@ -452,9 +422,6 @@ document.getElementById('finish').addEventListener('click', function() {
   });
 });
 
-/* ============================================================
-   ДОМАШНЕЕ ЗАДАНИЕ (автопроверка)
-   ============================================================ */
 (function initHomework(){
   const hwData = LESSON_DATA.homework;
   if (!hwData || !hwData.length) return;
@@ -463,9 +430,8 @@ document.getElementById('finish').addEventListener('click', function() {
   if (!hwTasksEl) return;
 
   const hwState = {};
-  const hwMax = hwData.length * 1;   // каждое задание = 1 балл
+  const hwMax = hwData.length * 1;
 
-  /* ---------- Рендер заданий ДЗ ---------- */
   hwData.forEach(function(t, i){
     const div = document.createElement('div');
     div.className = 'task easy';
@@ -488,7 +454,6 @@ document.getElementById('finish').addEventListener('click', function() {
     hwTasksEl.appendChild(div);
   });
 
-  /* ---------- Проверка одного задания ДЗ ---------- */
   hwTasksEl.addEventListener('click', function(e){
     const btn = e.target.closest('[data-hw-check]');
     if (!btn) return;
@@ -515,8 +480,7 @@ document.getElementById('finish').addEventListener('click', function() {
       res.innerHTML = `✔ Верно! +1 балл.<div class="exp">${t.exp}</div>`;
       hwState[i] = 1;
       launchConfetti(btn);
-       // ⬇️ ГЕЙМИФИКАЦИЯ: +XP за ДЗ
-      addXP(4);   // 4 XP за каждое задание ДЗ
+      addXP(4);
     } else {
       res.className = 'result bad';
       res.innerHTML = `✖ Неверно.<div class="exp">${t.exp}</div>`;
@@ -536,17 +500,14 @@ document.getElementById('finish').addEventListener('click', function() {
       `Проверено ${done} из ${hwData.length} заданий · Баллы: ${got} / ${hwMax}`;
   }
 
-  /* ---------- Итог ДЗ + отправка ---------- */
   document.getElementById('hwFinish').addEventListener('click', function(){
     const btn = document.getElementById('hwFinish');
 
-    // 1. Защита от повторного нажатия
     if (btn.dataset.sent === '1') {
       alert('Результат уже отправлен. Перезагрузите страницу, чтобы пройти заново.');
       return;
     }
 
-    // 2. Считаем результат
     const got = Object.values(hwState).reduce((a, b) => a + b, 0);
     const pct = got / hwMax * 100;
 
@@ -556,7 +517,6 @@ document.getElementById('finish').addEventListener('click', function() {
     else if (pct >= 45) { g = 3; comment = 'Удовлетворительно. Стоит перечитать теорию.'; }
     else                { g = 2; comment = 'Попробуйте выполнить домашнее задание ещё раз.'; }
 
-    // 3. Показываем оценку на экране
     const box = document.getElementById('hwScoreBox');
     box.classList.remove('hidden');
     box.classList.add('pop-in');
@@ -571,12 +531,10 @@ document.getElementById('finish').addEventListener('click', function() {
       setTimeout(() => launchConfetti(document.getElementById('hwGrade')), 500);
     }
 
-    // 4. Блокируем кнопку
     btn.dataset.sent = '1';
     btn.disabled = true;
     btn.textContent = 'Результат отправлен ✓';
 
-    // 5. Отправка в Google Таблицу
     const studentName = (window.__student && window.__student.name) || 'Без имени';
     sendToSheet({
       studentName: studentName,
@@ -589,4 +547,4 @@ document.getElementById('finish').addEventListener('click', function() {
       workType: 'homework'
     });
   });
-})();   // ← ЗАКРЫВАЕТ initHomework — этой строки не хватало!
+})();
