@@ -50,7 +50,7 @@
   }
 })();
 /* ============================================================
-   АВТОРИЗАЦИЯ: проверка, что ученик открыл урок своего класса
+   АВТОРИЗАЦИЯ: проверка класса
    ============================================================ */
 (function checkAccess(){
   const studentRaw = localStorage.getItem('student');
@@ -62,16 +62,16 @@
   }
 
   const student = JSON.parse(studentRaw);
-  // Делаем данные ученика доступными для остальной части app.js
   window.__student = student;
 
-  // 2. Если класс ученика не совпадает с классом урока — редирект
+  // 2. Проверяем, что класс ученика совпадает с классом урока.
+  // Если в LESSON_DATA не указан класс (например, это общий тренажер), пропускаем.
   if (LESSON_DATA.className && student.class !== LESSON_DATA.className) {
     alert(`Этот урок предназначен для ${LESSON_DATA.className}. Вы вошли как ${student.class}.`);
     window.location.href = '../lessons.html';
     throw new Error('Класс не совпадает');
   }
-   // 3. ПРОВЕРКА ПРОФИЛЯ: Блокируем доступ к ЕГЭ тем, кто не выбрал ЕГЭ.
+})();   // 3. ПРОВЕРКА ПРОФИЛЯ: Блокируем доступ к ЕГЭ тем, кто не выбрал ЕГЭ.
   // Но обычные уроки (где нет слова 'тренажер' или 'ege' в пути) пропускаем.
   const isEgeContent = window.location.pathname.includes('/ege-class/') || LESSON_DATA.title.toLowerCase().includes('тренажер');
   
