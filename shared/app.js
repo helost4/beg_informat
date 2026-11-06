@@ -71,6 +71,15 @@
     window.location.href = '../lessons.html';
     throw new Error('Класс не совпадает');
   }
+   // 3. ПРОВЕРКА ПРОФИЛЯ: Блокируем доступ к ЕГЭ тем, кто не выбрал ЕГЭ.
+  // Но обычные уроки (где нет слова 'тренажер' или 'ege' в пути) пропускаем.
+  const isEgeContent = window.location.pathname.includes('/ege-class/') || LESSON_DATA.title.toLowerCase().includes('тренажер');
+  
+  if (isEgeContent && student.track !== 'ege') {
+    alert('Этот урок доступен только в режиме "Подготовка к ЕГЭ". Выйдите и выберите соответствующий профиль при входе.');
+    window.location.href = '../lessons.html';
+    throw new Error('Неверный профиль');
+  }
 })();
 
 /* ============================================================
