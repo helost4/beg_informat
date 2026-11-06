@@ -2,7 +2,6 @@
    ПЛАВАЮЩАЯ НАВИГАЦИЯ (Главная и Выйти)
    ============================================================ */
 (function injectNav() {
-  // Чтобы на странице входа/выбора уроков не было этой панели
   if (window.location.pathname.includes('login.html') || window.location.pathname.includes('lessons.html')) {
     return;
   }
@@ -10,13 +9,11 @@
   const nav = document.createElement('div');
   nav.className = 'floating-nav';
 
-  // Кнопка "Главная"
   const homeBtn = document.createElement('a');
   homeBtn.className = 'floating-btn home';
-  homeBtn.href = '../lessons.html'; // путь на уровень выше (из папки с уроком в корень)
+  homeBtn.href = '../lessons.html';
   homeBtn.innerHTML = '🏠 Главная';
 
-  // Кнопка "Выйти"
   const logoutBtn = document.createElement('button');
   logoutBtn.className = 'floating-btn logout';
   logoutBtn.innerHTML = '🚪 Выйти';
@@ -29,33 +26,13 @@
   nav.appendChild(logoutBtn);
   document.body.appendChild(nav);
 })();
-/* ============================================================
-   ЗАЩИТА: Только для профиля ЕГЭ
-   ============================================================ */
-(function checkEgeAccess(){
-  const studentRaw = localStorage.getItem('student');
-  if (!studentRaw) {
-    window.location.href = '../login.html';
-    throw new Error('Не выполнен вход');
-  }
-  
-  const student = JSON.parse(studentRaw);
-  window.__student = student;
 
-  // Если ученик зашел в обычном профиле, не пускаем в тренажер ЕГЭ
-  if (student.track !== 'ege') {
-    alert('Этот урок доступен только в режиме "Подготовка к ЕГЭ". Выйдите и выберите соответствующий профиль при входе.');
-    window.location.href = '../lessons.html';
-    throw new Error('Неверный профиль');
-  }
-})();
 /* ============================================================
-   АВТОРИЗАЦИЯ: проверка класса
+   АВТОРИЗАЦИЯ И ЗАЩИТА
    ============================================================ */
 (function checkAccess(){
   const studentRaw = localStorage.getItem('student');
 
-  // 1. Если ученик не вошёл — редирект на страницу входа
   if (!studentRaw) {
     window.location.href = '../login.html';
     throw new Error('Не выполнен вход');
@@ -64,15 +41,14 @@
   const student = JSON.parse(studentRaw);
   window.__student = student;
 
-  // 2. Проверяем, что класс ученика совпадает с классом урока.
-  // Если в LESSON_DATA не указан класс (например, это общий тренажер), пропускаем.
+  // 1. Проверка класса
   if (LESSON_DATA.className && student.class !== LESSON_DATA.className) {
     alert(`Этот урок предназначен для ${LESSON_DATA.className}. Вы вошли как ${student.class}.`);
     window.location.href = '../lessons.html';
     throw new Error('Класс не совпадает');
   }
-})();   // 3. ПРОВЕРКА ПРОФИЛЯ: Блокируем доступ к ЕГЭ тем, кто не выбрал ЕГЭ.
-  // Но обычные уроки (где нет слова 'тренажер' или 'ege' в пути) пропускаем.
+
+  // 2. Проверка профиля ЕГЭ (блокируем только тренажеры ЕГЭ)
   const isEgeContent = window.location.pathname.includes('/ege-class/') || LESSON_DATA.title.toLowerCase().includes('тренажер');
   
   if (isEgeContent && student.track !== 'ege') {
@@ -80,7 +56,13 @@
     window.location.href = '../lessons.html';
     throw new Error('Неверный профиль');
   }
-)();
+})();
+
+/* ============================================================
+   ОБЩАЯ ФУНКЦИЯ ОТПРАВКИ РЕЗУЛЬТАТА В GOOGLE ТАБЛИЦУ
+   ============================================================ */
+function sendToSheet(payload){
+  // ... дальше ваш код функции sendToSheet без изменений ...
 
 /* ============================================================
    ОБЩАЯ ФУНКЦИЯ ОТПРАВКИ РЕЗУЛЬТАТА В GOOGLE ТАБЛИЦУ
