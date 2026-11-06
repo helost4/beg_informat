@@ -84,7 +84,7 @@ const LESSONS_CATALOG = {
 };
 
 /* ---------- Выбор каталога на основе профиля ---------- */
-let activeCatalog = (student.track === 'ege') ? CATALOG_EGE : CATALOG_STANDARD;
+let activeCatalog = (student.track === 'ege') ? CATALOG_STANDARD :CATALOG_EGE;
 
 /* ---------- Рендер уроков своего класса ---------- */
 const list = activeCatalog[student.class] || [];
