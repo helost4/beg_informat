@@ -20,6 +20,7 @@
     width: 100%; padding: 12px; font-size: 1rem; border: 2px solid #cbd5e1;
     border-radius: 8px; margin-bottom: 16px;
   }
+  .trainer-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,.15); }
   .trainer-footer {
     display: flex; justify-content: space-between; align-items: center;
     flex-wrap: wrap; gap: 10px;
@@ -31,13 +32,46 @@
   .lvl-1 { background: #dcfce7; color: #15803d; }
   .lvl-2 { background: #fef3c7; color: #b45309; }
   .lvl-3 { background: #fee2e2; color: #b91c1c; }
-  
+
   .progress-track {
     height: 8px; background: #e2e8f0; border-radius: 4px; margin-top: 16px;
   }
   .progress-fill {
     height: 100%; background: #3b82f6; border-radius: 4px; width: 0%; transition: width 0.3s;
   }
+
+  /* Теория: схемы и таблицы (перенесено из урока 10 класса) */
+  .ip-visual {
+    background: #1e293b; color: #fff; padding: 20px; border-radius: 12px;
+    font-family: monospace; font-size: 1.05rem; text-align: center; margin: 16px 0;
+    overflow-x: auto; line-height: 1.8;
+  }
+  .ip-visual .network-part { color: #3b82f6; font-weight: bold; }
+  .ip-visual .host-part { color: #ec4899; font-weight: bold; }
+  .ip-visual .mask-one { color: #22c55e; }
+  .ip-visual .mask-zero { color: #ef4444; }
+
+  .table-mask {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+  }
+  .table-mask th, .table-mask td {
+    border: 1px solid #cbd5e1; padding: 8px; text-align: center;
+  }
+  .table-mask th { background: #f1f5f9; color: #1e293b; }
+  .table-mask tr:nth-child(even) { background: #f8fafc; }
+
+  /* Теория с таблицами выше стандартных 900px */
+  .theory-item.open .theory-body { max-height: 2400px; }
+
+  .student-line {
+    margin-top: 8px; font-size: .9rem; color: #475569; font-weight: 600;
+  }
+  .level-summary {
+    display: inline-block; text-align: left; margin: 14px auto 0;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 14px 20px; font-size: .95rem; line-height: 1.7;
+  }
+  .level-summary b { color: #1e293b; }
 </style>
 </head>
 <body>
@@ -53,6 +87,7 @@
     <div class="hero-emoji">🧑‍💻</div>
     <h1 id="title">Тренажер ЕГЭ: Сети</h1>
     <div class="sub" id="subtitle">10-11 класс · Подготовка к ЕГЭ</div>
+    <div class="student-line">👤 <span id="studentNameDisplay">—</span></div>
   </header>
 
   <div class="section-tabs">
@@ -60,112 +95,254 @@
     <button class="tab" data-tab="trainer">🏆 Тренажер</button>
   </div>
 
-  <!-- ТЕОРИЯ -->
+  <!-- ======================= ТЕОРИЯ ======================= -->
   <div class="card" id="theorySection">
-    <h2>Теория по сетям</h2>
-    <p>Здесь будет ваш теоретический блок (можно скопировать из предыдущего урока).</p>
-    <a href="#" id="startTrainerBtn" class="btn" style="margin-top: 20px;">Перейти к тренажеру →</a>
+    <h2><span class="icon">📚</span> Теория по сетям</h2>
+    <p class="muted" style="margin:-8px 0 16px">
+      Краткая теория по теме «Сети. IP-адреса. Маски». Кликните по заголовку, чтобы раскрыть или свернуть блок.
+    </p>
+
+    <div id="theoryList">
+      <div class="theory-item open">
+        <div class="theory-head"><span>🌐 Компьютерные сети и IP-адреса</span><span class="arrow">▾</span></div>
+        <div class="theory-body">
+          <div class="theory-illustration">
+            <span class="emoji-big">🌐</span>
+            <span class="emoji-big">💻</span>
+            <span class="emoji-big">🛜</span>
+          </div>
+          <p><b>Компьютерная сеть</b> — это группа компьютеров, соединенных линиями связи и обменивающихся информацией.</p>
+          <p>Каждый компьютер в сети Интернет имеет уникальный адрес — <b>IP-адрес</b> (Internet Protocol).</p>
+          <p>IP-адрес (IPv4) состоит из <b>32 бит</b>. Для удобства его записывают в виде 4 чисел (октетов), разделенных точками. Каждое число может быть от 0 до 255.</p>
+          <p>Пример: <code>192.168.85.210</code></p>
+          <p>В двоичном виде это: <code>11000000.10101000.01010101.11010010</code></p>
+        </div>
+      </div>
+
+      <div class="theory-item">
+        <div class="theory-head"><span>🎭 Что такое маска сети?</span><span class="arrow">▾</span></div>
+        <div class="theory-body">
+          <div class="theory-illustration">
+            <span class="emoji-big">🎭</span>
+            <span class="emoji-big">🔢</span>
+            <span class="emoji-big">🛡️</span>
+          </div>
+          <p><b>Маска подсети</b> — это 32-битное число, которое показывает, какая часть IP-адреса относится к адресу сети, а какая — к адресу компьютера (узла) внутри этой сети.</p>
+          <p>В маске сначала идут <b>единицы</b>, а потом <b>нули</b> (не может быть наоборот).</p>
+          <ul>
+            <li><b>1</b> в маске — биты IP-адреса относятся к <b style="color:#3b82f6;">адресу сети</b>.</li>
+            <li><b>0</b> в маске — биты IP-адреса относятся к <b style="color:#ec4899;">адресу узла (компьютера)</b>.</li>
+          </ul>
+          <div class="ip-visual">
+            IP: &nbsp; <span class="network-part">11000000.10101000.01010101</span> . <span class="host-part">11010010</span><br>
+            Маска: <span class="mask-one">11111111.11111111.11111111</span> . <span class="mask-zero">00000000</span>
+          </div>
+          <p>В данном примере маска <code>255.255.255.0</code>. Первые 24 бита — это адрес сети, последние 8 бит — адрес компьютера.</p>
+        </div>
+      </div>
+
+      <div class="theory-item">
+        <div class="theory-head"><span>🧮 Адрес сети: операция логическое И</span><span class="arrow">▾</span></div>
+        <div class="theory-body">
+          <div class="theory-illustration">
+            <span class="emoji-big">🧮</span>
+            <span class="emoji-big">⚙️</span>
+            <span class="emoji-big">➕</span>
+          </div>
+          <p>Чтобы найти <b>адрес сети</b>, нужно применить поразрядную операцию <b>логическое «И» (AND)</b> к IP-адресу и маске.</p>
+          <ul>
+            <li><code>1 &amp; 1 = 1</code></li>
+            <li><code>1 &amp; 0 = 0</code></li>
+            <li><code>0 &amp; 1 = 0</code></li>
+            <li><code>0 &amp; 0 = 0</code></li>
+          </ul>
+          <p>Простыми словами: если бит маски равен <code>1</code>, мы <b>оставляем</b> бит IP-адреса без изменений. Если бит маски равен <code>0</code>, мы <b>заменяем</b> его на <code>0</code>.</p>
+          <p>В десятичном виде: мы «обнуляем» те числа IP-адреса, где маска равна 0, и оставляем без изменений там, где маска равна 255.</p>
+        </div>
+      </div>
+
+      <div class="theory-item">
+        <div class="theory-head"><span>📏 Допустимые значения маски</span><span class="arrow">▾</span></div>
+        <div class="theory-body">
+          <div class="theory-illustration">
+            <span class="emoji-big">📏</span>
+            <span class="emoji-big">0️⃣1️⃣</span>
+            <span class="emoji-big">🔢</span>
+          </div>
+          <p>Так как в маске сначала идут единицы, а потом нули, то каждый байт маски может принимать только ограниченный набор значений.</p>
+          <table class="table-mask">
+            <tr><th>Двоичный вид</th><th>Десятичный вид</th><th>Кол-во единиц</th></tr>
+            <tr><td>00000000</td><td><b>0</b></td><td>0</td></tr>
+            <tr><td>10000000</td><td><b>128</b></td><td>1</td></tr>
+            <tr><td>11000000</td><td><b>192</b></td><td>2</td></tr>
+            <tr><td>11100000</td><td><b>224</b></td><td>3</td></tr>
+            <tr><td>11110000</td><td><b>240</b></td><td>4</td></tr>
+            <tr><td>11111000</td><td><b>248</b></td><td>5</td></tr>
+            <tr><td>11111100</td><td><b>252</b></td><td>6</td></tr>
+            <tr><td>11111110</td><td><b>254</b></td><td>7</td></tr>
+            <tr><td>11111111</td><td><b>255</b></td><td>8</td></tr>
+          </table>
+          <p>Эти значения нужно знать наизусть или уметь быстро получать (255 минус степень двойки).</p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- ТРЕНАЖЕР -->
+  <!-- ======================= ТРЕНАЖЁР ======================= -->
   <div class="card hidden" id="trainerSection">
     <div id="trainerIntro">
       <h2>Добро пожаловать в тренажер!</h2>
       <p>Тренажер состоит из 3 уровней сложности. Задания идут от простого к сложному.</p>
-      <ul>
-        <li>🟢 <b>Уровень 1</b> — Базовые понятия (5 задач)</li>
-        <li>🟡 <b>Уровень 2</b> — Вычисления (3 задачи)</li>
-        <li>🔴 <b>Уровень 3</b> — Сложные задачи (2 задачи)</li>
-      </ul>
+      <ul id="levelsOverview"></ul>
       <button class="btn" id="startLevel1">Начать Уровень 1</button>
     </div>
 
     <div id="trainerPlay" class="hidden">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
         <span class="level-indicator" id="levelBadge">Уровень 1</span>
         <span style="font-weight:bold; color:#64748b;" id="taskCounter">Задача 1 / 5</span>
       </div>
-      
+
       <div class="trainer-box">
         <div class="trainer-question" id="trainerQuestion">Текст вопроса</div>
-        <input type="text" class="trainer-input" id="trainerInput" placeholder="Введите ответ...">
-        
+        <input type="text" class="trainer-input" id="trainerInput" placeholder="Введите ответ..." autocomplete="off">
+
         <div class="trainer-footer">
           <button class="btn" id="checkTrainerBtn">Проверить</button>
           <div id="trainerFeedback" style="font-weight:bold;"></div>
         </div>
         <div class="progress-track"><div class="progress-fill" id="trainerProgress"></div></div>
       </div>
-      
+
       <div id="trainerResultBox" class="hidden" style="text-align:center; padding: 20px;">
-        <h2 style="color:#22c55e;">Уровень пройден!</h2>
+        <h2 style="color:#22c55e;" id="resultTitle">Уровень пройден!</h2>
         <p>Правильных ответов: <span id="correctCount">0</span> из <span id="totalCount">0</span></p>
-        <button class="btn" id="nextLevelBtn">Перейти на следующий уровень</button>
+        <div id="finalSummary" class="hidden"></div>
+        <div style="margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn" id="nextLevelBtn">Перейти на следующий уровень</button>
+          <button class="btn ghost hidden" id="restartBtn">🔄 Пройти заново</button>
+        </div>
       </div>
     </div>
   </div>
+
+  <footer>Подготовка к ЕГЭ · Задание 10 · Интерактивный тренажёр</footer>
 </div>
+
+<!-- Авторизация и навигация (без зависимости от LESSON_DATA) -->
+<script src="../shared/nav-auth.js"></script>
+<!-- Банк заданий -->
+<script src="tasks.js"></script>
 
 <script>
 /* ============================================================
-   НАСТРОЙКИ (ЗАМЕНИТЕ URL НА НОВУЮ ТАБЛИЦУ)
+   НАСТРОЙКИ
    ============================================================ */
 const APPS_SCRIPT_URL_TRAINER = 'https://script.google.com/macros/s/AKfycbydyCpASxZ026Vxr4aRhR1zgsxMWq9JUnwaVEvxpB0jeWD8Ww5mu53oY2CaHjfuck0e/exec';
 
+const LEVEL_META = {
+  1: { name: 'Уровень 1', desc: 'Базовые понятия', emoji: '🟢', cls: 'lvl-1' },
+  2: { name: 'Уровень 2', desc: 'Вычисления',      emoji: '🟡', cls: 'lvl-2' },
+  3: { name: 'Уровень 3', desc: 'Сложные задачи',  emoji: '🔴', cls: 'lvl-3' }
+};
+
 /* ============================================================
-   ЛОГИКА ТРЕНАЖЕРА
+   СОСТОЯНИЕ ТРЕНАЖЁРА
    ============================================================ */
-let allTasks = {};
+let allTasks = (typeof TRAINER_TASKS !== 'undefined') ? TRAINER_TASKS : {};
 let currentLevel = 1;
 let currentTaskIndex = 0;
 let currentTasksList = [];
 let correctAnswers = 0;
+const levelResults = {};
+let resultSent = false;
 
-// Загрузка задач из JSON
-fetch('tasks.json')
-  .then(res => res.json())
-  .then(data => { allTasks = data; })
-  .catch(err => console.error("Ошибка загрузки задач:", err));
+/* ============================================================
+   ИМЯ УЧЕНИКА
+   ============================================================ */
+(function showStudent() {
+  const el = document.getElementById('studentNameDisplay');
+  if (el && window.__student) {
+    el.textContent = window.__student.name + ' · ' + window.__student.class;
+  }
+})();
 
-// Переключение вкладок
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+/* ============================================================
+   ОБЗОР УРОВНЕЙ
+   ============================================================ */
+function tasksWord(n) {
+  const d = Math.abs(n) % 100;
+  if (d >= 11 && d <= 14) return 'задач';
+  switch (d % 10) {
+    case 1: return 'задача';
+    case 2:
+    case 3:
+    case 4: return 'задачи';
+    default: return 'задач';
+  }
+}
+
+function renderLevelsOverview() {
+  const ul = document.getElementById('levelsOverview');
+  if (!ul) return;
+
+  ul.innerHTML = '';
+  [1, 2, 3].forEach(function (level) {
+    const count = (allTasks['level' + level] || []).length;
+    const meta = LEVEL_META[level];
+    const li = document.createElement('li');
+    li.innerHTML = meta.emoji + ' <b>' + meta.name + '</b> — ' + meta.desc +
+      ' (' + count + ' ' + tasksWord(count) + ')';
+    ul.appendChild(li);
+  });
+}
+
+/* ============================================================
+   ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+   ============================================================ */
+document.querySelectorAll('.tab').forEach(function (tab) {
+  tab.addEventListener('click', function () {
+    document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
     tab.classList.add('active');
-    const t = tab.dataset.tab;
-    document.getElementById('theorySection').classList.toggle('hidden', t !== 'theory');
-    document.getElementById('trainerSection').classList.toggle('hidden', t !== 'trainer');
+
+    const target = tab.dataset.tab;
+    document.getElementById('theorySection').classList.toggle('hidden', target !== 'theory');
+    document.getElementById('trainerSection').classList.toggle('hidden', target !== 'trainer');
   });
 });
 
-document.getElementById('startTrainerBtn').addEventListener('click', (e) => {
-  e.preventDefault();
-  document.querySelector('[data-tab="trainer"]').click();
+document.getElementById('theoryList').addEventListener('click', function (e) {
+  const head = e.target.closest('.theory-head');
+  if (!head) return;
+  head.parentElement.classList.toggle('open');
 });
 
-// Запуск тренажера
+/* ============================================================
+   ЛОГИКА ТРЕНАЖЁРА
+   ============================================================ */
 function startLevel(level) {
   currentLevel = level;
   currentTaskIndex = 0;
   correctAnswers = 0;
-  
-  // Выбираем список задач для текущего уровня
-  const key = 'level' + level;
-  currentTasksList = allTasks[key] || [];
-  
+
+  currentTasksList = allTasks['level' + level] || [];
+
   if (currentTasksList.length === 0) {
-    alert("Задачи для этого уровня не найдены.");
+    alert('Задачи для этого уровня не найдены.');
     return;
   }
 
-  // Настройка интерфейса
   document.getElementById('trainerIntro').classList.add('hidden');
   document.getElementById('trainerResultBox').classList.add('hidden');
   document.getElementById('trainerPlay').classList.remove('hidden');
-  
+
   const badge = document.getElementById('levelBadge');
-  badge.textContent = `Уровень ${level}`;
-  badge.className = 'level-indicator lvl-' + level;
+  badge.textContent = LEVEL_META[level].name;
+  badge.className = 'level-indicator ' + LEVEL_META[level].cls;
+
+  document.getElementById('finalSummary').classList.add('hidden');
+  document.getElementById('nextLevelBtn').classList.remove('hidden');
+  document.getElementById('restartBtn').classList.add('hidden');
 
   loadTask();
 }
@@ -182,89 +359,172 @@ function loadTask() {
   document.getElementById('trainerFeedback').innerText = '';
   document.getElementById('trainerInput').disabled = false;
   document.getElementById('checkTrainerBtn').disabled = false;
-  
-  document.getElementById('taskCounter').innerText = `Задача ${currentTaskIndex + 1} / ${currentTasksList.length}`;
-  
-  // Обновляем прогресс-бар
+  document.getElementById('trainerInput').focus();
+
+  document.getElementById('taskCounter').innerText =
+    'Задача ' + (currentTaskIndex + 1) + ' / ' + currentTasksList.length;
+
   const progress = (currentTaskIndex / currentTasksList.length) * 100;
   document.getElementById('trainerProgress').style.width = progress + '%';
 }
 
-document.getElementById('checkTrainerBtn').addEventListener('click', () => {
+function normalizeAnswer(value) {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/,/g, '.')
+    .replace(/^https?:\/\//, '');
+}
+
+function isCorrect(userAnswer, task) {
+  const user = normalizeAnswer(userAnswer);
+  if (!user) return false;
+
+  const accepted = [task.answer].concat(task.accept || []);
+  return accepted.some(function (a) {
+    return normalizeAnswer(a) === user;
+  });
+}
+
+function checkCurrentTask() {
   const task = currentTasksList[currentTaskIndex];
-  const userAnswer = document.getElementById('trainerInput').value.trim();
+  const userAnswer = document.getElementById('trainerInput').value;
   const feedback = document.getElementById('trainerFeedback');
-  
-  // Простое сравнение (можно усложнить, если нужно игнорировать регистр)
-  if (userAnswer.toLowerCase() === task.answer.toLowerCase()) {
-    feedback.innerText = "✅ Верно! " + task.exp;
-    feedback.style.color = "#22c55e";
+
+  if (!normalizeAnswer(userAnswer)) {
+    feedback.innerText = 'Введите ответ.';
+    feedback.style.color = '#b45309';
+    return;
+  }
+
+  if (isCorrect(userAnswer, task)) {
+    feedback.innerText = '✅ Верно! ' + task.exp;
+    feedback.style.color = '#22c55e';
     correctAnswers++;
   } else {
-    feedback.innerText = `❌ Неверно. Правильный ответ: ${task.answer}. ` + task.exp;
-    feedback.style.color = "#ef4444";
+    feedback.innerHTML = '❌ Неверно. Правильный ответ: <b>' + task.answer + '</b>. ' + task.exp;
+    feedback.style.color = '#ef4444';
   }
-  
-  // Блокируем ввод до следующего шага
+
   document.getElementById('trainerInput').disabled = true;
   document.getElementById('checkTrainerBtn').disabled = true;
-  
-  // Создаем кнопку "Далее"
+
   const nextBtn = document.createElement('button');
   nextBtn.className = 'btn ghost';
   nextBtn.style.marginTop = '10px';
-  nextBtn.innerText = 'Следующая задача →';
-  nextBtn.onclick = () => {
+  nextBtn.innerText = (currentTaskIndex === currentTasksList.length - 1)
+    ? 'Завершить уровень →'
+    : 'Следующая задача →';
+  nextBtn.onclick = function () {
     nextBtn.remove();
     currentTaskIndex++;
     loadTask();
   };
+
   feedback.appendChild(document.createElement('br'));
   feedback.appendChild(nextBtn);
+}
+
+document.getElementById('checkTrainerBtn').addEventListener('click', checkCurrentTask);
+document.getElementById('trainerInput').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && !this.disabled) checkCurrentTask();
 });
 
 function finishLevel() {
+  levelResults[currentLevel] = {
+    correct: correctAnswers,
+    total: currentTasksList.length
+  };
+
   document.getElementById('trainerPlay').classList.add('hidden');
   document.getElementById('trainerResultBox').classList.remove('hidden');
-  
+  document.getElementById('resultTitle').textContent = LEVEL_META[currentLevel].name + ' пройден!';
   document.getElementById('correctCount').innerText = correctAnswers;
   document.getElementById('totalCount').innerText = currentTasksList.length;
-  
+  document.getElementById('finalSummary').classList.add('hidden');
+
   const nextBtn = document.getElementById('nextLevelBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  restartBtn.classList.add('hidden');
+
   if (currentLevel < 3) {
-    nextBtn.style.display = 'inline-block';
-    nextBtn.innerText = `Перейти на Уровень ${currentLevel + 1}`;
-    nextBtn.onclick = () => startLevel(currentLevel + 1);
+    nextBtn.classList.remove('hidden');
+    nextBtn.innerText = 'Перейти на ' + LEVEL_META[currentLevel + 1].name;
+    nextBtn.onclick = function () { startLevel(currentLevel + 1); };
   } else {
-    nextBtn.style.display = 'inline-block';
+    nextBtn.classList.remove('hidden');
     nextBtn.innerText = 'Завершить тренажер';
-    nextBtn.onclick = () => {
-      alert('Вы прошли все уровни! Результат отправлен учителю.');
-      // Отправка данных
-      sendTrainerResult();
-      // Возврат в начало
-      document.getElementById('trainerResultBox').classList.add('hidden');
-      document.getElementById('trainerIntro').classList.remove('hidden');
-    };
+    nextBtn.onclick = finishTrainer;
   }
 }
 
-document.getElementById('startLevel1').addEventListener('click', () => startLevel(1));
+function finishTrainer() {
+  let totalCorrect = 0;
+  let totalTasks = 0;
+  let rows = '';
 
-// Функция отправки в Google Таблицу
-function sendTrainerResult() {
-  if (!APPS_SCRIPT_URL_TRAINER || APPS_SCRIPT_URL_TRAINER.includes('ВАШ_НОВЫЙ_ID')) return;
-  
-  const studentName = (window.__student && window.__student.name) || 'Аноним';
-  
+  [1, 2, 3].forEach(function (level) {
+    const res = levelResults[level] || { correct: 0, total: 0 };
+    totalCorrect += res.correct;
+    totalTasks += res.total;
+    rows += '<div>' + LEVEL_META[level].emoji + ' <b>' + LEVEL_META[level].name + ':</b> ' +
+      res.correct + ' из ' + res.total + '</div>';
+  });
+
+  const pct = totalTasks ? Math.round(totalCorrect / totalTasks * 100) : 0;
+
+  document.getElementById('resultTitle').textContent = '🏁 Тренажер завершён!';
+  document.getElementById('correctCount').innerText = totalCorrect;
+  document.getElementById('totalCount').innerText = totalTasks;
+
+  const summary = document.getElementById('finalSummary');
+  summary.innerHTML =
+    '<div class="level-summary">' + rows +
+    '<hr style="border:none;border-top:1px solid #cbd5e1;margin:10px 0">' +
+    '<div>Итого: <b>' + totalCorrect + ' из ' + totalTasks + '</b> (' + pct + '%)</div></div>';
+  summary.classList.remove('hidden');
+
+  document.getElementById('nextLevelBtn').classList.add('hidden');
+  const restartBtn = document.getElementById('restartBtn');
+  restartBtn.classList.remove('hidden');
+  restartBtn.onclick = resetTrainer;
+
+  if (!resultSent) {
+    resultSent = true;
+    sendTrainerResult(totalCorrect, totalTasks, pct);
+  }
+}
+
+function resetTrainer() {
+  Object.keys(levelResults).forEach(function (k) { delete levelResults[k]; });
+  currentLevel = 1;
+  currentTaskIndex = 0;
+  correctAnswers = 0;
+  resultSent = false;
+
+  document.getElementById('trainerResultBox').classList.add('hidden');
+  document.getElementById('trainerPlay').classList.add('hidden');
+  document.getElementById('trainerIntro').classList.remove('hidden');
+}
+
+function sendTrainerResult(score, maxScore, pct) {
+  if (typeof APPS_SCRIPT_URL_TRAINER === 'undefined' || !APPS_SCRIPT_URL_TRAINER) return;
+
+  let grade = 2;
+  if (pct >= 85) grade = 5;
+  else if (pct >= 65) grade = 4;
+  else if (pct >= 45) grade = 3;
+
   const payload = {
-    studentName: studentName,
-    className: '10-11 класс',
+    studentName: (window.__student && window.__student.name) || 'Аноним',
+    className: (window.__student && window.__student.class) || '10-11 класс',
+    track: (window.__student && window.__student.track) || '',
     lesson: 'Тренажер Сети',
     variant: 'Trainer',
-    score: correctAnswers,
-    maxScore: currentTasksList.length, // (условно, для последнего уровня)
-    grade: '', // Можно выставить оценку по итогам всех уровней
+    score: score,
+    maxScore: maxScore,
+    grade: grade,
     workType: 'trainer'
   };
 
@@ -273,8 +533,21 @@ function sendTrainerResult() {
     mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(payload)
-  }).catch(err => console.error('Ошибка отправки:', err));
+  }).then(function () {
+    console.log('Результат тренажёра отправлен:', payload);
+  }).catch(function (err) {
+    console.error('Ошибка отправки:', err);
+  });
 }
+
+/* ============================================================
+   СТАРТ
+   ============================================================ */
+document.getElementById('startLevel1').addEventListener('click', function () {
+  startLevel(1);
+});
+
+renderLevelsOverview();
 </script>
 </body>
 </html>
