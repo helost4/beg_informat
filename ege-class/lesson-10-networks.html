@@ -72,6 +72,18 @@
     padding: 14px 20px; font-size: .95rem; line-height: 1.7;
   }
   .level-summary b { color: #1e293b; }
+
+  /* Статус отправки результата в Google-таблицу */
+  .send-status {
+    display: inline-block; margin-top: 14px; padding: 10px 16px;
+    border-radius: 10px; font-size: .9rem; font-weight: 600;
+    max-width: 100%; word-break: break-word;
+  }
+  .send-status.hidden { display: none; }
+  .send-status.ok { background: #dcfce7; color: #15803d; }
+  .send-status.bad { background: #fee2e2; color: #b91c1c; }
+  .send-status.sending { background: #e0f2fe; color: #0369a1; }
+  .send-retry { margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -218,9 +230,13 @@
         <h2 style="color:#22c55e;" id="resultTitle">Уровень пройден!</h2>
         <p>Правильных ответов: <span id="correctCount">0</span> из <span id="totalCount">0</span></p>
         <div id="finalSummary" class="hidden"></div>
+        <div id="sendStatus" class="send-status hidden"></div>
         <div style="margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
           <button class="btn" id="nextLevelBtn">Перейти на следующий уровень</button>
           <button class="btn ghost hidden" id="restartBtn">🔄 Пройти заново</button>
+        </div>
+        <div>
+          <button class="btn ghost send-retry hidden" id="retrySendBtn" type="button">🔁 Повторить отправку</button>
         </div>
       </div>
     </div>
@@ -343,6 +359,7 @@ function startLevel(level) {
   document.getElementById('finalSummary').classList.add('hidden');
   document.getElementById('nextLevelBtn').classList.remove('hidden');
   document.getElementById('restartBtn').classList.add('hidden');
+  hideSendStatus();
 
   loadTask();
 }
@@ -457,6 +474,17 @@ function finishLevel() {
     nextBtn.innerText = 'Завершить тренажер';
     nextBtn.onclick = finishTrainer;
   }
+
+  // Отправляем результат сразу после каждого уровня, не дожидаясь финала
+  const lvl = levelResults[currentLevel];
+  const lvlPct = lvl.total ? Math.round(lvl.correct / lvl.total * 100) : 0;
+  sendResult({
+    variant: 'Trainer L' + currentLevel,
+    score: lvl.correct,
+    maxScore: lvl.total,
+    grade: gradeFor(lvlPct),
+    workType: 'trainer-level'
+  });
 }
 
 function finishTrainer() {
@@ -492,7 +520,13 @@ function finishTrainer() {
 
   if (!resultSent) {
     resultSent = true;
-    sendTrainerResult(totalCorrect, totalTasks, pct);
+    sendResult({
+      variant: 'Trainer TOTAL',
+      score: totalCorrect,
+      maxScore: totalTasks,
+      grade: gradeFor(pct),
+      workType: 'trainer'
+    });
   }
 }
 
@@ -506,37 +540,179 @@ function resetTrainer() {
   document.getElementById('trainerResultBox').classList.add('hidden');
   document.getElementById('trainerPlay').classList.add('hidden');
   document.getElementById('trainerIntro').classList.remove('hidden');
+  hideSendStatus();
 }
 
-function sendTrainerResult(score, maxScore, pct) {
-  if (typeof APPS_SCRIPT_URL_TRAINER === 'undefined' || !APPS_SCRIPT_URL_TRAINER) return;
+/* ============================================================
+   ОТПРАВКА РЕЗУЛЬТАТОВ В GOOGLE-ТАБЛИЦУ
+   ============================================================ */
+const SEND_QUEUE_KEY = 'trainerResultQueue';
 
-  let grade = 2;
-  if (pct >= 85) grade = 5;
-  else if (pct >= 65) grade = 4;
-  else if (pct >= 45) grade = 3;
+function gradeFor(pct) {
+  if (pct >= 85) return 5;
+  if (pct >= 65) return 4;
+  if (pct >= 45) return 3;
+  return 2;
+}
 
+function newClientId() {
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9);
+}
+
+function buildPayload(extra) {
+  const student = window.__student || {};
   const payload = {
-    studentName: (window.__student && window.__student.name) || 'Аноним',
-    className: (window.__student && window.__student.class) || '10-11 класс',
-    track: (window.__student && window.__student.track) || '',
+    clientId: newClientId(),
+    studentName: student.name || 'Аноним',
+    className: student.class || '10-11 класс',
     lesson: 'Тренажер Сети',
     variant: 'Trainer',
-    score: score,
-    maxScore: maxScore,
-    grade: grade,
+    score: 0,
+    maxScore: 0,
+    grade: 2,
     workType: 'trainer'
   };
+  return Object.assign(payload, extra || {});
+}
 
-  fetch(APPS_SCRIPT_URL_TRAINER, {
+/* --- Очередь неотправленных результатов (localStorage) --- */
+function readQueue() {
+  try {
+    const raw = localStorage.getItem(SEND_QUEUE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function writeQueue(arr) {
+  try {
+    localStorage.setItem(SEND_QUEUE_KEY, JSON.stringify(arr));
+  } catch (e) {
+    console.warn('Не удалось сохранить очередь отправки:', e);
+  }
+}
+
+function enqueue(payload) {
+  const queue = readQueue();
+  if (!queue.some(function (p) { return p.clientId === payload.clientId; })) {
+    queue.push(payload);
+    writeQueue(queue);
+  }
+}
+
+function dequeue(clientId) {
+  writeQueue(readQueue().filter(function (p) { return p.clientId !== clientId; }));
+}
+
+/* --- Статус отправки в интерфейсе --- */
+function setSendStatus(state, text) {
+  const el = document.getElementById('sendStatus');
+  if (!el) return;
+  el.className = 'send-status ' + state;
+  el.textContent = text;
+}
+
+function hideSendStatus() {
+  const el = document.getElementById('sendStatus');
+  if (el) el.className = 'send-status hidden';
+  const retry = document.getElementById('retrySendBtn');
+  if (retry) retry.classList.add('hidden');
+}
+
+function showRetryButton() {
+  const retry = document.getElementById('retrySendBtn');
+  if (retry) retry.classList.remove('hidden');
+}
+
+/* --- Сетевая отправка --- */
+function postResult(payload) {
+  if (typeof APPS_SCRIPT_URL_TRAINER === 'undefined' || !APPS_SCRIPT_URL_TRAINER) {
+    return Promise.reject(new Error('APPS_SCRIPT_URL_TRAINER не настроен'));
+  }
+
+  return fetch(APPS_SCRIPT_URL_TRAINER, {
     method: 'POST',
-    mode: 'no-cors',
+    // no-cors убран: деплоймент отдаёт access-control-allow-origin: *
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
-  }).then(function () {
-    console.log('Результат тренажёра отправлен:', payload);
+    body: JSON.stringify(payload),
+    keepalive: true
+  }).then(function (res) {
+    return res.text().then(function (text) {
+      let data = null;
+      try { data = JSON.parse(text); } catch (e) { data = null; }
+
+      if (!res.ok) {
+        throw new Error('HTTP ' + res.status + ': ' + text.slice(0, 150));
+      }
+      if (!data) {
+        throw new Error('Некорректный ответ сервера: ' + text.slice(0, 150));
+      }
+      if (data.result === 'error') {
+        throw new Error(data.message || 'Скрипт вернул ошибку');
+      }
+      return data;
+    });
+  });
+}
+
+function sendResult(extra) {
+  const payload = buildPayload(extra);
+
+  setSendStatus('sending', '⏳ Отправляем результат…');
+
+  return postResult(payload).then(function (data) {
+    console.log('Результат отправлен:', payload, data);
+    dequeue(payload.clientId);
+    const rowInfo = (data && data.row) ? ' (строка ' + data.row + ')' : '';
+    setSendStatus('ok', '✅ Результат отправлен' + rowInfo);
+    const retry = document.getElementById('retrySendBtn');
+    if (retry) retry.classList.add('hidden');
+    return true;
   }).catch(function (err) {
-    console.error('Ошибка отправки:', err);
+    console.error('Ошибка отправки результата:', err, payload);
+    enqueue(payload);
+    setSendStatus('bad', '⚠️ Не удалось отправить результат. Он сохранён и будет отправлен позже. (' + (err && err.message ? err.message : 'ошибка сети') + ')');
+    showRetryButton();
+    return false;
+  });
+}
+
+/* --- Досылка накопленной очереди --- */
+function flushQueue() {
+  const queue = readQueue();
+  if (!queue.length) return Promise.resolve(0);
+
+  let sent = 0;
+  let chain = Promise.resolve();
+
+  queue.forEach(function (payload) {
+    chain = chain.then(function () {
+      return postResult(payload).then(function (data) {
+        console.log('Отложенный результат отправлен:', payload, data);
+        dequeue(payload.clientId);
+        sent++;
+      }).catch(function (err) {
+        console.error('Не удалось дослать отложенный результат:', err, payload);
+      });
+    });
+  });
+
+  return chain.then(function () { return sent; });
+}
+
+function retrySending() {
+  setSendStatus('sending', '⏳ Повторная отправка…');
+  flushQueue().then(function (sent) {
+    if (readQueue().length === 0) {
+      setSendStatus('ok', '✅ Все результаты отправлены' + (sent ? ' (' + sent + ')' : ''));
+      const retry = document.getElementById('retrySendBtn');
+      if (retry) retry.classList.add('hidden');
+    } else {
+      setSendStatus('bad', '⚠️ Часть результатов пока не отправлена. Попробуйте ещё раз позже.');
+      showRetryButton();
+    }
   });
 }
 
@@ -547,7 +723,12 @@ document.getElementById('startLevel1').addEventListener('click', function () {
   startLevel(1);
 });
 
+document.getElementById('retrySendBtn').addEventListener('click', retrySending);
+
 renderLevelsOverview();
+
+// Досылаем результаты, которые не удалось отправить в прошлый раз
+flushQueue();
 </script>
 </body>
 </html>
