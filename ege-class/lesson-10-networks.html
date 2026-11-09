@@ -84,6 +84,26 @@
   .send-status.bad { background: #fee2e2; color: #b91c1c; }
   .send-status.sending { background: #e0f2fe; color: #0369a1; }
   .send-retry { margin-top: 10px; }
+
+  /* Список уровней */
+  .levels-list { display: grid; gap: 12px; margin: 16px 0 20px; }
+  .level-card {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    border: 2px solid #e2e8f0; border-radius: 14px; padding: 14px 18px;
+    background: #f8fafc; transition: .2s;
+  }
+  .level-card:hover {
+    border-color: #3b82f6; background: #fff;
+    box-shadow: 0 4px 14px rgba(59,130,246,.08);
+  }
+  .level-card.done { border-color: #86efac; background: #f0fdf4; }
+  .level-card .level-emoji { font-size: 1.4rem; }
+  .level-card .level-info { flex: 1; min-width: 180px; }
+  .level-card .level-name { font-weight: 700; color: #1e293b; }
+  .level-card .level-desc { font-size: .88rem; color: #64748b; margin-top: 2px; }
+  .level-card .level-score { font-size: .85rem; font-weight: 700; color: #15803d; margin-top: 4px; }
+  .level-card .btn { padding: 10px 18px; }
+  .level-back { margin-right: 4px; }
 </style>
 </head>
 <body>
@@ -204,18 +224,17 @@
   <div class="card hidden" id="trainerSection">
     <div id="trainerIntro">
       <h2>Добро пожаловать в тренажер!</h2>
-      <p>Выберите уровень сложности. Задания идут от простого к сложному.</p>
-      <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px;">
-      <ul id="levelsOverview"></ul>
-      <button class="btn" id="startLevel1">🟢 Уровень 1 (Легкий)</button>
-      <button class="btn" id="startLevel2">🟡 Уровень 2 (Средний)2</button>
-      <button class="btn" id="startLevel3">🔴 Уровень 3 (Сложный)</button>
-      </div>
+      <p>Выберите любой из трёх уровней сложности — проходить их можно в любом порядке.</p>
+      <div id="levelsOverview" class="levels-list"></div>
+      <button class="btn hidden" id="finishTrainerBtn" type="button">🏁 Итоги тренажёра</button>
     </div>
 
     <div id="trainerPlay" class="hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
-        <span class="level-indicator" id="levelBadge">Уровень 1</span>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <button class="btn ghost level-back" id="backToLevelsBtn" type="button">← К уровням</button>
+          <span class="level-indicator" id="levelBadge">Уровень 1</span>
+        </div>
         <span style="font-weight:bold; color:#64748b;" id="taskCounter">Задача 1 / 5</span>
       </div>
 
@@ -237,7 +256,8 @@
         <div id="sendStatus" class="send-status hidden"></div>
         <div style="margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
           <button class="btn" id="nextLevelBtn">Перейти на следующий уровень</button>
-          <button class="btn ghost" id="showIntro()">В меню тренажера</button>
+          <button class="btn ghost" id="backToLevelsResultBtn" type="button">← К списку уровней</button>
+          <button class="btn ghost hidden" id="restartBtn">🔄 Пройти заново</button>
         </div>
         <div>
           <button class="btn ghost send-retry hidden" id="retrySendBtn" type="button">🔁 Повторить отправку</button>
@@ -245,7 +265,7 @@
       </div>
     </div>
   </div>
- 
+
   <footer>Подготовка к ЕГЭ · Задание 10 · Интерактивный тренажёр</footer>
 </div>
 
@@ -275,6 +295,7 @@ let currentTaskIndex = 0;
 let currentTasksList = [];
 let correctAnswers = 0;
 const levelResults = {};
+const levelSent = {};
 let resultSent = false;
 
 /* ============================================================
@@ -303,18 +324,63 @@ function tasksWord(n) {
 }
 
 function renderLevelsOverview() {
-  const ul = document.getElementById('levelsOverview');
-  if (!ul) return;
+  const box = document.getElementById('levelsOverview');
+  if (!box) return;
 
-  ul.innerHTML = '';
+  box.innerHTML = '';
   [1, 2, 3].forEach(function (level) {
     const count = (allTasks['level' + level] || []).length;
     const meta = LEVEL_META[level];
-    const li = document.createElement('li');
-    li.innerHTML = meta.emoji + ' <b>' + meta.name + '</b> — ' + meta.desc +
-      ' (' + count + ' ' + tasksWord(count) + ')';
-    ul.appendChild(li);
+    const res = levelResults[level];
+
+    const card = document.createElement('div');
+    card.className = 'level-card' + (res ? ' done' : '');
+    card.innerHTML =
+      '<span class="level-emoji">' + meta.emoji + '</span>' +
+      '<div class="level-info">' +
+        '<div class="level-name">' + meta.name + '</div>' +
+        '<div class="level-desc">' + meta.desc + ' · ' + count + ' ' + tasksWord(count) + '</div>' +
+        (res ? '<div class="level-score">✅ Пройден: ' + res.correct + ' из ' + res.total + '</div>' : '') +
+      '</div>';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn' + (res ? ' ghost' : '');
+    btn.textContent = res ? 'Пройти снова' : 'Начать';
+    btn.addEventListener('click', function () { startLevel(level); });
+    card.appendChild(btn);
+
+    box.appendChild(card);
   });
+
+  updateFinishButton();
+}
+
+function allLevelsDone() {
+  return [1, 2, 3].every(function (level) { return !!levelResults[level]; });
+}
+
+function updateFinishButton() {
+  const btn = document.getElementById('finishTrainerBtn');
+  if (btn) btn.classList.toggle('hidden', !allLevelsDone());
+}
+
+/* Возврат к списку уровней без сброса уже пройденных */
+function showLevelList() {
+  document.getElementById('trainerPlay').classList.add('hidden');
+  document.getElementById('trainerResultBox').classList.add('hidden');
+  document.getElementById('trainerIntro').classList.remove('hidden');
+  hideSendStatus();
+  renderLevelsOverview();
+}
+
+function backToLevels() {
+  const inProgress = currentTaskIndex > 0 ||
+    document.getElementById('trainerInput').disabled;
+  if (inProgress && !confirm('Выйти к списку уровней? Результат этого уровня не сохранится.')) {
+    return;
+  }
+  showLevelList();
 }
 
 /* ============================================================
@@ -468,27 +534,36 @@ function finishLevel() {
   const nextBtn = document.getElementById('nextLevelBtn');
   const restartBtn = document.getElementById('restartBtn');
   restartBtn.classList.add('hidden');
+  document.getElementById('backToLevelsResultBtn').classList.remove('hidden');
 
   if (currentLevel < 3) {
     nextBtn.classList.remove('hidden');
     nextBtn.innerText = 'Перейти на ' + LEVEL_META[currentLevel + 1].name;
     nextBtn.onclick = function () { startLevel(currentLevel + 1); };
-  } else {
+  } else if (allLevelsDone()) {
     nextBtn.classList.remove('hidden');
-    nextBtn.innerText = 'Завершить тренажер';
+    nextBtn.innerText = '🏁 Завершить тренажёр';
     nextBtn.onclick = finishTrainer;
+  } else {
+    nextBtn.classList.add('hidden');
   }
 
-  // Отправляем результат сразу после каждого уровня, не дожидаясь финала
-  const lvl = levelResults[currentLevel];
-  const lvlPct = lvl.total ? Math.round(lvl.correct / lvl.total * 100) : 0;
-  sendResult({
-    variant: 'Trainer L' + currentLevel,
-    score: lvl.correct,
-    maxScore: lvl.total,
-    grade: gradeFor(lvlPct),
-    workType: 'trainer-level'
-  });
+  // Отправляем результат сразу после каждого уровня, не дожидаясь финала.
+  // Повторное прохождение уровня в той же сессии повторно не отправляем (вариант B).
+  if (!levelSent[currentLevel]) {
+    levelSent[currentLevel] = true;
+    const lvl = levelResults[currentLevel];
+    const lvlPct = lvl.total ? Math.round(lvl.correct / lvl.total * 100) : 0;
+    sendResult({
+      variant: 'Trainer L' + currentLevel,
+      score: lvl.correct,
+      maxScore: lvl.total,
+      grade: gradeFor(lvlPct),
+      workType: 'trainer-level'
+    });
+  }
+
+  updateFinishButton();
 }
 
 function finishTrainer() {
@@ -518,6 +593,10 @@ function finishTrainer() {
   summary.classList.remove('hidden');
 
   document.getElementById('nextLevelBtn').classList.add('hidden');
+  document.getElementById('backToLevelsResultBtn').classList.remove('hidden');
+  document.getElementById('trainerIntro').classList.add('hidden');
+  document.getElementById('trainerPlay').classList.add('hidden');
+  document.getElementById('trainerResultBox').classList.remove('hidden');
   const restartBtn = document.getElementById('restartBtn');
   restartBtn.classList.remove('hidden');
   restartBtn.onclick = resetTrainer;
@@ -536,15 +615,13 @@ function finishTrainer() {
 
 function resetTrainer() {
   Object.keys(levelResults).forEach(function (k) { delete levelResults[k]; });
+  Object.keys(levelSent).forEach(function (k) { delete levelSent[k]; });
   currentLevel = 1;
   currentTaskIndex = 0;
   correctAnswers = 0;
   resultSent = false;
 
-  document.getElementById('trainerResultBox').classList.add('hidden');
-  document.getElementById('trainerPlay').classList.add('hidden');
-  document.getElementById('trainerIntro').classList.remove('hidden');
-  hideSendStatus();
+  showLevelList();
 }
 
 /* ============================================================
@@ -723,14 +800,9 @@ function retrySending() {
 /* ============================================================
    СТАРТ
    ============================================================ */
-document.getElementById('startLevel1').addEventListener('click', function () {
-  startLevel(1);
-  document.getElementById('startLevel2').addEventListener('click', function () {
-  startLeveд(2);
-  document.getElementById('startLevel3').addEventListener('click', function () {
-  startLeveд(3);
-});
-
+document.getElementById('backToLevelsBtn').addEventListener('click', backToLevels);
+document.getElementById('backToLevelsResultBtn').addEventListener('click', showLevelList);
+document.getElementById('finishTrainerBtn').addEventListener('click', finishTrainer);
 document.getElementById('retrySendBtn').addEventListener('click', retrySending);
 
 renderLevelsOverview();
