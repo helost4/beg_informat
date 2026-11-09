@@ -104,6 +104,7 @@
   .level-card .level-score { font-size: .85rem; font-weight: 700; color: #15803d; margin-top: 4px; }
   .level-card .btn { padding: 10px 18px; }
   .level-back { margin-right: 4px; }
+  .level-stats { margin: 6px 0 0; color: #475569; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -252,11 +253,12 @@
       <div id="trainerResultBox" class="hidden" style="text-align:center; padding: 20px;">
         <h2 style="color:#22c55e;" id="resultTitle">Уровень пройден!</h2>
         <p>Правильных ответов: <span id="correctCount">0</span> из <span id="totalCount">0</span></p>
+        <p id="levelStats" class="level-stats hidden"></p>
         <div id="finalSummary" class="hidden"></div>
         <div id="sendStatus" class="send-status hidden"></div>
         <div style="margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-          <button class="btn" id="nextLevelBtn">Перейти на следующий уровень</button>
-          <button class="btn ghost" id="backToLevelsResultBtn" type="button">← К списку уровней</button>
+          <button class="btn" id="backToLevelsResultBtn" type="button">← К выбору уровней</button>
+          <button class="btn ghost" id="nextLevelBtn">Перейти на следующий уровень</button>
           <button class="btn ghost hidden" id="restartBtn">🔄 Пройти заново</button>
         </div>
         <div>
@@ -335,12 +337,14 @@ function renderLevelsOverview() {
 
     const card = document.createElement('div');
     card.className = 'level-card' + (res ? ' done' : '');
+    const pct = (res && res.total) ? Math.round(res.correct / res.total * 100) : 0;
     card.innerHTML =
       '<span class="level-emoji">' + meta.emoji + '</span>' +
       '<div class="level-info">' +
         '<div class="level-name">' + meta.name + '</div>' +
         '<div class="level-desc">' + meta.desc + ' · ' + count + ' ' + tasksWord(count) + '</div>' +
-        (res ? '<div class="level-score">✅ Пройден: ' + res.correct + ' из ' + res.total + '</div>' : '') +
+        (res ? '<div class="level-score">✅ Пройден: ' + res.correct + ' из ' + res.total +
+          ' (' + pct + '%) · оценка ' + gradeFor(pct) + '</div>' : '') +
       '</div>';
 
     const btn = document.createElement('button');
@@ -381,6 +385,51 @@ function backToLevels() {
     return;
   }
   showLevelList();
+}
+
+/* ============================================================
+   СОХРАНЕНИЕ РЕЗУЛЬТАТОВ В РАМКАХ СЕССИИ
+   ============================================================ */
+function sessionKey(suffix) {
+  const s = window.__student || {};
+  return 'trainer:v1:' + (s.name || 'anon') + ':' + (s.class || '') + ':' + suffix;
+}
+
+function saveLevelResults() {
+  try {
+    sessionStorage.setItem(sessionKey('results'), JSON.stringify(levelResults));
+  } catch (e) {
+    console.warn('Не удалось сохранить результаты уровней:', e);
+  }
+}
+
+function restoreLevelResults() {
+  try {
+    const raw = sessionStorage.getItem(sessionKey('results'));
+    if (raw) {
+      const data = JSON.parse(raw);
+      [1, 2, 3].forEach(function (level) {
+        const res = data && data[level];
+        if (res && typeof res.correct === 'number' && typeof res.total === 'number') {
+          levelResults[level] = { correct: res.correct, total: res.total };
+        }
+      });
+    }
+    if (sessionStorage.getItem(sessionKey('total')) === '1') {
+      resultSent = true;
+    }
+  } catch (e) {
+    console.warn('Не удалось восстановить результаты уровней:', e);
+  }
+}
+
+function clearLevelResultsStorage() {
+  try {
+    sessionStorage.removeItem(sessionKey('results'));
+    sessionStorage.removeItem(sessionKey('total'));
+  } catch (e) {
+    // ignore
+  }
 }
 
 /* ============================================================
@@ -429,6 +478,7 @@ function startLevel(level) {
   document.getElementById('finalSummary').classList.add('hidden');
   document.getElementById('nextLevelBtn').classList.remove('hidden');
   document.getElementById('restartBtn').classList.add('hidden');
+  document.getElementById('levelStats').classList.add('hidden');
   hideSendStatus();
 
   loadTask();
@@ -523,6 +573,10 @@ function finishLevel() {
     correct: correctAnswers,
     total: currentTasksList.length
   };
+  saveLevelResults();
+
+  const lvl = levelResults[currentLevel];
+  const lvlPct = lvl.total ? Math.round(lvl.correct / lvl.total * 100) : 0;
 
   document.getElementById('trainerPlay').classList.add('hidden');
   document.getElementById('trainerResultBox').classList.remove('hidden');
@@ -530,6 +584,11 @@ function finishLevel() {
   document.getElementById('correctCount').innerText = correctAnswers;
   document.getElementById('totalCount').innerText = currentTasksList.length;
   document.getElementById('finalSummary').classList.add('hidden');
+
+  const stats = document.getElementById('levelStats');
+  stats.textContent = 'Результат: ' + lvlPct + '% · оценка ' + gradeFor(lvlPct) +
+    '. Результат сохранён — можно выбрать другой уровень.';
+  stats.classList.remove('hidden');
 
   const nextBtn = document.getElementById('nextLevelBtn');
   const restartBtn = document.getElementById('restartBtn');
@@ -552,8 +611,6 @@ function finishLevel() {
   // Повторное прохождение уровня в той же сессии повторно не отправляем (вариант B).
   if (!levelSent[currentLevel]) {
     levelSent[currentLevel] = true;
-    const lvl = levelResults[currentLevel];
-    const lvlPct = lvl.total ? Math.round(lvl.correct / lvl.total * 100) : 0;
     sendResult({
       variant: 'Trainer L' + currentLevel,
       score: lvl.correct,
@@ -594,6 +651,7 @@ function finishTrainer() {
 
   document.getElementById('nextLevelBtn').classList.add('hidden');
   document.getElementById('backToLevelsResultBtn').classList.remove('hidden');
+  document.getElementById('levelStats').classList.add('hidden');
   document.getElementById('trainerIntro').classList.add('hidden');
   document.getElementById('trainerPlay').classList.add('hidden');
   document.getElementById('trainerResultBox').classList.remove('hidden');
@@ -603,6 +661,7 @@ function finishTrainer() {
 
   if (!resultSent) {
     resultSent = true;
+    try { sessionStorage.setItem(sessionKey('total'), '1'); } catch (e) { /* ignore */ }
     sendResult({
       variant: 'Trainer TOTAL',
       score: totalCorrect,
@@ -620,6 +679,7 @@ function resetTrainer() {
   currentTaskIndex = 0;
   correctAnswers = 0;
   resultSent = false;
+  clearLevelResultsStorage();
 
   showLevelList();
 }
@@ -805,6 +865,7 @@ document.getElementById('backToLevelsResultBtn').addEventListener('click', showL
 document.getElementById('finishTrainerBtn').addEventListener('click', finishTrainer);
 document.getElementById('retrySendBtn').addEventListener('click', retrySending);
 
+restoreLevelResults();
 renderLevelsOverview();
 
 // Досылаем результаты, которые не удалось отправить в прошлый раз
