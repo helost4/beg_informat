@@ -204,11 +204,13 @@
   <div class="card hidden" id="trainerSection">
     <div id="trainerIntro">
       <h2>Добро пожаловать в тренажер!</h2>
-      <p>Тренажер состоит из 3 уровней сложности. Задания идут от простого к сложному.</p>
+      <p>Выберите уровень сложности. Задания идут от простого к сложному.</p>
+      <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px;">
       <ul id="levelsOverview"></ul>
-      <button class="btn" id="startLevel1">Начать Уровень 1</button>
-      <button class="btn" id="startLevel2">Начать Уровень 2</button>
-      <button class="btn" id="startLevel3">Начать Уровень 3</button>
+      <button class="btn" id="startLevel1">🟢 Уровень 1 (Легкий)</button>
+      <button class="btn" id="startLevel2">🟡 Уровень 2 (Средний)2</button>
+      <button class="btn" id="startLevel3">🔴 Уровень 3 (Сложный)</button>
+      </div>
     </div>
 
     <div id="trainerPlay" class="hidden">
@@ -235,7 +237,7 @@
         <div id="sendStatus" class="send-status hidden"></div>
         <div style="margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
           <button class="btn" id="nextLevelBtn">Перейти на следующий уровень</button>
-          <button class="btn ghost hidden" id="restartBtn">🔄 Пройти заново</button>
+          <button class="btn ghost" id="showIntro()">В меню тренажера</button>
         </div>
         <div>
           <button class="btn ghost send-retry hidden" id="retrySendBtn" type="button">🔁 Повторить отправку</button>
@@ -243,7 +245,7 @@
       </div>
     </div>
   </div>
-
+ 
   <footer>Подготовка к ЕГЭ · Задание 10 · Интерактивный тренажёр</footer>
 </div>
 
