@@ -249,21 +249,21 @@
         </div>
         <div class="progress-track"><div class="progress-fill" id="trainerProgress"></div></div>
       </div>
+    </div>
 
-      <div id="trainerResultBox" class="hidden" style="text-align:center; padding: 20px;">
-        <h2 style="color:#22c55e;" id="resultTitle">Уровень пройден!</h2>
-        <p>Правильных ответов: <span id="correctCount">0</span> из <span id="totalCount">0</span></p>
-        <p id="levelStats" class="level-stats hidden"></p>
-        <div id="finalSummary" class="hidden"></div>
-        <div id="sendStatus" class="send-status hidden"></div>
-        <div style="margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-          <button class="btn" id="backToLevelsResultBtn" type="button">← К выбору уровней</button>
-          <button class="btn ghost" id="nextLevelBtn">Перейти на следующий уровень</button>
-          <button class="btn ghost hidden" id="restartBtn">🔄 Пройти заново</button>
-        </div>
-        <div>
-          <button class="btn ghost send-retry hidden" id="retrySendBtn" type="button">🔁 Повторить отправку</button>
-        </div>
+    <div id="trainerResultBox" class="hidden" style="text-align:center; padding: 20px;">
+      <h2 style="color:#22c55e;" id="resultTitle">Уровень пройден!</h2>
+      <p>Правильных ответов: <span id="correctCount">0</span> из <span id="totalCount">0</span></p>
+      <p id="levelStats" class="level-stats hidden"></p>
+      <div id="finalSummary" class="hidden"></div>
+      <div id="sendStatus" class="send-status hidden"></div>
+      <div style="margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn" id="backToLevelsResultBtn" type="button">← К выбору уровней</button>
+        <button class="btn ghost" id="nextLevelBtn">Перейти на следующий уровень</button>
+        <button class="btn ghost hidden" id="restartBtn">🔄 Пройти заново</button>
+      </div>
+      <div>
+        <button class="btn ghost send-retry hidden" id="retrySendBtn" type="button">🔁 Повторить отправку</button>
       </div>
     </div>
   </div>
@@ -376,6 +376,13 @@ function showLevelList() {
   document.getElementById('trainerIntro').classList.remove('hidden');
   hideSendStatus();
   renderLevelsOverview();
+}
+
+function scrollToResult() {
+  const box = document.getElementById('trainerResultBox');
+  if (box && typeof box.scrollIntoView === 'function') {
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function backToLevels() {
@@ -589,6 +596,7 @@ function finishLevel() {
   stats.textContent = 'Результат: ' + lvlPct + '% · оценка ' + gradeFor(lvlPct) +
     '. Результат сохранён — можно выбрать другой уровень.';
   stats.classList.remove('hidden');
+  scrollToResult();
 
   const nextBtn = document.getElementById('nextLevelBtn');
   const restartBtn = document.getElementById('restartBtn');
@@ -658,6 +666,7 @@ function finishTrainer() {
   const restartBtn = document.getElementById('restartBtn');
   restartBtn.classList.remove('hidden');
   restartBtn.onclick = resetTrainer;
+  scrollToResult();
 
   if (!resultSent) {
     resultSent = true;
