@@ -523,3 +523,67 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:30px;pad
   background: #fef2f2;
   transform: translateY(-2px);
 }
+
+/* ============================================================
+   АККАУНТ: ВКЛАДКИ, ПАРОЛЬ
+   ============================================================ */
+.auth-tabs{
+  display:flex;gap:8px;background:#f1f5f9;border-radius:12px;padding:5px;margin-bottom:18px;
+}
+.auth-tab{
+  flex:1;padding:10px 14px;border:none;border-radius:9px;background:transparent;
+  color:#475569;font-weight:700;font-size:.95rem;cursor:pointer;transition:.2s;
+}
+.auth-tab:hover{background:#e2e8f0;}
+.auth-tab.active{
+  background:#fff;color:#1e293b;box-shadow:0 2px 8px rgba(15,23,42,.12);
+}
+.password-wrap{position:relative;}
+.password-wrap input{padding-right:46px;}
+.password-toggle{
+  position:absolute;top:50%;right:8px;transform:translateY(-50%);
+  border:none;background:transparent;font-size:1.1rem;cursor:pointer;
+  padding:6px 8px;border-radius:8px;line-height:1;
+}
+.password-toggle:hover{background:#f1f5f9;}
+
+/* ============================================================
+   МОИ РЕЗУЛЬТАТЫ
+   ============================================================ */
+.results-block{
+  background:#fff;border-radius:16px;padding:20px 22px;margin-top:28px;
+  border:1px solid #e2e8f0;box-shadow:0 6px 18px rgba(15,23,42,.06);
+}
+.results-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+.results-head h2{margin:0;font-size:1.2rem;display:block;}
+.results-refresh{
+  background:#fff;border:2px solid #3b82f6;color:#3b82f6;border-radius:10px;
+  padding:8px 16px;font-weight:700;cursor:pointer;transition:.2s;
+}
+.results-refresh:hover{background:#eff6ff;}
+.results-refresh:disabled{opacity:.6;cursor:wait;}
+.results-status{color:#64748b;font-size:.9rem;margin-bottom:10px;}
+.results-empty{
+  background:#f8fafc;border:2px dashed #cbd5e1;border-radius:12px;
+  padding:18px;color:#64748b;text-align:center;
+}
+.results-table{width:100%;border-collapse:collapse;font-size:.9rem;}
+.results-table th,.results-table td{padding:9px 10px;text-align:left;border-bottom:1px solid #eef2f7;vertical-align:top;}
+.results-table th{color:#64748b;font-size:.78rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
+.results-table tr:hover td{background:#f8fafc;}
+.results-table .num{white-space:nowrap;font-weight:700;}
+.results-table .work{font-weight:600;color:#1e293b;}
+.results-table .variant{color:#64748b;font-size:.82rem;}
+.grade-pill{
+  display:inline-block;min-width:28px;text-align:center;padding:3px 9px;border-radius:20px;
+  font-weight:800;font-size:.85rem;
+}
+.grade-pill.g5{background:#dcfce7;color:#15803d;}
+.grade-pill.g4{background:#dbeafe;color:#1d4ed8;}
+.grade-pill.g3{background:#fef3c7;color:#b45309;}
+.grade-pill.g2{background:#fee2e2;color:#b91c1c;}
+.results-scroll{overflow-x:auto;}
+@media (max-width:640px){
+  .results-table th:nth-child(2),.results-table td:nth-child(2){display:none;}
+  .results-table th,.results-table td{padding:8px 6px;}
+}

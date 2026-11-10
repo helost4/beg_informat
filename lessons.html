@@ -23,89 +23,217 @@
 <div class="lessons-wrap">
   <div class="lessons-header">
     <h1>📚 Мои уроки</h1>
-    <div style="display:flex;gap:10px;align-items:center;">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
       <div class="student-badge" id="studentBadge"></div>
       <button class="logout-btn" id="logoutBtn">Выйти</button>
     </div>
   </div>
 
   <div id="lessonsList"></div>
+
+  <section class="results-block" id="resultsBlock">
+    <div class="results-head">
+      <h2>📊 Мои результаты</h2>
+      <button class="results-refresh" id="refreshResultsBtn" type="button">Обновить</button>
+    </div>
+    <div class="results-status" id="resultsStatus">Загрузка результатов…</div>
+    <div id="resultsList"></div>
+  </section>
 </div>
 
+<script src="shared/account.js"></script>
 <script>
-/* ---------- Проверка входа ---------- */
-const studentRaw = localStorage.getItem('student');
-if (!studentRaw) {
-  window.location.href = 'login.html';
-} else {
-const student = JSON.parse(studentRaw);
-  
-document.getElementById('studentBadge').textContent =
-  `👤 ${student.name} · ${student.class}`+ (student.track === 'ege' ? ' · Подготовка к ЕГЭ' : '');
-  
+(function () {
+  'use strict';
 
-/* ---------- Выход ---------- */
-document.getElementById('logoutBtn').addEventListener('click', function(){
-  localStorage.removeItem('student');
-  window.location.href = 'login.html';
-});
+  /* ---------- Проверка входа ---------- */
+  if (!Account.requireLogin('login.html')) return;
 
-/* ---------- Справочник всех уроков по классам ---------- */
-const LESSONS_CATALOG = {
-  "5 класс": [
-    { file: "5-class/lesson-08-tekst.html", title: "Текст как форма представления информации", tag: "§ 8" },
-    { file: "5-class/lesson-07-kodirovanie.html", title: "Кодирование информации", tag: "§ 7" },
-    // добавляйте сюда остальные уроки 5 класса
-  ],
-  "6 класс": [
-    // { file: "6-class/lesson-01-obekty.html", title: "Объекты окружающего мира", tag: "§ 1" },
-  ],
-  "7 класс": [
-    // { file: "7-class/lesson-01-informaciya-svoystva.html", title: "Информация и её свойства", tag: "§ 1.1" },
-  ],
-  "8 класс": [],
-  "9 класс": [],
-  "10 класс": [
-    { file: "10-class/lesson-10-networks.html", title: "Сеть. IP-адреса. Маски", tag: "ЕГЭ №10" }
-  ],
-  "11 класс": []
-};
-  const CATALOG_EGE = {
-  // Тренажеры по подготовке к ЕГЭ можно давать всем старшим классам
-  "10 класс": [
-    { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
-  ],
-  "11 класс": [
-    { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
-  ],
-  // Если 9-классник захочет попробовать, можно разрешить
-  "9 класс": [
-    { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
-  ]
-};
+  const student = Account.currentStudent();
+  if (!student) {
+    window.location.href = 'login.html';
+    return;
+  }
 
-/* ---------- Выбор каталога на основе профиля ---------- */
-let activeCatalog = (student.track === 'ege') ? CATALOG_EGE: LESSONS_CATALOG;
+  document.getElementById('studentBadge').textContent =
+    `👤 ${student.name} · ${student.class}` +
+    (student.track === 'ege' ? ' · Подготовка к ЕГЭ' : '');
 
-/* ---------- Рендер уроков своего класса ---------- */
-const list = activeCatalog[student.class] || [];
-const container = document.getElementById('lessonsList');
-
-if (!list.length) {
-  container.innerHTML = `
-    <div class="no-lessons">
-      ⚠️ Для ${student.class} (${student.track === 'ege' ? 'ЕГЭ' : 'обычный профиль'}) пока нет уроков. Обратитесь к учителю.
-    </div>`;
-} else {
-  list.forEach(function(lesson){
-    const a = document.createElement('a');
-    a.className = 'lesson-card';
-    a.href = lesson.file;
-    a.innerHTML = `${lesson.title}<span class="tag">${lesson.tag}</span>`;
-    container.appendChild(a);
+  /* ---------- Выход ---------- */
+  document.getElementById('logoutBtn').addEventListener('click', function () {
+    Account.logout();
+    window.location.href = 'login.html';
   });
- }
-}
+
+  /* ---------- Справочник всех уроков по классам ---------- */
+  const LESSONS_CATALOG = {
+    "5 класс": [
+      { file: "5-class/lesson-08-tekst.html", title: "Текст как форма представления информации", tag: "§ 8" },
+      { file: "5-class/lesson-07-kodirovanie.html", title: "Кодирование информации", tag: "§ 7" }
+    ],
+    "6 класс": [],
+    "7 класс": [],
+    "8 класс": [],
+    "9 класс": [],
+    "10 класс": [
+      { file: "10-class/lesson-10-networks.html", title: "Сеть. IP-адреса. Маски", tag: "ЕГЭ №10" }
+    ],
+    "11 класс": []
+  };
+
+  const CATALOG_EGE = {
+    "9 класс": [
+      { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
+    ],
+    "10 класс": [
+      { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
+    ],
+    "11 класс": [
+      { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
+    ]
+  };
+
+  /* ---------- Выбор каталога на основе профиля ---------- */
+  const activeCatalog = (student.track === 'ege') ? CATALOG_EGE : LESSONS_CATALOG;
+
+  /* ---------- Рендер уроков своего класса ---------- */
+  const list = activeCatalog[student.class] || [];
+  const container = document.getElementById('lessonsList');
+
+  if (!list.length) {
+    container.innerHTML = `
+      <div class="no-lessons">
+        ⚠️ Для ${student.class} (${student.track === 'ege' ? 'ЕГЭ' : 'обычный профиль'}) пока нет уроков. Обратитесь к учителю.
+      </div>`;
+  } else {
+    list.forEach(function (lesson) {
+      const a = document.createElement('a');
+      a.className = 'lesson-card';
+      a.href = lesson.file;
+      a.innerHTML = `${lesson.title}<span class="tag">${lesson.tag}</span>`;
+      container.appendChild(a);
+    });
+  }
+
+  /* ---------- Мои результаты ---------- */
+  const refreshBtn = document.getElementById('refreshResultsBtn');
+  const statusEl = document.getElementById('resultsStatus');
+  const resultsList = document.getElementById('resultsList');
+
+  function renderResults(rows) {
+    resultsList.textContent = '';
+    statusEl.style.color = '#64748b';
+
+    if (!rows || !rows.length) {
+      statusEl.textContent = 'Пока результатов нет. Пройдите урок или тренажёр — результаты появятся здесь.';
+      const empty = document.createElement('div');
+      empty.className = 'results-empty';
+      empty.textContent = 'Сохранённых работ пока нет.';
+      resultsList.appendChild(empty);
+      return;
+    }
+
+    statusEl.textContent = 'Всего результатов: ' + rows.length +
+      ' · показаны последние ' + Math.min(rows.length, 100);
+
+    const scroll = document.createElement('div');
+    scroll.className = 'results-scroll';
+
+    const table = document.createElement('table');
+    table.className = 'results-table';
+
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['Дата', 'Работа', 'Баллы', '%', 'Оценка'].forEach(function (text) {
+      const th = document.createElement('th');
+      th.textContent = text;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+
+    rows.slice(0, 100).forEach(function (row) {
+      const pct = Account.percent(row.score, row.maxScore);
+      const grade = Number(row.grade) || Account.gradeFor(pct);
+
+      const tr = document.createElement('tr');
+
+      const dateTd = document.createElement('td');
+      dateTd.textContent = Account.formatDate(row.timestamp);
+      dateTd.className = 'num';
+      tr.appendChild(dateTd);
+
+      const workTd = document.createElement('td');
+      const work = document.createElement('div');
+      work.className = 'work';
+      work.textContent = row.lesson || 'Работа';
+      const variant = document.createElement('div');
+      variant.className = 'variant';
+      const typeLabel = Account.workTypeLabel(row.workType);
+      variant.textContent = typeLabel + (row.variant ? ' · ' + row.variant : '');
+      workTd.appendChild(work);
+      workTd.appendChild(variant);
+      tr.appendChild(workTd);
+
+      const scoreTd = document.createElement('td');
+      scoreTd.className = 'num';
+      scoreTd.textContent = (Number(row.score) || 0) + ' / ' + (Number(row.maxScore) || 0);
+      tr.appendChild(scoreTd);
+
+      const pctTd = document.createElement('td');
+      pctTd.className = 'num';
+      pctTd.textContent = pct + '%';
+      tr.appendChild(pctTd);
+
+      const gradeTd = document.createElement('td');
+      const pill = document.createElement('span');
+      pill.className = 'grade-pill g' + grade;
+      pill.textContent = grade;
+      gradeTd.appendChild(pill);
+      tr.appendChild(gradeTd);
+
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    scroll.appendChild(table);
+    resultsList.appendChild(scroll);
+  }
+
+  function loadResults() {
+    refreshBtn.disabled = true;
+    statusEl.style.color = '#64748b';
+    statusEl.textContent = 'Загрузка результатов…';
+    resultsList.textContent = '';
+
+    // Сначала досылаем то, что не ушло в прошлый раз, потом читаем историю.
+    Account.flushQueue()
+      .catch(function () { return 0; })
+      .then(function () { return Account.getMyResults(); })
+      .then(function (rows) {
+        refreshBtn.disabled = false;
+        renderResults(rows);
+      })
+      .catch(function (err) {
+        refreshBtn.disabled = false;
+
+        if (err && (err.code === 'AUTH_REQUIRED' || err.code === 'TOKEN_EXPIRED')) {
+          Account.logout();
+          window.location.href = 'login.html';
+          return;
+        }
+
+        statusEl.style.color = '#b91c1c';
+        statusEl.textContent = 'Не удалось загрузить результаты. ' +
+          ((err && err.message) || 'Проверьте интернет и попробуйте ещё раз.');
+      });
+  }
+
+  refreshBtn.addEventListener('click', loadResults);
+  loadResults();
+})();
 </script>
 </body>
 </html>

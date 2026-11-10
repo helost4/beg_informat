@@ -3,22 +3,17 @@
    (практические работы, тренажёры и другие служебные страницы)
 
    Подключать на страницах, расположенных на один уровень
-   вглубь от корня (например, 5-class/, ege-class/).
+   вглубь от корня (например, 5-class/, ege-class/), после
+   shared/account.js.
    ============================================================ */
 (function initNavAndAuth() {
-  const studentRaw = localStorage.getItem('student');
-  let student = null;
+  const student = (window.Account && Account.currentStudent())
+    ? Account.currentStudent()
+    : null;
 
-  if (studentRaw) {
-    try {
-      student = JSON.parse(studentRaw);
-    } catch (e) {
-      student = null;
-    }
-  }
-
-  if (!student || !student.name) {
-    localStorage.removeItem('student');
+  if (!student) {
+    if (window.Account) Account.logout();
+    else localStorage.removeItem('student');
     window.location.href = '../login.html';
     return;
   }
@@ -37,7 +32,8 @@
   logoutBtn.className = 'floating-btn logout';
   logoutBtn.innerHTML = '🚪 Выйти';
   logoutBtn.onclick = function () {
-    localStorage.removeItem('student');
+    if (window.Account) Account.logout();
+    else localStorage.removeItem('student');
     window.location.href = '../login.html';
   };
 

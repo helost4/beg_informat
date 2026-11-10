@@ -18,7 +18,8 @@
   logoutBtn.className = 'floating-btn logout';
   logoutBtn.innerHTML = '🚪 Выйти';
   logoutBtn.onclick = function() {
-    localStorage.removeItem('student');
+    if (window.Account) Account.logout();
+    else localStorage.removeItem('student');
     window.location.href = '../login.html';
   };
 
@@ -31,14 +32,15 @@
    АВТОРИЗАЦИЯ И ЗАЩИТА
    ============================================================ */
 (function checkAccess(){
-  const studentRaw = localStorage.getItem('student');
+  const student = (window.Account && Account.currentStudent())
+    ? Account.currentStudent()
+    : null;
 
-  if (!studentRaw) {
+  if (!student) {
     window.location.href = '../login.html';
     throw new Error('Не выполнен вход');
   }
 
-  const student = JSON.parse(studentRaw);
   window.__student = student;
 
   // 1. Проверка класса
@@ -59,23 +61,20 @@
 })();
 
 /* ============================================================
-   ОБЩАЯ ФУНКЦИЯ ОТПРАВКИ РЕЗУЛЬТАТА В GOOGLE ТАБЛИЦУ
+   ОБЩАЯ ФУНКЦИЯ СОХРАНЕНИЯ РЕЗУЛЬТАТА
    ============================================================ */
 function sendToSheet(payload){
-  if (typeof APPS_SCRIPT_URL === 'undefined' || !APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('ВАШ_ID')) {
-    console.warn('APPS_SCRIPT_URL не настроен — отправка пропущена');
-    return;
+  if (!window.Account || !Account.isLoggedIn()) {
+    console.warn('Нет активного аккаунта — результат не сохранён:', payload);
+    return Promise.resolve(false);
   }
 
-  fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
-  }).then(function() {
-    console.log('Результат отправлен:', payload);
+  return Account.saveResult(payload).then(function(data) {
+    console.log('Результат сохранён в аккаунт:', payload, data);
+    return true;
   }).catch(function(err) {
-    console.error('Ошибка отправки:', err);
+    console.error('Не удалось сохранить результат (поставлен в очередь):', err, payload);
+    return false;
   });
 }
 

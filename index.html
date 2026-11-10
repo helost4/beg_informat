@@ -4,12 +4,19 @@
 <meta charset="UTF-8">
 <title>Интерактивные уроки информатики</title>
   <script>
-  // Проверяем, есть ли данные ученика в памяти браузера
-  if (localStorage.getItem('student')) {
-    window.location.href = 'lessons.html';
-  } else {
-    window.location.href = 'login.html';
-  }
+  // Есть действующая сессия (токен + ученик) — к урокам, иначе ко входу.
+  (function () {
+    var token = null;
+    var student = null;
+    try {
+      token = localStorage.getItem('accountToken');
+      student = localStorage.getItem('student');
+    } catch (e) {
+      token = null;
+      student = null;
+    }
+    window.location.href = (token && student) ? 'lessons.html' : 'login.html';
+  })();
 </script>
 </head>
 <body>
