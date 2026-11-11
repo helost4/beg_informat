@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Понятие как форма мышления — 6 класс</title>
+<link rel="stylesheet" href="../shared/style.css">
+<style>
+  /* Длинная теория должна раскрываться полностью */
+  .theory-item.open .theory-body{max-height:8000px;}
+
+  .fig{margin:18px 0;padding:14px;border-radius:14px;
+    background:linear-gradient(135deg,#f8fafc,#eff6ff);border:1px solid #dbeafe;}
+  .fig svg{display:block;width:100%;height:auto;max-width:100%;}
+  .fig-cap{text-align:center;font-size:.82rem;color:#64748b;margin-top:10px;line-height:1.4;}
+
+  .fig-grid{display:grid;gap:10px;margin:16px 0;}
+  .fig-grid.two{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+  .fig-grid.three{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));}
+  .fig-grid.six{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));}
+  .fig-card{background:#fff;border:2px solid #e2e8f0;border-radius:12px;
+    padding:12px;text-align:center;}
+  .fig-card h4{margin:6px 0 4px;font-size:.9rem;color:#1e293b;}
+  .fig-card p{margin:0;font-size:.82rem;color:#64748b;line-height:1.45;}
+  .fig-card .big{font-size:1.9rem;line-height:1;}
+  .fig-card.green{border-color:#86efac;background:#f0fdf4;}
+  .fig-card.blue{border-color:#93c5fd;background:#eff6ff;}
+  .fig-card.pink{border-color:#f9a8d4;background:#fdf2f8;}
+  .fig-card.amber{border-color:#fcd34d;background:#fffbeb;}
+
+  .chain{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px;}
+  .chain .fig-card{flex:1 1 180px;max-width:250px;display:flex;flex-direction:column;justify-content:center;}
+  .chain .arrow{font-size:1.5rem;color:#3b82f6;font-weight:700;display:flex;align-items:center;}
+
+  .note{margin:14px 0;padding:12px 14px;border-radius:12px;background:#fffbeb;
+    border-left:4px solid #f59e0b;font-size:.9rem;color:#78350f;line-height:1.5;}
+  .note.blue{background:#eff6ff;border-left-color:#3b82f6;color:#1e3a8a;}
+  .note.pink{background:#fdf2f8;border-left-color:#ec4899;color:#831843;}
+
+  table.fig-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;}
+  table.fig-table th,table.fig-table td{border:1px solid #e2e8f0;padding:8px 10px;
+    text-align:left;vertical-align:top;}
+  table.fig-table th{background:#eff6ff;color:#1e293b;}
+  table.fig-table tr:nth-child(even) td{background:#f8fafc;}
+
+  details.answer{margin:10px 0;background:#f0fdf4;border:1px solid #bbf7d0;
+    border-radius:10px;padding:8px 12px;font-size:.9rem;}
+  details.answer summary{cursor:pointer;font-weight:600;color:#166534;}
+  details.answer p{margin:8px 0 0;color:#334155;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<!-- Фоновые эмодзи -->
+<div class="bubble-field" aria-hidden="true">
+  <span class="bubble" style="top:8%;  left:5%;  animation-delay:0s;">💭</span>
+  <span class="bubble" style="top:20%; left:88%; animation-delay:1s;">🧠</span>
+  <span class="bubble" style="top:55%; left:3%;  animation-delay:2s;">🔍</span>
+  <span class="bubble" style="top:72%; left:92%; animation-delay:1.5s;">🧩</span>
+  <span class="bubble" style="top:35%; left:50%; animation-delay:.5s;">⚖️</span>
+  <span class="bubble" style="top:85%; left:40%; animation-delay:2.5s;">📝</span>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="hero-emoji">💭</div>
+    <h1 id="title"></h1>
+    <div class="sub" id="subtitle"></div>
+    <div class="variant-badge" id="variantBadge"></div>
+  </header>
+
+  <!-- ГЕЙМИФИКАЦИЯ -->
+  <div class="xp-panel" id="xpPanel">
+    <div class="xp-header">
+      <span class="xp-level-name" id="xpLevelName">🥉 Наблюдатель</span>
+      <span class="xp-points" id="xpPoints">0 / 100 XP</span>
+    </div>
+    <div class="xp-bar-bg">
+      <div class="xp-bar-fill" id="xpBarFill"></div>
+    </div>
+    <div class="xp-badges">
+      <div class="badge-slot" id="badgeBronze">
+        <span class="badge-icon">🥉</span> Наблюдатель
+      </div>
+      <div class="badge-slot" id="badgeSilver">
+        <span class="badge-icon">🥈</span> Аналитик
+      </div>
+      <div class="badge-slot" id="badgeGold">
+        <span class="badge-icon">🥇</span> Мыслитель
+      </div>
+    </div>
+  </div>
+
+  <div class="section-tabs">
+    <button class="tab active" data-tab="theory">📚 Теория</button>
+    <button class="tab" data-tab="mindmap">🧠 Карта</button>
+    <button class="tab" data-tab="solutions">📐 Разбор задач</button>
+    <button class="tab" data-tab="test">✏️ Тест</button>
+    <button class="tab" data-tab="homework">🏠 Домашнее задание</button>
+  </div>
+
+  <!-- ТЕОРИЯ -->
+  <div class="card" id="theorySection">
+    <div id="lessonGoals">
+      <h2><span class="icon">🎯</span> Цель и задачи урока</h2>
+      <div style="margin-bottom:14px;">
+        <span class="goal-tag goal">ЦЕЛЬ</span>
+        <div id="goalText" style="font-size:1rem;line-height:1.5;color:#1e293b;"></div>
+      </div>
+      <div>
+        <span class="goal-tag tasks">ЗАДАЧИ</span>
+        <ul id="tasksList" style="margin:8px 0 0;padding-left:22px;line-height:1.7;color:#334155;"></ul>
+      </div>
+    </div>
+
+    <h2><span class="icon">💡</span> Ключевые понятия темы</h2>
+    <div id="theoryList"></div>
+  </div>
+
+  <!-- ИНТЕЛЛЕКТ-КАРТА -->
+  <div class="card hidden" id="mindmapSection">
+    <h2><span class="icon">🧠</span> Интеллект-карта темы</h2>
+    <p class="muted" style="margin:-8px 0 14px">Кликните по узлу, чтобы раскрыть/свернуть ветвь</p>
+    <div id="mindmapBox"></div>
+  </div>
+
+  <!-- РАЗБОР ЗАДАЧ -->
+  <div class="card hidden" id="solutionsSection">
+    <h2><span class="icon">📐</span> Разбор задач по шаблону</h2>
+    <p class="muted" style="margin:-8px 0 16px">
+      Разберите каждую задачу по шагам. Попробуйте решить сами, затем нажмите «Показать решение».
+    </p>
+    <div id="solutionsList"></div>
+  </div>
+
+  <!-- ТЕСТ -->
+  <div class="card hidden" id="testSection">
+    <h2><span class="icon">🎯</span> Проверочный тест</h2>
+
+    <div id="studentInfo" style="background:#eff6ff;border-radius:12px;padding:16px;margin-bottom:18px;border:2px solid #3b82f6;">
+      <div style="font-weight:700;color:#1e293b;">
+        👤 Ученик: <span id="studentNameDisplay">—</span>
+      </div>
+      <div class="muted" style="margin-top:6px;font-size:.85rem;">
+        ФИО подставлено из вашего входа и будет отправлено в журнал учителя.
+      </div>
+    </div>
+
+    <div class="muted">Прогресс выполнения</div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="muted" id="progTxt">0 из 0 заданий</div>
+    <div id="tasks" style="margin-top:18px"></div>
+  </div>
+
+  <!-- ДОМАШНЕЕ ЗАДАНИЕ -->
+  <div class="card hidden" id="homeworkSection">
+    <h2><span class="icon">🏠</span> Домашнее задание</h2>
+    <p class="muted" style="margin:-8px 0 16px">
+      Выполните задания дома. Проверка автоматическая — оценка не влияет на оценку за урок.
+    </p>
+
+    <div id="homeworkTasks"></div>
+
+    <div class="progress" style="margin-top:18px"><div id="hwBar"></div></div>
+    <div class="muted" id="hwProgTxt">0 из 0 заданий</div>
+
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn" id="hwFinish">Проверить домашнее задание</button>
+    </div>
+
+    <div class="score-box hidden" id="hwScoreBox" style="margin-top:20px">
+      <div class="muted">Результат домашнего задания</div>
+      <div id="hwFinalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div class="grade" id="hwGrade"></div>
+      <div class="muted" id="hwComment" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="finishCard" style="text-align:center">
+    <button class="btn" id="finish">Завершить урок и получить оценку</button>
+    <div class="score-box hidden" id="scoreBox">
+      <div class="muted">Ваш результат</div>
+      <div id="finalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div style="font-size:3rem;margin:8px 0;" id="finalEmoji"></div>
+      <div class="grade-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#ec4899"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="60" cy="60" r="45"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="45"/>
+        </svg>
+        <div class="ring-text">
+          <span id="ringPercent">0%</span>
+          <small>выполнено</small>
+        </div>
+      </div>
+      <div class="grade" id="finalGrade"></div>
+      <div class="muted" id="finalComment" style="margin-top:10px"></div>
+      <button class="btn ghost" style="margin-top:20px" onclick="location.reload()">🔄 Пройти другой вариант</button>
+    </div>
+  </div>
+
+  <footer>УМК Л.Л. Босовой · § 8 · Интерактивный урок с самопроверкой</footer>
+</div>
+
+<script>
+/* ============================================================
+   ДАННЫЕ УРОКА
+   ============================================================ */
+const LESSON_DATA = {
+  title: "Понятие как форма мышления",
+  subtitle: "6 класс · УМК Босовой · § 8",
+  className: "6 класс",
+
+  goal: "Сформировать представление о понятии как форме мышления: о существенных и несущественных признаках, логических приёмах формирования понятий, содержании и объёме понятия, отношениях между понятиями и правилах определения.",
+
+  tasks: [
+    "Понять, чем понятие отличается от суждения и умозаключения.",
+    "Научиться отличать существенные признаки объекта от несущественных.",
+    "Освоить пять логических приёмов формирования понятий.",
+    "Разобраться в содержании и объёме понятия, увидеть между ними обратную зависимость.",
+    "Научиться определять отношения между понятиями с помощью кругов Эйлера.",
+    "Строить определения через ближайший род и видовое отличие и находить ошибки в определениях."
+  ],
+
+  gameLevels: [
+    { name: '🥉 Наблюдатель', threshold: 0,  badge: 'badgeBronze' },
+    { name: '🥈 Аналитик',    threshold: 15, badge: 'badgeSilver' },
+    { name: '🥇 Мыслитель',   threshold: 30, badge: 'badgeGold'   }
+  ],
+
+  theory: [
+    {
+      title: "💭 Мышление и его три формы",
+      body: `<p>Мы познаём окружающий мир двумя путями: с помощью <b>органов чувств</b> (увидели, услышали, потрогали) и с помощью <b>мышления</b> (подумали, сравнили, сделали вывод).</p>
+             <p><b>Мышление</b> — это высшая ступень познания: способность человека рассуждать, находить общее в разных предметах и явлениях, объяснять их и делать выводы.</p>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 270" role="img" aria-label="Облако мыслей и понятия: дерево, компьютер, велосипед">
+                 <rect x="4" y="4" width="632" height="262" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <g>
+                   <ellipse cx="150" cy="140" rx="108" ry="74" fill="#dbeafe" stroke="#93c5fd" stroke-width="3"/>
+                   <circle cx="86" cy="100" r="40" fill="#dbeafe" stroke="#93c5fd" stroke-width="3"/>
+                   <circle cx="150" cy="76" r="46" fill="#dbeafe" stroke="#93c5fd" stroke-width="3"/>
+                   <circle cx="214" cy="104" r="38" fill="#dbeafe" stroke="#93c5fd" stroke-width="3"/>
+                   <text x="150" y="132" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="18" font-weight="800" fill="#1e3a8a">МЫШЛЕНИЕ</text>
+                   <text x="150" y="156" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#3b82f6">понятия, признаки, связи</text>
+                   <text x="150" y="176" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#3b82f6">суждения, выводы</text>
+                 </g>
+
+                 <g fill="none" stroke="#93c5fd" stroke-width="3" stroke-dasharray="7 6">
+                   <path d="M246 96 C300 66 320 58 344 58"/>
+                   <path d="M258 140 H340"/>
+                   <path d="M246 184 C300 212 320 218 344 218"/>
+                 </g>
+
+                 <g>
+                   <rect x="360" y="58" width="9" height="26" rx="3" fill="#b45309"/>
+                   <circle cx="364" cy="47" r="19" fill="#22c55e" fill-opacity="0.8" stroke="#16a34a" stroke-width="2.5"/>
+                   <text x="392" y="63" font-family="Segoe UI, sans-serif" font-size="15" font-weight="600" fill="#1e293b">дерево</text>
+                 </g>
+
+                 <g>
+                   <rect x="348" y="118" width="46" height="32" rx="5" fill="#e2e8f0" stroke="#475569" stroke-width="2.5"/>
+                   <rect x="354" y="124" width="34" height="20" rx="2" fill="#bfdbfe"/>
+                   <rect x="342" y="150" width="58" height="7" rx="3.5" fill="#94a3b8"/>
+                   <text x="392" y="143" font-family="Segoe UI, sans-serif" font-size="15" font-weight="600" fill="#1e293b">компьютер</text>
+                 </g>
+
+                 <g>
+                   <circle cx="356" cy="218" r="14" fill="none" stroke="#2563eb" stroke-width="3"/>
+                   <circle cx="388" cy="218" r="14" fill="none" stroke="#2563eb" stroke-width="3"/>
+                   <path d="M356 218 L368 198 L380 218 M368 198 H388 M362 198 L356 208" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                   <text x="412" y="223" font-family="Segoe UI, sans-serif" font-size="15" font-weight="600" fill="#1e293b">велосипед</text>
+                 </g>
+               </svg>
+               <div class="fig-cap">Рис. 1. Понятиями мы пользуемся, когда думаем, а словами — когда говорим. Понятие одно, а слов для него может быть несколько</div>
+             </div>
+
+             <p>Мышление работает в трёх основных формах. Сравните их:</p>
+             <div class="fig-grid three">
+               <div class="fig-card blue"><div class="big">📘</div><h4>Понятие</h4><p>Мысль о существенных признаках объекта или класса однородных объектов</p></div>
+               <div class="fig-card pink"><div class="big">💬</div><h4>Суждение</h4><p>Мысль, в которой что-то утверждается или отрицается</p></div>
+               <div class="fig-card green"><div class="big">🧠</div><h4>Умозаключение</h4><p>Вывод нового суждения из одного или нескольких известных суждений</p></div>
+             </div>
+
+             <p><b>Понятие</b> отвечает на вопрос «что это?», <b>суждение</b> — «что об этом можно сказать?», <b>умозаключение</b> — «что из этого следует?».</p>
+             <p><b>Пример.</b> Посмотрите, как из понятий рождается вывод:</p>
+
+             <div class="chain">
+               <div class="fig-card"><h4>Понятие</h4><p>«Берёза — лиственное дерево с белым стволом»</p></div>
+               <span class="arrow">+</span>
+               <div class="fig-card"><h4>Суждение</h4><p>«Все деревья — растения»</p></div>
+               <span class="arrow">→</span>
+               <div class="fig-card"><h4>Умозаключение</h4><p>«Берёза — растение»</p></div>
+             </div>
+
+             <p class="note blue">💡 Понятие — «кирпичик» мышления. Из понятий строятся суждения, а из суждений — умозаключения. Понятиями мы пользуемся, когда думаем, а словами — когда говорим.</p>`
+    },
+    {
+      title: "🔎 Существенные и несущественные признаки",
+      image: "🔎 ✅ ➖",
+      body: `<p>Любой объект можно описать множеством <b>признаков</b>: цвет, форма, размер, материал, возраст, назначение, место расположения и другие.</p>
+             <p>Признаки бывают <b>существенными</b> и <b>несущественными</b>.</p>
+
+             <div class="fig-grid two">
+               <div class="fig-card green"><div class="big">✅</div><h4>Существенные признаки</h4><p>Без них объект перестаёт быть самим собой. Именно они помогают отличить его от других объектов.</p></div>
+               <div class="fig-card amber"><div class="big">➖</div><h4>Несущественные признаки</h4><p>Могут меняться, а объект остаётся тем же: возраст дерева, место, где стоит предмет, цвет обложки книги.</p></div>
+             </div>
+
+             <p><b>Пример из учебника.</b> В лесу у озера растёт берёза. Ей 10 лет, её высота — 5 метров. Какие признаки помогут найти именно берёзу среди других деревьев?</p>
+
+             <table class="fig-table">
+               <thead><tr><th>Признак берёзы</th><th>Существенный?</th><th>Почему</th></tr></thead>
+               <tbody>
+                 <tr><td>Белый цвет ствола</td><td>✅ да</td><td>Отличает берёзу от дуба, сосны и клёна</td></tr>
+                 <tr><td>Форма и цвет листьев</td><td>✅ да</td><td>По ним мы узнаём дерево</td></tr>
+                 <tr><td>Высота 5 метров</td><td>➖ нет</td><td>Бывают берёзы выше и ниже</td></tr>
+                 <tr><td>Возраст 10 лет</td><td>➖ нет</td><td>Возраст у деревьев разный</td></tr>
+                 <tr><td>Растёт у озера</td><td>➖ нет</td><td>Берёза может расти где угодно</td></tr>
+               </tbody>
+             </table>
+
+             <p class="note">⚠️ Существенность признака зависит от задачи. Если мы делаем мебель, для берёзы важны толщина ствола и качество древесины, а форма листьев — нет. Для поиска дерева в лесу всё наоборот.</p>
+
+             <p><b>Проверьте себя.</b> Какие из признаков существенны для понятия «компьютер»?</p>
+             <table class="fig-table">
+               <thead><tr><th>Признак</th><th>Вывод</th></tr></thead>
+               <tbody>
+                 <tr><td>Электронное устройство, работающее по программе</td><td>✅ существенный</td></tr>
+                 <tr><td>Хранит, обрабатывает и передаёт данные</td><td>✅ существенный</td></tr>
+                 <tr><td>Стоит на втором этаже школы</td><td>➖ несущественный</td></tr>
+                 <tr><td>Корпус чёрного цвета</td><td>➖ несущественный</td></tr>
+               </tbody>
+             </table>`
+    },
+    {
+      title: "🧩 Пять логических приёмов формирования понятия",
+      body: `<p>Понятие не появляется само собой. Чтобы его сформировать, человек мысленно выполняет пять <b>логических приёмов</b>.</p>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 270" role="img" aria-label="Анализ: робот разобран на части; синтез: робот собран">
+                 <rect x="4" y="4" width="308" height="262" rx="18" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+                 <rect x="328" y="4" width="308" height="262" rx="18" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="2"/>
+
+                 <text x="158" y="34" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="16" font-weight="800" fill="#1d4ed8">АНАЛИЗ</text>
+                 <text x="158" y="52" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#3b82f6">разбираем на части</text>
+
+                 <text x="482" y="34" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="16" font-weight="800" fill="#15803d">СИНТЕЗ</text>
+                 <text x="482" y="52" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#16a34a">собираем в целое</text>
+
+                 <g>
+                   <rect x="70" y="80" width="46" height="34" rx="8" fill="#bfdbfe" stroke="#2563eb" stroke-width="2.5"/>
+                   <circle cx="84" cy="97" r="4" fill="#1e293b"/>
+                   <circle cx="102" cy="97" r="4" fill="#1e293b"/>
+                   <line x1="93" y1="80" x2="93" y2="68" stroke="#2563eb" stroke-width="2.5"/>
+                   <circle cx="93" cy="64" r="5" fill="#f59e0b" stroke="#d97706" stroke-width="2"/>
+
+                   <rect x="196" y="82" width="76" height="56" rx="10" fill="#bfdbfe" stroke="#2563eb" stroke-width="2.5"/>
+                   <rect x="212" y="98" width="44" height="24" rx="4" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
+
+                   <rect x="52" y="150" width="42" height="12" rx="6" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                   <rect x="222" y="150" width="42" height="12" rx="6" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+
+                   <circle cx="92" cy="196" r="17" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>
+                   <circle cx="92" cy="196" r="5" fill="#475569"/>
+                   <circle cx="230" cy="196" r="17" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>
+                   <circle cx="230" cy="196" r="5" fill="#475569"/>
+
+                   <rect x="120" y="220" width="12" height="30" rx="5" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                   <rect x="176" y="220" width="12" height="30" rx="5" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                 </g>
+
+                 <g>
+                   <rect x="446" y="86" width="56" height="40" rx="9" fill="#bbf7d0" stroke="#16a34a" stroke-width="2.5"/>
+                   <circle cx="462" cy="106" r="4" fill="#1e293b"/>
+                   <circle cx="486" cy="106" r="4" fill="#1e293b"/>
+                   <line x1="474" y1="86" x2="474" y2="72" stroke="#16a34a" stroke-width="2.5"/>
+                   <circle cx="474" cy="68" r="5" fill="#f59e0b" stroke="#d97706" stroke-width="2"/>
+
+                   <rect x="432" y="132" width="84" height="58" rx="10" fill="#bbf7d0" stroke="#16a34a" stroke-width="2.5"/>
+                   <rect x="450" y="148" width="48" height="26" rx="4" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+
+                   <rect x="404" y="142" width="24" height="12" rx="6" fill="#86efac" stroke="#16a34a" stroke-width="2"/>
+                   <rect x="520" y="142" width="24" height="12" rx="6" fill="#86efac" stroke="#16a34a" stroke-width="2"/>
+
+                   <circle cx="446" cy="210" r="18" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>
+                   <circle cx="446" cy="210" r="5" fill="#475569"/>
+                   <circle cx="502" cy="210" r="18" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>
+                   <circle cx="502" cy="210" r="5" fill="#475569"/>
+
+                   <rect x="456" y="232" width="12" height="22" rx="5" fill="#86efac" stroke="#16a34a" stroke-width="2"/>
+                   <rect x="482" y="232" width="12" height="22" rx="5" fill="#86efac" stroke="#16a34a" stroke-width="2"/>
+                 </g>
+               </svg>
+               <div class="fig-cap">Рис. 2. Слева — анализ (мысленно разбираем объект на части), справа — синтез (мысленно соединяем части в целое)</div>
+             </div>
+
+             <div class="fig-grid three">
+               <div class="fig-card blue"><div class="big">🔍</div><h4>1. Анализ</h4><p>Мысленное разделение объекта на составные части или выделение его признаков</p></div>
+               <div class="fig-card green"><div class="big">🧩</div><h4>2. Синтез</h4><p>Мысленное соединение частей или признаков в единое целое</p></div>
+               <div class="fig-card amber"><div class="big">⚖️</div><h4>3. Сравнение</h4><p>Установление сходства или различия объектов по их признакам</p></div>
+               <div class="fig-card pink"><div class="big">🎯</div><h4>4. Абстрагирование</h4><p>Выделение одних признаков и отвлечение от других</p></div>
+               <div class="fig-card"><div class="big">🌐</div><h4>5. Обобщение</h4><p>Мысленное объединение однородных объектов</p></div>
+             </div>
+
+             <p>Разберём все пять приёмов на примере <b>велосипеда</b>:</p>
+             <ul>
+               <li><b>Анализ:</b> мысленно «разбираем» велосипед на раму, два колеса, руль, педали, цепь и седло.</li>
+               <li><b>Синтез:</b> снова соединяем части в целое и понимаем, как велосипед устроен.</li>
+               <li><b>Сравнение:</b> сравниваем велосипед и самокат: общее — два колеса и руль, различие — у велосипеда есть педали и цепь.</li>
+               <li><b>Абстрагирование:</b> отвлекаемся от цвета, размера и марки, оставляем главное — транспорт на двух колёсах, который движется от нажатия на педали.</li>
+               <li><b>Обобщение:</b> объединяем все такие устройства в одно понятие — «велосипед».</li>
+             </ul>
+
+             <p class="note blue">💡 Анализ и синтез работают в паре: сначала мы «разбираем» объект мысленно, затем соединяем существенное в целое. Без абстрагирования мы бы утонули в мелочах, а без обобщения не смогли бы назвать группу предметов одним словом.</p>`
+    },
+    {
+      title: "📦 Содержание и объём понятия",
+      image: "📋 👥 ⚖️",
+      body: `<p>У каждого понятия есть две стороны — <b>содержание</b> и <b>объём</b>.</p>
+
+             <div class="fig-grid two">
+               <div class="fig-card blue"><div class="big">📋</div><h4>Содержание понятия</h4><p>Совокупность всех существенных признаков объекта или класса объектов</p></div>
+               <div class="fig-card amber"><div class="big">👥</div><h4>Объём понятия</h4><p>Множество объектов, которые охватываются этим понятием</p></div>
+             </div>
+
+             <p><b>Пример.</b> Понятие «компьютер»:</p>
+             <ul>
+               <li><b>содержание:</b> электронное устройство, которое хранит, обрабатывает и передаёт данные и работает по программе;</li>
+               <li><b>объём:</b> настольные компьютеры, ноутбуки, планшеты, смартфоны — все они компьютеры.</li>
+             </ul>
+
+             <p><b>Главное правило:</b> чем больше содержание понятия, тем меньше его объём, и наоборот.</p>
+
+             <div class="fig">
+               <svg viewBox="0 0 520 300" role="img" aria-label="Вложенные понятия: транспорт, автомобиль, легковой автомобиль, электромобиль">
+                 <rect x="16" y="16" width="488" height="268" rx="18" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                 <text x="34" y="46" font-family="Segoe UI, sans-serif" font-size="15" font-weight="700" fill="#1e3a8a">Транспорт</text>
+
+                 <rect x="64" y="62" width="392" height="206" rx="16" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                 <text x="82" y="92" font-family="Segoe UI, sans-serif" font-size="15" font-weight="700" fill="#1e3a8a">Автомобиль</text>
+
+                 <rect x="112" y="104" width="296" height="148" rx="14" fill="#bfdbfe" stroke="#2563eb" stroke-width="2"/>
+                 <text x="130" y="134" font-family="Segoe UI, sans-serif" font-size="15" font-weight="700" fill="#1e3a8a">Легковой автомобиль</text>
+
+                 <rect x="160" y="146" width="200" height="90" rx="12" fill="#93c5fd" stroke="#1d4ed8" stroke-width="2"/>
+                 <text x="178" y="176" font-family="Segoe UI, sans-serif" font-size="15" font-weight="700" fill="#1e3a8a">Электромобиль</text>
+                 <text x="178" y="200" font-family="Segoe UI, sans-serif" font-size="12" fill="#1e3a8a">самое узкое понятие</text>
+                 <text x="178" y="218" font-family="Segoe UI, sans-serif" font-size="12" fill="#1e3a8a">самое богатое содержание</text>
+
+                 <text x="260" y="296" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#475569">объём уменьшается, содержание растёт</text>
+               </svg>
+               <div class="fig-cap">Рис. 3. Чем уже понятие, тем богаче его содержание и меньше объём</div>
+             </div>
+
+             <p>Сравните: «транспорт» — очень широкое понятие (маленькое содержание, огромный объём). «Электромобиль» — узкое понятие (много признаков, мало объектов).</p>`
+    },
+    {
+      title: "🔢 Единичные и общие понятия",
+      image: "1️⃣ 👥 📚",
+      body: `<p>По объёму понятия делят на <b>единичные</b> и <b>общие</b>.</p>
+
+             <div class="fig-grid two">
+               <div class="fig-card pink"><div class="big">1️⃣</div><h4>Единичное понятие</h4><p>В его объёме ровно один объект</p></div>
+               <div class="fig-card blue"><div class="big">👥</div><h4>Общее понятие</h4><p>В его объёме два и более объектов</p></div>
+             </div>
+
+             <table class="fig-table">
+               <thead><tr><th>Понятие</th><th>Вид</th><th>Объяснение</th></tr></thead>
+               <tbody>
+                 <tr><td>Байкал</td><td>единичное</td><td>В объёме только один объект — самое глубокое озеро мира</td></tr>
+                 <tr><td>озеро</td><td>общее</td><td>Много объектов: Байкал, Ладожское, Онежское…</td></tr>
+                 <tr><td>Москва</td><td>единичное</td><td>Один город</td></tr>
+                 <tr><td>город</td><td>общее</td><td>Москва, Казань, Сочи, Тверь…</td></tr>
+                 <tr><td>А. С. Пушкин</td><td>единичное</td><td>Один человек</td></tr>
+                 <tr><td>поэт</td><td>общее</td><td>Пушкин, Лермонтов, Тютчев…</td></tr>
+               </tbody>
+             </table>
+
+             <p class="note">⚠️ Единичное понятие — это всё равно понятие: оно отражает существенные признаки одного объекта. Например, «Байкал» — озеро с определёнными признаками, а не просто название.</p>
+
+             <p>Есть и другая пара: <b>конкретные</b> и <b>абстрактные</b> понятия.</p>
+             <ul>
+               <li><b>Конкретные</b> обозначают реальные объекты: «стол», «берёза», «компьютер», «ученик».</li>
+               <li><b>Абстрактные</b> обозначают свойства, отношения и процессы: «красота», «смелость», «информация», «скорость», «алгоритм».</li>
+             </ul>`
+    },
+    {
+      title: "⚖️ Отношения между понятиями. Круги Эйлера",
+      image: "⚖️ 🔵 🔗",
+      body: `<p>Чтобы наглядно показать отношения между понятиями, используют <b>круги Эйлера</b>. Каждое понятие изображают кругом: круг — это объём понятия, то есть множество всех объектов, которые в него входят.</p>
+             <p>Рассмотрим шесть основных отношений.</p>
+
+             <div class="fig-grid six">
+               <div class="fig-card blue">
+                 <svg viewBox="0 0 160 100" aria-label="Тождество">
+                   <circle cx="80" cy="50" r="32" fill="#3b82f6" fill-opacity="0.35" stroke="#2563eb" stroke-width="2.5"/>
+                   <circle cx="80" cy="50" r="38" fill="none" stroke="#ec4899" stroke-width="2.5" stroke-dasharray="6 4"/>
+                 </svg>
+                 <h4>Тождество</h4><p>«Москва» и «столица России»</p>
+               </div>
+               <div class="fig-card green">
+                 <svg viewBox="0 0 160 100" aria-label="Пересечение">
+                   <circle cx="62" cy="50" r="30" fill="#22c55e" fill-opacity="0.35" stroke="#16a34a" stroke-width="2.5"/>
+                   <circle cx="98" cy="50" r="30" fill="#3b82f6" fill-opacity="0.30" stroke="#2563eb" stroke-width="2.5"/>
+                 </svg>
+                 <h4>Пересечение</h4><p>«школьник» и «спортсмен»</p>
+               </div>
+               <div class="fig-card amber">
+                 <svg viewBox="0 0 160 100" aria-label="Подчинение">
+                   <circle cx="80" cy="50" r="38" fill="#f59e0b" fill-opacity="0.25" stroke="#d97706" stroke-width="2.5"/>
+                   <circle cx="70" cy="62" r="16" fill="#3b82f6" fill-opacity="0.55" stroke="#2563eb" stroke-width="2.5"/>
+                 </svg>
+                 <h4>Подчинение</h4><p>«дерево» и «берёза»</p>
+               </div>
+               <div class="fig-card pink">
+                 <svg viewBox="0 0 160 100" aria-label="Соподчинение">
+                   <circle cx="80" cy="50" r="40" fill="#ec4899" fill-opacity="0.18" stroke="#db2777" stroke-width="2.5"/>
+                   <circle cx="66" cy="62" r="15" fill="#3b82f6" fill-opacity="0.55" stroke="#2563eb" stroke-width="2.5"/>
+                   <circle cx="96" cy="62" r="15" fill="#22c55e" fill-opacity="0.55" stroke="#16a34a" stroke-width="2.5"/>
+                 </svg>
+                 <h4>Соподчинение</h4><p>«берёза» и «дуб» внутри «дерева»</p>
+               </div>
+               <div class="fig-card">
+                 <svg viewBox="0 0 160 100" aria-label="Противоположность">
+                   <circle cx="80" cy="50" r="40" fill="#8b5cf6" fill-opacity="0.15" stroke="#7c3aed" stroke-width="2.5"/>
+                   <circle cx="58" cy="50" r="15" fill="#ef4444" fill-opacity="0.55" stroke="#dc2626" stroke-width="2.5"/>
+                   <circle cx="102" cy="50" r="15" fill="#06b6d4" fill-opacity="0.55" stroke="#0891b2" stroke-width="2.5"/>
+                 </svg>
+                 <h4>Противоположность</h4><p>«горячий» и «холодный» (есть «тёплый»)</p>
+               </div>
+               <div class="fig-card">
+                 <svg viewBox="0 0 160 100" aria-label="Противоречие">
+                   <path d="M80,10 A40,40 0 0 0 80,90 Z" fill="#22c55e" fill-opacity="0.55" stroke="#16a34a" stroke-width="2.5"/>
+                   <path d="M80,10 A40,40 0 0 1 80,90 Z" fill="#ef4444" fill-opacity="0.55" stroke="#dc2626" stroke-width="2.5"/>
+                   <line x1="80" y1="10" x2="80" y2="90" stroke="#1e293b" stroke-width="2.5"/>
+                 </svg>
+                 <h4>Противоречие</h4><p>«съедобный» и «несъедобный»</p>
+               </div>
+             </div>
+
+             <table class="fig-table">
+               <thead><tr><th>Отношение</th><th>Что происходит с объёмами</th><th>Пример</th></tr></thead>
+               <tbody>
+                 <tr><td>Тождество</td><td>Объёмы полностью совпадают</td><td>«Москва» — «столица России»</td></tr>
+                 <tr><td>Пересечение</td><td>Объёмы совпадают частично</td><td>«школьник» — «спортсмен»</td></tr>
+                 <tr><td>Подчинение</td><td>Объём одного целиком входит в объём другого</td><td>«берёза» — «дерево»</td></tr>
+                 <tr><td>Соподчинение</td><td>Два объёма входят в третье, но не пересекаются</td><td>«берёза» и «дуб» — «дерево»</td></tr>
+                 <tr><td>Противоположность</td><td>Два понятия внутри рода, между ними есть третье</td><td>«горячий» — «тёплый» — «холодный»</td></tr>
+                 <tr><td>Противоречие</td><td>Два понятия исчерпывают род, третьего нет</td><td>«съедобный» — «несъедобный»</td></tr>
+               </tbody>
+             </table>
+
+             <p class="note pink">💡 Подсказка: нарисуйте два круга и спросите себя — они совпадают, пересекаются, один внутри другого или стоят рядом? Так отношение определяется за несколько секунд.</p>`
+    },
+    {
+      title: "📝 Определение понятия",
+      image: "📝 🧬 ➕",
+      body: `<p><b>Определение понятия</b> — это перечисление всех существенных признаков объекта (класса объектов) в связном предложении.</p>
+             <p>Каждый признак в определении должен быть <b>необходим</b>, а все вместе — <b>достаточны</b>, чтобы узнать объект. В определении не должно быть лишних слов, но не должно быть и недосказанности.</p>
+             <p>Самый распространённый способ — <b>через ближайший род и видовое отличие</b>.</p>
+
+             <div class="fig">
+               <div class="chain">
+                 <div class="fig-card blue"><h4>Определяемое понятие</h4><p><b>Пользователь</b></p></div>
+                 <span class="arrow">=</span>
+                 <div class="fig-card green"><h4>Ближайший род</h4><p><b>человек</b></p></div>
+                 <span class="arrow">+</span>
+                 <div class="fig-card amber"><h4>Видовое отличие</h4><p>применяющий компьютер для получения информации или решения задачи</p></div>
+               </div>
+               <div class="fig-cap">Рис. 4. «Пользователь — это человек, применяющий компьютер для получения информации или решения задачи»</div>
+             </div>
+
+             <p><b>Примеры определений:</b></p>
+             <table class="fig-table">
+               <thead><tr><th>Определение</th><th>Род</th><th>Видовое отличие</th></tr></thead>
+               <tbody>
+                 <tr><td>Квадрат — это прямоугольник, у которого все стороны равны</td><td>прямоугольник</td><td>все стороны равны</td></tr>
+                 <tr><td>Термометр — это прибор для измерения температуры</td><td>прибор</td><td>измеряет температуру</td></tr>
+                 <tr><td>Файл — это информация, хранящаяся в долговременной памяти под определённым именем</td><td>информация</td><td>хранится в памяти под именем</td></tr>
+                 <tr><td>Алгоритм — это последовательность действий, приводящая к намеченному результату</td><td>последовательность действий</td><td>приводит к результату</td></tr>
+               </tbody>
+             </table>
+
+             <p><b>Четыре правила определения:</b></p>
+             <ol>
+               <li><b>Соразмерность:</b> определение не должно быть слишком широким или слишком узким.</li>
+               <li><b>Ясность:</b> нельзя определять непонятное через ещё более непонятное.</li>
+               <li><b>Без круга:</b> нельзя определять понятие через само себя: «Книга — это книжка».</li>
+               <li><b>Без отрицания:</b> «Стул — это не стол» ничего не объясняет.</li>
+             </ol>
+
+             <p><b>Найдите ошибку:</b></p>
+             <table class="fig-table">
+               <thead><tr><th>Определение</th><th>Что не так</th></tr></thead>
+               <tbody>
+                 <tr><td>Стул — это мебель</td><td>Слишком широко: нет видового отличия, подходит и шкаф, и стол</td></tr>
+                 <tr><td>Книга — это то, что читают</td><td>Не указан род и нет точных существенных признаков</td></tr>
+                 <tr><td>Масло — это маслянистое вещество</td><td>Круг: понятие определено через само себя</td></tr>
+                 <tr><td>Собака — это не кошка</td><td>Отрицание: не раскрывает, что такое собака</td></tr>
+               </tbody>
+             </table>
+
+             <p class="note blue">💡 Некоторые первоначальные понятия не определяются. В математике это «точка» и «множество», в информатике — «информация». Их смысл поясняют на примерах.</p>`
+    },
+    {
+      title: "🗂️ Классификация понятий",
+      image: "🗂️ 🌳 📦",
+      body: `<p>Один из способов упорядочить понятия — <b>классификация</b>, то есть распределение объектов по группам на основании общего признака.</p>
+             <p>Признак, по которому делят, называют <b>основанием классификации</b>.</p>
+             <p><b>Пример:</b> устройства компьютера по назначению.</p>
+
+             <div class="fig-grid three">
+               <div class="fig-card blue"><div class="big">⌨️</div><h4>Ввода</h4><p>Клавиатура, мышь, сканер, микрофон</p></div>
+               <div class="fig-card green"><div class="big">🖥️</div><h4>Вывода</h4><p>Монитор, принтер, колонки, проектор</p></div>
+               <div class="fig-card amber"><div class="big">⚙️</div><h4>Обработки</h4><p>Процессор</p></div>
+               <div class="fig-card pink"><div class="big">💾</div><h4>Хранения</h4><p>Оперативная память, жёсткий диск, флешка</p></div>
+               <div class="fig-card"><div class="big">📡</div><h4>Передачи</h4><p>Сетевая карта, Wi-Fi-адаптер</p></div>
+             </div>
+
+             <p><b>Правила классификации:</b></p>
+             <ol>
+               <li>Основание деления одно на всех уровнях.</li>
+               <li>Группы не пересекаются: один объект не может попасть сразу в две группы.</li>
+               <li>Все объекты рода распределены, ни один не забыт.</li>
+               <li>Группы — это виды одного рода.</li>
+             </ol>
+
+             <p><b>Пример ошибки.</b> Транспорт делят на «наземный, водный, воздушный, легковой». Здесь смешаны два основания: среда движения и назначение. Легковой автомобиль одновременно наземный, значит группы пересекаются — так классифицировать нельзя.</p>
+
+             <p><b>Классификация в информатике:</b> информация по способу восприятия (зрительная, слуховая, вкусовая, обонятельная, осязательная); по форме представления (текстовая, числовая, графическая, звуковая, видео); программы (системные, прикладные, инструментальные).</p>`
+    },
+    {
+      title: "🏁 Итоги темы",
+      image: "🏁 ✅ 📌",
+      body: `<p><b>Самое главное:</b></p>
+             <ol>
+               <li><b>Понятие</b> — форма мышления, отражающая существенные признаки объекта или класса однородных объектов.</li>
+               <li>Понятия образуются с помощью <b>анализа, синтеза, сравнения, абстрагирования и обобщения</b>.</li>
+               <li>У понятия есть <b>содержание</b> (признаки) и <b>объём</b> (объекты). Чем больше содержание, тем меньше объём.</li>
+               <li>Понятия бывают <b>единичными</b> и <b>общими</b>, <b>конкретными</b> и <b>абстрактными</b>.</li>
+               <li>Отношения между понятиями показывают <b>кругами Эйлера</b>: тождество, пересечение, подчинение, соподчинение, противоположность, противоречие.</li>
+               <li><b>Определение</b> строится через ближайший род и видовое отличие.</li>
+             </ol>
+
+             <details class="answer">
+               <summary>Проверь себя: чем понятие отличается от суждения?</summary>
+               <p>Понятие только называет существенные признаки («берёза»), а суждение что-то утверждает или отрицает («берёза — лиственное дерево»).</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: что шире по объёму — «дерево» или «берёза»?</summary>
+               <p>«Дерево»: объём берёзы целиком входит в объём деревьев, поэтому «дерево» шире.</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: какой род в определении «Квадрат — это прямоугольник с равными сторонами»?</summary>
+               <p>Род — «прямоугольник», видовое отличие — «с равными сторонами».</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: в каком отношении находятся «горячий» и «холодный»?</summary>
+               <p>В отношении противоположности: между ними есть промежуточное понятие «тёплый».</p>
+             </details>`
+    }
+  ],
+
+  mindmap: {
+    center: "Понятие",
+    branches: [
+      { text: "Признаки", color: "#3b82f6",
+        children: ["Существенные", "Несущественные", "Пример с берёзой"] },
+      { text: "Приёмы", color: "#8b5cf6",
+        children: ["Анализ", "Синтез", "Сравнение", "Абстрагирование", "Обобщение"] },
+      { text: "Строение", color: "#22c55e",
+        children: ["Содержание", "Объём", "Обратная связь"] },
+      { text: "Отношения", color: "#f59e0b",
+        children: ["Тождество", "Пересечение", "Подчинение", "Соподчинение"] },
+      { text: "Определение", color: "#ec4899",
+        children: ["Род и отличие", "Правила", "Ошибки"] }
+    ]
+  },
+
+  variants: {
+    A: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что такое понятие?",
+        options:["Мысль, в которой отражены существенные признаки объекта или класса однородных объектов","Любое слово русского языка","Утверждение, которое может быть истинным или ложным","Вывод из нескольких суждений"],
+        answer:0, exp:"Понятие — форма мышления, отражающая существенные признаки объекта или класса объектов." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Какие признаки объекта называют существенными?",
+        options:["Те, без которых объект перестаёт быть самим собой","Те, которые можно измерить линейкой","Все признаки, которые мы видим","Только цвет и форму"],
+        answer:0, exp:"Существенные признаки отличают объект от других и определяют его суть." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Мысленное разделение объекта на составные части — это…",
+        options:["Анализ","Синтез","Обобщение","Абстрагирование"],
+        answer:0, exp:"Анализ — мысленное разделение объекта на части или выделение его признаков." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какое отношение между понятиями «дерево» и «берёза»?",
+        options:["Подчинение","Тождество","Пересечение","Противоречие"],
+        answer:0, exp:"Объём понятия «берёза» целиком входит в объём понятия «дерево» — это подчинение." },
+      { level:"hard", weight:3, type:"text",
+        q:"Определение: «Квадрат — это прямоугольник, у которого все стороны равны». Назовите родовое понятие (одно слово).",
+        answer:"прямоугольник", exp:"Род — прямоугольник, видовое отличие — равенство всех сторон." }
+    ],
+    B: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Какие три формы мышления выделяют?",
+        options:["Понятие, суждение, умозаключение","Анализ, синтез, сравнение","Ощущение, восприятие, представление","Текст, число, графика"],
+        answer:0, exp:"Основные формы мышления — понятие, суждение и умозаключение." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Что такое обобщение?",
+        options:["Мысленное объединение однородных объектов","Мысленное разделение объекта на части","Установление сходства и различия объектов","Отвлечение от несущественных признаков"],
+        answer:0, exp:"Обобщение — мысленное объединение однородных объектов." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Что отражает содержание понятия?",
+        options:["Совокупность существенных признаков","Количество объектов, входящих в понятие","Название понятия","Расположение кругов Эйлера"],
+        answer:0, exp:"Содержание — совокупность существенных признаков объекта или класса объектов." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какое понятие является единичным?",
+        options:["Байкал","озеро","река","ученик"],
+        answer:0, exp:"В объёме понятия «Байкал» только один объект, поэтому оно единичное." },
+      { level:"hard", weight:3, type:"text",
+        q:"«Москва — столица России». Это понятие, суждение или умозаключение? (одно слово)",
+        answer:"суждение", exp:"Здесь что-то утверждается о Москве, значит это суждение." }
+    ],
+    C: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что такое объём понятия?",
+        options:["Множество объектов, которые охватываются понятием","Совокупность существенных признаков","Слово, выражающее понятие","Правило построения определения"],
+        answer:0, exp:"Объём — множество объектов, входящих в понятие." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Мысленное выделение одних признаков и отвлечение от других — это…",
+        options:["Абстрагирование","Анализ","Синтез","Сравнение"],
+        answer:0, exp:"Абстрагирование — выделение одних признаков и отвлечение от других." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какое отношение между понятиями «школьник» и «спортсмен»?",
+        options:["Пересечение","Тождество","Подчинение","Соподчинение"],
+        answer:0, exp:"Есть школьники-спортсмены, но не все школьники — спортсмены: объёмы совпадают частично." },
+      { level:"medium", weight:2, type:"choice",
+        q:"В определении «Термометр — это прибор для измерения температуры» родовым понятием является…",
+        options:["прибор","термометр","измерение","температура"],
+        answer:0, exp:"Род — «прибор», видовое отличие — «для измерения температуры»." },
+      { level:"hard", weight:3, type:"text",
+        q:"Определите отношение между понятиями «съедобный» и «несъедобный» (одно слово).",
+        answer:"противоречие", exp:"Эти понятия исчерпывают род: третьего варианта нет — это противоречие." }
+    ]
+  },
+
+  homework: [
+    {
+      type: "choice",
+      q: "Что такое мышление?",
+      options: ["Высшая ступень познания: способность рассуждать и делать выводы", "Способность видеть и слышать", "Любое произнесённое слово", "Запоминание готовых ответов"],
+      answer: 0,
+      exp: "Мышление — высшая ступень познания, оно позволяет находить общее и делать выводы."
+    },
+    {
+      type: "choice",
+      q: "Какой логический приём называют мысленным соединением частей в единое целое?",
+      options: ["Синтез", "Анализ", "Сравнение", "Обобщение"],
+      answer: 0,
+      exp: "Синтез — мысленное соединение частей или признаков в целое."
+    },
+    {
+      type: "choice",
+      q: "Какое отношение между понятиями «Москва» и «столица России»?",
+      options: ["Тождество", "Пересечение", "Подчинение", "Противоположность"],
+      answer: 0,
+      exp: "Объёмы этих понятий полностью совпадают — это тождество."
+    },
+    {
+      type: "text",
+      q: "Определение: «Ножницы — это инструмент для разрезания». Назовите родовое понятие (одно слово).",
+      answer: "инструмент",
+      exp: "Род — «инструмент», видовое отличие — «для разрезания»."
+    },
+    {
+      type: "text",
+      q: "«Все птицы имеют перья. Воробей — птица. Значит, воробей имеет перья». Как называется эта форма мышления? (одно слово)",
+      answer: "умозаключение",
+      exp: "Из двух суждений получено новое — это умозаключение."
+    },
+    {
+      type: "choice",
+      q: "Какая ошибка допущена в определении «Книга — это книжка»?",
+      options: ["Понятие определено через само себя (круг)", "Определение слишком узкое", "В определении есть отрицание", "Определение слишком широкое"],
+      answer: 0,
+      exp: "Нельзя определять понятие через однокоренное слово: получается круг."
+    }
+  ],
+
+  solutions: [
+    {
+      title: "Задача 1. Существенные признаки понятия",
+      task: "Выделите существенные признаки понятия «светофор».",
+      template: [
+        "1. Задаём вопрос: <b>без каких признаков предмет перестанет быть светофором?</b>",
+        "2. <b>Анализ:</b> выделяем признаки — корпус, три сигнала, цвета сигналов, столб, козырёк, кнопка.",
+        "3. <b>Абстрагирование:</b> отбрасываем цвет корпуса, высоту, материал — они могут быть любыми.",
+        "4. <b>Обобщение:</b> существенные признаки — устройство для регулирования дорожного движения с тремя сигналами: красным, жёлтым и зелёным."
+      ],
+      answer: "Устройство для регулирования дорожного движения с тремя сигналами: красным, жёлтым и зелёным",
+      hint: "Спросите себя: без какого признака предмет уже не будет светофором?"
+    },
+    {
+      title: "Задача 2. Определение через род и видовое отличие",
+      task: "Дайте определение понятия «велосипед» через ближайший род и видовое отличие.",
+      template: [
+        "1. Находим <b>ближайший род</b>: велосипед — это транспортное средство.",
+        "2. Выделяем <b>видовое отличие</b>: два колеса, движение от нажатия на педали.",
+        "3. Соединяем в одно предложение: «Велосипед — это транспортное средство на двух колёсах, приводимое в движение педалями».",
+        "4. Проверяем: определение не слишком широкое (не подходит самокат) и не слишком узкое."
+      ],
+      answer: "Велосипед — это транспортное средство на двух колёсах, приводимое в движение педалями",
+      hint: "Сначала назовите более общее понятие (род), затем то, что отличает велосипед от других видов транспорта."
+    },
+    {
+      title: "Задача 3. Отношения между понятиями",
+      task: "Определите отношение между понятиями «школьник» и «спортсмен».",
+      template: [
+        "1. Рисуем два круга: каждый круг — объём одного понятия.",
+        "2. Есть школьники, которые занимаются спортом, — значит, круги <b>пересекаются</b>.",
+        "3. Но есть школьники, не занимающиеся спортом, и спортсмены, которые уже не школьники, — значит, круги не совпадают.",
+        "4. Вывод: объёмы совпадают частично — это <b>пересечение</b>."
+      ],
+      answer: "Пересечение",
+      hint: "Проверьте, есть ли объекты, которые входят в оба понятия, но не исчерпывают их."
+    },
+    {
+      title: "Задача 4. Содержание и объём",
+      task: "Расположите понятия от самого широкого к самому узкому: «легковой автомобиль», «транспорт», «автомобиль».",
+      template: [
+        "1. Определяем объём: <b>транспорт</b> — всё, что перевозит людей и грузы. Это самое широкое понятие.",
+        "2. <b>Автомобиль</b> — вид транспорта, его объём уже.",
+        "3. <b>Легковой автомобиль</b> — вид автомобиля, объём ещё уже.",
+        "4. Вывод: транспорт → автомобиль → легковой автомобиль. Содержание при этом растёт."
+      ],
+      answer: "транспорт → автомобиль → легковой автомобиль",
+      hint: "Чем больше признаков в понятии, тем меньше объектов оно охватывает."
+    },
+    {
+      title: "Задача 5. Ошибка в определении",
+      task: "Найдите ошибку в определении «Стул — это мебель» и исправьте его.",
+      template: [
+        "1. Проверяем <b>соразмерность</b>: под определение «мебель» подходят и шкаф, и стол — определение слишком широкое.",
+        "2. Значит, не хватает <b>видового отличия</b>.",
+        "3. Добавляем отличие: стул — это мебель для сидения одного человека, имеющая спинку.",
+        "4. Проверяем: теперь под определение подходит только стул. Род — «мебель», отличие — «для сидения одного человека, со спинкой»."
+      ],
+      answer: "Определение слишком широкое. Например: «Стул — это мебель для сидения одного человека, со спинкой»",
+      hint: "Подставьте вместо слова «стул» другие предметы мебели — подходит ли им это определение?"
+    }
+  ]
+};
+</script>
+
+<!-- Подключение общих скриптов -->
+<script src="../shared/account.js"></script>
+<script src="../shared/mindmap.js"></script>
+<script src="../shared/app.js"></script>
+
+</body>
+</html>
