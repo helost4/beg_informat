@@ -86,6 +86,11 @@
     "11 класс": []
   };
 
+  /* Уроки, доступные всем классам (5–11) */
+  const PYTHON_CATALOG = [
+    { file: "python-class/lesson-01-start.html", title: "Python для начинающих. Урок 1. Запуск Python в Astra Linux", tag: "5–11 классы · Astra Linux" }
+  ];
+
   const CATALOG_EGE = {
     "9 класс": [
       { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
@@ -134,6 +139,8 @@
 
     container.appendChild(section);
   }
+
+  renderSection('🐍 Python для начинающих', PYTHON_CATALOG, '');
 
   if (isSenior) {
     renderSection(
