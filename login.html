@@ -79,12 +79,6 @@
         <option value="11 класс">11 класс</option>
       </select>
 
-      <label for="regTrack">Направление обучения</label>
-      <select id="regTrack" required>
-        <option value="standard">Обычные уроки</option>
-        <option value="ege">Подготовка к ЕГЭ (тренажёры и разборы)</option>
-      </select>
-
       <label for="regPassword">Пароль</label>
       <div class="password-wrap">
         <input type="password" id="regPassword" placeholder="Минимум 6 символов" autocomplete="new-password" minlength="6" required>
@@ -136,7 +130,6 @@
 
     document.getElementById('regName').value = legacy.name;
     if (legacy.class) document.getElementById('regClass').value = legacy.class;
-    if (legacy.track) document.getElementById('regTrack').value = legacy.track;
 
     document.getElementById('loginName').value = legacy.name;
     if (legacy.class) document.getElementById('loginClass').value = legacy.class;
@@ -255,7 +248,6 @@
     var btn = document.getElementById('registerSubmit');
     var name = document.getElementById('regName').value.trim().replace(/\s+/g, ' ');
     var className = document.getElementById('regClass').value;
-    var track = document.getElementById('regTrack').value;
     var password = document.getElementById('regPassword').value;
     var password2 = document.getElementById('regPassword2').value;
 
@@ -281,7 +273,6 @@
     Account.register({
       name: name,
       className: className,
-      track: track,
       password: password
     }).then(function () {
       window.location.href = 'lessons.html';

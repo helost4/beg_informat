@@ -17,6 +17,9 @@
   .logout-btn{background:#fff;border:2px solid #ef4444;color:#ef4444;border-radius:10px;padding:8px 16px;cursor:pointer;font-weight:600;}
   .logout-btn:hover{background:#fef2f2;}
   .no-lessons{background:#fffbeb;border:2px solid #f59e0b;border-radius:12px;padding:20px;color:#92400e;}
+  .lessons-section{margin-bottom:30px;}
+  .lessons-section .section-title{font-size:1.15rem;margin:0 0 12px;color:#1e293b;display:flex;align-items:center;gap:8px;}
+  .section-empty{background:#f8fafc;border:2px dashed #cbd5e1;border-radius:12px;padding:14px 18px;color:#64748b;font-size:.92rem;line-height:1.45;}
 </style>
 </head>
 <body>
@@ -56,8 +59,7 @@
   }
 
   document.getElementById('studentBadge').textContent =
-    `👤 ${student.name} · ${student.class}` +
-    (student.track === 'ege' ? ' · Подготовка к ЕГЭ' : '');
+    `👤 ${student.name} · ${student.class}`;
 
   /* ---------- Выход ---------- */
   document.getElementById('logoutBtn').addEventListener('click', function () {
@@ -71,7 +73,9 @@
       { file: "5-class/lesson-08-tekst.html", title: "Текст как форма представления информации", tag: "§ 8" },
       { file: "5-class/lesson-07-kodirovanie.html", title: "Кодирование информации", tag: "§ 7" }
     ],
-    "6 класс": [],
+    "6 класс": [
+      { file: "6-class/lesson-05-sistema.html", title: "Система и окружающая среда. Система как «чёрный ящик»", tag: "§ 5" }
+    ],
     "7 класс": [],
     "8 класс": [],
     "9 класс": [],
@@ -93,26 +97,60 @@
     ]
   };
 
-  /* ---------- Выбор каталога на основе профиля ---------- */
-  const activeCatalog = (student.track === 'ege') ? CATALOG_EGE : LESSONS_CATALOG;
-
-  /* ---------- Рендер уроков своего класса ---------- */
-  const list = activeCatalog[student.class] || [];
+  /* ---------- Рендер уроков: обычные и тренажёры ЕГЭ ---------- */
   const container = document.getElementById('lessonsList');
+  const SENIOR_CLASSES = ['9 класс', '10 класс', '11 класс'];
+  const isSenior = SENIOR_CLASSES.indexOf(student.class) !== -1;
 
-  if (!list.length) {
-    container.innerHTML = `
-      <div class="no-lessons">
-        ⚠️ Для ${student.class} (${student.track === 'ege' ? 'ЕГЭ' : 'обычный профиль'}) пока нет уроков. Обратитесь к учителю.
-      </div>`;
+  function renderSection(title, items, emptyText) {
+    const section = document.createElement('section');
+    section.className = 'lessons-section';
+
+    const heading = document.createElement('h2');
+    heading.className = 'section-title';
+    heading.textContent = title;
+    section.appendChild(heading);
+
+    if (!items || !items.length) {
+      const empty = document.createElement('div');
+      empty.className = 'section-empty';
+      empty.textContent = emptyText;
+      section.appendChild(empty);
+    } else {
+      const listEl = document.createElement('div');
+      listEl.className = 'lesson-list';
+
+      items.forEach(function (lesson) {
+        const a = document.createElement('a');
+        a.className = 'lesson-card';
+        a.href = lesson.file;
+        a.innerHTML = `${lesson.title}<span class="tag">${lesson.tag}</span>`;
+        listEl.appendChild(a);
+      });
+
+      section.appendChild(listEl);
+    }
+
+    container.appendChild(section);
+  }
+
+  if (isSenior) {
+    renderSection(
+      '📘 Обычные уроки',
+      LESSONS_CATALOG[student.class],
+      `Обычных уроков для ${student.class} пока нет. Доступен тренажёр ЕГЭ.`
+    );
+    renderSection(
+      '🎯 Тренажёры ЕГЭ',
+      CATALOG_EGE[student.class],
+      `Тренажёров для ${student.class} пока нет.`
+    );
   } else {
-    list.forEach(function (lesson) {
-      const a = document.createElement('a');
-      a.className = 'lesson-card';
-      a.href = lesson.file;
-      a.innerHTML = `${lesson.title}<span class="tag">${lesson.tag}</span>`;
-      container.appendChild(a);
-    });
+    renderSection(
+      '📘 Уроки',
+      LESSONS_CATALOG[student.class],
+      `Для ${student.class} пока нет уроков. Обратитесь к учителю.`
+    );
   }
 
   /* ---------- Мои результаты ---------- */

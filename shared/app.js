@@ -49,15 +49,6 @@
     window.location.href = '../lessons.html';
     throw new Error('Класс не совпадает');
   }
-
-  // 2. Проверка профиля ЕГЭ (блокируем только тренажеры ЕГЭ)
-  const isEgeContent = window.location.pathname.includes('/ege-class/') || LESSON_DATA.title.toLowerCase().includes('тренажер');
-  
-  if (isEgeContent && student.track !== 'ege') {
-    alert('Этот урок доступен только в режиме "Подготовка к ЕГЭ". Выйдите и выберите соответствующий профиль при входе.');
-    window.location.href = '../lessons.html';
-    throw new Error('Неверный профиль');
-  }
 })();
 
 /* ============================================================
@@ -138,14 +129,18 @@ function sendToSheet(payload){
 /* ============================================================
    ГЕЙМИФИКАЦИЯ: уровни, XP, значки
    ============================================================ */
+const DEFAULT_GAME_LEVELS = [
+  { name: '🥉 Новичок',        threshold: 0,  badge: 'badgeBronze' },
+  { name: '🥈 Писарь',          threshold: 40, badge: 'badgeSilver' },
+  { name: '🥇 Мастер текста',   threshold: 75, badge: 'badgeGold'   }
+];
+
 const GAME = {
   xp: 0,
   maxXP: 100,
-  levels: [
-    { name: '🥉 Новичок',        threshold: 0,  badge: 'badgeBronze' },
-    { name: '🥈 Писарь',          threshold: 40, badge: 'badgeSilver' },
-    { name: '🥇 Мастер текста',   threshold: 75, badge: 'badgeGold'   }
-  ],
+  levels: (LESSON_DATA.gameLevels && LESSON_DATA.gameLevels.length === 3)
+    ? LESSON_DATA.gameLevels
+    : DEFAULT_GAME_LEVELS,
   currentLevel: 0
 };
 
@@ -205,6 +200,16 @@ const LEVEL_LABEL = {
   medium:"🟡 Среднее · 2 балла",
   hard:  "🔴 Сложное · 3 балла"
 };
+
+/* Мягкое сравнение текстовых ответов: регистр, «ё», лишние пробелы, запятая */
+function normalizeAnswer(value){
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/\s+/g, ' ')
+    .replace(/,/g, '.');
+}
 
 const variantKeys = Object.keys(LESSON_DATA.variants);
 const variantKey  = variantKeys[Math.floor(Math.random()*variantKeys.length)];
@@ -321,8 +326,8 @@ tasksEl.addEventListener('click', e=>{
     if (!sel){ res.className='result bad'; res.innerHTML='Выберите вариант ответа.'; return; }
     correct = (+sel.value === t.answer);
   } else {
-    const val = document.getElementById('txt'+i).value.trim().replace(',','.');
-    correct = (val === String(t.answer).trim());
+    const val = document.getElementById('txt'+i).value;
+    correct = (normalizeAnswer(val) === normalizeAnswer(t.answer));
   }
 
   if (correct){
@@ -470,8 +475,8 @@ document.getElementById('finish').addEventListener('click', function() {
       }
       correct = (+sel.value === t.answer);
     } else {
-      const val = document.getElementById('hwTxt' + i).value.trim().replace(',', '.');
-      correct = (val === String(t.answer).trim());
+      const val = document.getElementById('hwTxt' + i).value;
+      correct = (normalizeAnswer(val) === normalizeAnswer(t.answer));
     }
 
     if (correct) {
