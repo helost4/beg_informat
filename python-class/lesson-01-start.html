@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Python для начинающих. Урок 1. Запуск Python в Astra Linux</title>
+<title>Python для начинающих. Урок 1. Первая программа в IDLE (Astra Linux)</title>
 <link rel="stylesheet" href="../shared/style.css">
 <style>
   /* Длинная теория должна раскрываться полностью */
@@ -38,6 +38,7 @@
     border-left:4px solid #f59e0b;font-size:.9rem;color:#78350f;line-height:1.5;}
   .note.blue{background:#eff6ff;border-left-color:#3b82f6;color:#1e3a8a;}
   .note.pink{background:#fdf2f8;border-left-color:#ec4899;color:#831843;}
+  .note.green{background:#f0fdf4;border-left-color:#22c55e;color:#14532d;}
 
   table.fig-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;}
   table.fig-table th,table.fig-table td{border:1px solid #e2e8f0;padding:8px 10px;
@@ -67,26 +68,37 @@
   .code-compare{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin:14px 0;}
   .code-compare .code-title{font-weight:700;font-size:.85rem;color:#475569;margin-bottom:-4px;}
 
-  .term{background:#0f172a;border-radius:12px;overflow:hidden;margin:14px 0;
-    border:1px solid #1e293b;box-shadow:0 8px 24px rgba(15,23,42,.25);}
-  .term-bar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#1e293b;}
-  .term-dot{width:11px;height:11px;border-radius:50%;display:inline-block;}
-  .term-dot.r{background:#ef4444;} .term-dot.y{background:#f59e0b;} .term-dot.g{background:#22c55e;}
-  .term-title{margin-left:8px;color:#94a3b8;font-size:.75rem;}
-  .term-body{padding:14px 16px;color:#e2e8f0;font-family:Consolas,"Courier New",monospace;
-    font-size:.86rem;line-height:1.6;overflow-x:auto;}
-  .term-body .prompt{color:#4ade80;}
-  .term-body .cmd{color:#f8fafc;}
-  .term-body .out{color:#cbd5e1;}
-  .term-body .err{color:#fca5a5;}
-  .term-body .ok{color:#86efac;}
-  .term-body .cursor{color:#f8fafc;animation:blink 1s step-start infinite;}
-  @keyframes blink{50%{opacity:0;}}
+  /* Окна IDLE — светлые, как в настоящей программе */
+  .idle{background:#fff;border:2px solid #cbd5e1;border-radius:12px;overflow:hidden;
+    margin:14px 0;box-shadow:0 8px 24px rgba(15,23,42,.10);}
+  .idle-bar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#e2e8f0;
+    border-bottom:1px solid #cbd5e1;}
+  .idle-dot{width:11px;height:11px;border-radius:50%;display:inline-block;}
+  .idle-dot.r{background:#ef4444;} .idle-dot.y{background:#f59e0b;} .idle-dot.g{background:#22c55e;}
+  .idle-title{margin-left:8px;color:#334155;font-size:.78rem;font-weight:600;}
+  .idle-menu{display:flex;flex-wrap:wrap;gap:14px;padding:6px 14px;background:#f8fafc;
+    border-bottom:1px solid #e2e8f0;font-size:.76rem;color:#475569;}
+  .idle-body{padding:14px 16px;background:#fff;color:#0f172a;
+    font-family:Consolas,"Courier New",monospace;font-size:.86rem;line-height:1.65;
+    overflow-x:auto;}
+  .idle-body .prompt{color:#1d4ed8;font-weight:700;}
+  .idle-body .cmd{color:#0f172a;}
+  .idle-body .out{color:#1d4ed8;}
+  .idle-body .err{color:#dc2626;font-weight:600;}
+  .idle-body .ok{color:#15803d;}
+  .idle-body .cmt{color:#94a3b8;}
+  .idle-editor .idle-body{font-size:.9rem;}
+  .idle-editor .kw{color:#c2410c;font-weight:600;}
+  .idle-editor .str{color:#15803d;}
+  .idle-editor .num{color:#7c3aed;}
 
-  .editor{background:#fff;border:2px solid #e2e8f0;border-radius:12px;overflow:hidden;margin:14px 0;}
-  .editor-bar{padding:8px 12px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;
-    color:#475569;font-size:.78rem;font-weight:600;}
-  .editor pre{margin:0;border-radius:0;}
+  /* Путь сохранения файла */
+  .path-flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+    gap:8px;margin:16px 0;}
+  .path-step{background:#fff;border:2px solid #93c5fd;border-radius:12px;
+    padding:10px 14px;font-size:.88rem;font-weight:600;color:#1e3a8a;text-align:center;}
+  .path-step small{display:block;font-weight:400;font-size:.75rem;color:#64748b;margin-top:2px;}
+  .path-arrow{color:#3b82f6;font-size:1.2rem;font-weight:700;}
 
   .checklist{list-style:none;padding:0;margin:12px 0;}
   .checklist li{padding:8px 0 8px 30px;position:relative;line-height:1.5;}
@@ -99,7 +111,7 @@
 <div class="bubble-field" aria-hidden="true">
   <span class="bubble" style="top:8%;  left:5%;  animation-delay:0s;">🐍</span>
   <span class="bubble" style="top:20%; left:88%; animation-delay:1s;">💻</span>
-  <span class="bubble" style="top:55%; left:3%;  animation-delay:2s;">⌨️</span>
+  <span class="bubble" style="top:55%; left:3%;  animation-delay:2s;">🪟</span>
   <span class="bubble" style="top:72%; left:92%; animation-delay:1.5s;">▶️</span>
   <span class="bubble" style="top:35%; left:50%; animation-delay:.5s;">📄</span>
   <span class="bubble" style="top:85%; left:40%; animation-delay:2.5s;">💡</span>
@@ -200,7 +212,7 @@
   <div class="card hidden" id="homeworkSection">
     <h2><span class="icon">🏠</span> Домашнее задание</h2>
     <p class="muted" style="margin:-8px 0 16px">
-      Если дома нет Python — выполните теоретическую часть, а команды запишите на бумаге.
+      Если дома нет IDLE — выполните теоретическую часть, а команды запишите на бумаге.
       Проверка автоматическая, даётся одна попытка.
     </p>
 
@@ -249,7 +261,7 @@
     </div>
   </div>
 
-  <footer>Python · Astra Linux · Урок 1 · Интерактивный урок с самопроверкой</footer>
+  <footer>Python · Astra Linux · IDLE · Урок 1 · Интерактивный урок с самопроверкой</footer>
 </div>
 
 <script>
@@ -257,24 +269,24 @@
    ДАННЫЕ УРОКА
    ============================================================ */
 const LESSON_DATA = {
-  title: "Python для начинающих. Урок 1. Запуск Python в Astra Linux",
-  subtitle: "5–11 классы · Astra Linux · Первая программа",
+  title: "Python для начинающих. Урок 1. Первая программа в IDLE (Astra Linux)",
+  subtitle: "5–11 классы · Astra Linux · Графическая среда IDLE",
   className: "",
 
-  goal: "Познакомиться с Python и научиться запускать его на школьном компьютере под управлением Astra Linux: открывать терминал, проверять версию, работать в интерактивном режиме, создавать и запускать файл с программой, понимать простые сообщения об ошибках.",
+  goal: "Познакомиться с Python и научиться работать в графической среде IDLE на Astra Linux: открывать IDLE из меню, выполнять команды в окне Python Shell, создавать файл hello.py в папке со своей фамилией и классом на Рабочем столе, запускать программу клавишей F5 и понимать простые сообщения об ошибках.",
 
   tasks: [
     "Понять, зачем нужен Python и где он применяется.",
-    "Научиться открывать терминал в Astra Linux.",
-    "Проверять, установлен ли Python, командой python3 --version.",
-    "Запускать Python в интерактивном режиме и выходить из него.",
-    "Создавать файл hello.py и запускать его командой python3 hello.py.",
-    "Освоить команды навигации pwd, ls, cd, mkdir, cat.",
-    "Научиться читать простые сообщения об ошибках и исправлять их."
+    "Научиться открывать IDLE из меню Astra Linux.",
+    "Выполнять первые команды в окне Python Shell.",
+    "Создавать файл программы в редакторе IDLE.",
+    "Сохранять файлы в папку «Фамилия Класс» на Рабочем столе.",
+    "Запускать программу клавишей F5 и видеть результат.",
+    "Читать простые сообщения об ошибках и исправлять код."
   ],
 
   gameLevels: [
-    { name: '🥉 Первый запуск',         threshold: 0,  badge: 'badgeBronze' },
+    { name: '🥉 Первый запуск',          threshold: 0,  badge: 'badgeBronze' },
     { name: '🥈 Уверенный пользователь', threshold: 15, badge: 'badgeSilver' },
     { name: '🥇 Юный питонист',          threshold: 30, badge: 'badgeGold'   }
   ],
@@ -306,7 +318,7 @@ const LESSON_DATA = {
              </div>
 
              <p class="note blue">💡 На ЕГЭ по информатике Python — один из разрешённых языков программирования. Чем раньше начнёте, тем спокойнее будет в старших классах.</p>
-             <p>В этом уроке мы не будем учить сложные конструкции. Сначала разберёмся, <b>где находится Python</b> и <b>как заставить его выполнить первую команду</b>.</p>`
+             <p>В этом уроке мы не будем учить сложные конструкции. Сначала разберёмся, <b>где находится Python</b> и <b>как выполнить первую команду в графической среде IDLE</b> — без сложных настроек.</p>`
     },
     {
       title: "🖥️ Как устроен запуск программы",
@@ -314,12 +326,12 @@ const LESSON_DATA = {
 
              <div class="fig-grid three">
                <div class="fig-card blue"><div class="big">📄</div><h4>Файл с кодом</h4><p>Текстовый файл с расширением <code class="inline">.py</code>, например <code class="inline">hello.py</code></p></div>
-               <div class="fig-card green"><div class="big">⚙️</div><h4>Интерпретатор</h4><p>Программа Python, которая читает код и выполняет команды</p></div>
-               <div class="fig-card amber"><div class="big">⌨️</div><h4>Терминал</h4><p>Окно, в котором мы пишем команды и видим результат</p></div>
+               <div class="fig-card green"><div class="big">⚙️</div><h4>Интерпретатор</h4><p>Программа Python 3, которая читает код и выполняет команды</p></div>
+               <div class="fig-card amber"><div class="big">🪟</div><h4>IDLE</h4><p>Графическая среда: в ней мы пишем код и сразу видим результат</p></div>
              </div>
 
              <div class="fig">
-               <svg viewBox="0 0 640 250" role="img" aria-label="Схема: файл hello.py передаётся интерпретатору Python, на экран выводится результат">
+               <svg viewBox="0 0 640 250" role="img" aria-label="Файл hello.py передаётся интерпретатору Python 3, результат появляется в окне IDLE Python Shell">
                  <defs>
                    <marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
                      <path d="M0,0 L10,5 L0,10 Z" fill="#3b82f6"/>
@@ -332,153 +344,116 @@ const LESSON_DATA = {
                  <line x1="44" y1="104" x2="150" y2="104" stroke="#cbd5e1" stroke-width="2"/>
                  <text x="44" y="126" font-family="Consolas, monospace" font-size="12" fill="#64748b">print("Привет!")</text>
                  <text x="44" y="146" font-family="Consolas, monospace" font-size="12" fill="#64748b">print("Я учусь!")</text>
-                 <text x="103" y="168" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#3b82f6">текст программы</text>
+                 <text x="103" y="168" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#3b82f6">файл программы</text>
 
                  <line x1="188" y1="119" x2="244" y2="119" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow1)"/>
-                 <text x="216" y="108" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#3b82f6">команда</text>
-                 <text x="216" y="140" text-anchor="middle" font-family="Consolas, monospace" font-size="10" fill="#64748b">python3</text>
+                 <text x="216" y="108" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#3b82f6">запуск</text>
 
-                 <circle cx="316" cy="119" r="46" fill="#dcfce7" stroke="#22c55e" stroke-width="2.5"/>
-                 <text x="316" y="113" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="15" font-weight="700" fill="#15803d">Python 3</text>
-                 <text x="316" y="134" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#16a34a">интерпретатор</text>
+                 <rect x="252" y="76" width="116" height="86" rx="14" fill="#dcfce7" stroke="#22c55e" stroke-width="2.5"/>
+                 <text x="310" y="108" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="15" font-weight="700" fill="#15803d">Python 3</text>
+                 <text x="310" y="130" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#16a34a">интерпретатор</text>
+                 <text x="310" y="150" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#16a34a">внутри IDLE</text>
 
-                 <line x1="366" y1="119" x2="422" y2="119" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow1)"/>
+                 <line x1="374" y1="119" x2="426" y2="119" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow1)"/>
 
-                 <rect x="438" y="66" width="174" height="106" rx="14" fill="#eff6ff" stroke="#3b82f6" stroke-width="2.5"/>
-                 <text x="454" y="96" font-family="Consolas, monospace" font-size="14" fill="#1e3a8a">&gt; Привет!</text>
-                 <text x="454" y="120" font-family="Consolas, monospace" font-size="14" fill="#1e3a8a">&gt; Я учусь!</text>
-                 <text x="525" y="152" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#3b82f6">результат на экране</text>
+                 <rect x="434" y="46" width="182" height="156" rx="12" fill="#fff" stroke="#93c5fd" stroke-width="2"/>
+                 <rect x="434" y="46" width="182" height="26" rx="12" fill="#e2e8f0"/>
+                 <rect x="434" y="60" width="182" height="12" fill="#e2e8f0"/>
+                 <text x="446" y="64" font-family="Segoe UI, sans-serif" font-size="10" font-weight="700" fill="#334155">IDLE — Python Shell</text>
 
-                 <text x="320" y="222" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#475569">Вы запускаете файл — Python читает его и выполняет команды по порядку</text>
+                 <text x="446" y="94" font-family="Consolas, monospace" font-size="11" fill="#1d4ed8">&gt;&gt;&gt; print("Привет!")</text>
+                 <text x="446" y="114" font-family="Consolas, monospace" font-size="11" fill="#1d4ed8">Привет!</text>
+                 <text x="446" y="136" font-family="Consolas, monospace" font-size="11" fill="#0f172a">&gt;&gt;&gt; 2 + 2</text>
+                 <text x="446" y="156" font-family="Consolas, monospace" font-size="11" fill="#1d4ed8">4</text>
+                 <text x="525" y="184" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#3b82f6">результат</text>
+
+                 <text x="320" y="222" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#475569">IDLE читает файл и показывает результат в окне Python Shell</text>
                </svg>
-               <div class="fig-cap">Рис. 1. Файл с кодом → интерпретатор Python → результат</div>
+               <div class="fig-cap">Рис. 1. Файл с кодом → интерпретатор Python 3 → результат в окне IDLE</div>
              </div>
 
-             <p><b>Интерпретатор</b> — это программа, которая выполняет код. В Astra Linux команда для него обычно называется <code class="inline">python3</code> (именно с тройкой).</p>`
+             <p><b>IDLE</b> — это графическая среда для работы с Python. В ней есть два главных окна: <b>Python Shell</b> (там выполняются команды и появляется результат) и <b>редактор</b> (там мы пишем программу и сохраняем её в файл).</p>`
     },
     {
-      title: "⌨️ Открываем терминал в Astra Linux",
-      body: `<p><b>Astra Linux</b> — российская операционная система на основе Linux. На школьных компьютерах она встречается всё чаще. Python работает в ней так же, как в других Linux-системах.</p>
-             <p><b>Способ 1, самый быстрый:</b> нажмите <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd>.</p>
-             <p><b>Способ 2:</b> откройте меню → <b>Системные</b> → <b>Терминал</b>. В разных версиях Astra Linux названия могут немного отличаться: «Терминал», «Konsole», «XTerm».</p>
+      title: "🪟 Открываем IDLE в Astra Linux",
+      body: `<p><b>Astra Linux</b> — российская операционная система на основе Linux. На школьных компьютерах она встречается всё чаще. Python и графическая среда IDLE запускаются из обычного меню — никаких сложных команд вводить не нужно.</p>
+
+             <p><b>Как открыть IDLE:</b></p>
+             <ol>
+               <li>Нажмите кнопку <b>«Пуск»</b> в левом нижнем углу экрана.</li>
+               <li>Откройте раздел <b>«Образование»</b> или <b>«Разработка»</b> — название зависит от версии Astra Linux.</li>
+               <li>Выберите <b>IDLE (Python 3.x)</b>.</li>
+             </ol>
 
              <div class="fig">
-               <svg viewBox="0 0 640 360" role="img" aria-label="Меню Astra Linux с подсвеченным пунктом Терминал и подсказкой Ctrl Alt T">
+               <svg viewBox="0 0 640 360" role="img" aria-label="Меню Astra Linux: Пуск, раздел Образование или Разработка, пункт IDLE">
                  <rect x="4" y="4" width="632" height="352" rx="16" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
                  <rect x="18" y="18" width="604" height="324" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
 
                  <rect x="18" y="18" width="604" height="34" fill="#1e293b"/>
                  <circle cx="38" cy="35" r="8" fill="#3b82f6"/>
                  <text x="54" y="40" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#f8fafc">Astra Linux</text>
-                 <text x="560" y="40" font-family="Consolas, monospace" font-size="11" fill="#cbd5e1">12:00</text>
+                 <text x="566" y="40" font-family="Consolas, monospace" font-size="11" fill="#cbd5e1">12:00</text>
 
-                 <rect x="34" y="74" width="258" height="246" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+                 <rect x="34" y="74" width="270" height="246" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
                  <text x="52" y="102" font-family="Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#1e293b">Меню</text>
-                 <text x="236" y="102" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="16" fill="#94a3b8">×</text>
+                 <text x="286" y="102" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="16" fill="#94a3b8">×</text>
 
                  <text x="52" y="132" font-family="Segoe UI, sans-serif" font-size="13" fill="#334155">📚 Образование</text>
                  <text x="52" y="160" font-family="Segoe UI, sans-serif" font-size="13" fill="#334155">📝 Офис</text>
                  <text x="52" y="188" font-family="Segoe UI, sans-serif" font-size="13" fill="#334155">🌐 Интернет</text>
                  <text x="52" y="216" font-family="Segoe UI, sans-serif" font-size="13" fill="#334155">🎨 Графика</text>
 
-                 <text x="52" y="246" font-family="Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#94a3b8">СИСТЕМНЫЕ</text>
-                 <rect x="42" y="256" width="242" height="34" rx="8" fill="#3b82f6"/>
-                 <text x="56" y="278" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#ffffff">⌨️ Терминал</text>
-                 <text x="272" y="278" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="10" fill="#dbeafe">Ctrl+Alt+T</text>
+                 <text x="52" y="248" font-family="Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#94a3b8">РАЗРАБОТКА</text>
+                 <rect x="42" y="258" width="254" height="36" rx="8" fill="#3b82f6"/>
+                 <text x="56" y="281" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#ffffff">🪟 IDLE (Python 3.11)</text>
 
-                 <rect x="320" y="96" width="278" height="120" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
-                 <text x="338" y="126" font-family="Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#1e3a8a">Быстрый способ</text>
-                 <text x="338" y="152" font-family="Segoe UI, sans-serif" font-size="13" fill="#334155">Нажмите одновременно:</text>
-                 <g font-family="Segoe UI, sans-serif" font-size="12" font-weight="700">
-                   <rect x="338" y="166" width="52" height="28" rx="6" fill="#fff" stroke="#94a3b8"/>
-                   <text x="364" y="185" text-anchor="middle" fill="#334155">Ctrl</text>
-                   <text x="398" y="185" fill="#64748b">+</text>
-                   <rect x="410" y="166" width="46" height="28" rx="6" fill="#fff" stroke="#94a3b8"/>
-                   <text x="433" y="185" text-anchor="middle" fill="#334155">Alt</text>
-                   <text x="464" y="185" fill="#64748b">+</text>
-                   <rect x="476" y="166" width="34" height="28" rx="6" fill="#fff" stroke="#94a3b8"/>
-                   <text x="493" y="185" text-anchor="middle" fill="#334155">T</text>
-                 </g>
+                 <rect x="324" y="94" width="280" height="158" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
+                 <text x="342" y="122" font-family="Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#1e3a8a">Как открыть IDLE</text>
+                 <text x="342" y="148" font-family="Segoe UI, sans-serif" font-size="13" fill="#334155">1. Нажмите «Пуск»</text>
+                 <text x="342" y="172" font-family="Segoe UI, sans-serif" font-size="13" fill="#334155">2. Выберите «Образование»</text>
+                 <text x="342" y="194" font-family="Segoe UI, sans-serif" font-size="13" fill="#334155">или «Разработка»</text>
+                 <text x="342" y="218" font-family="Segoe UI, sans-serif" font-size="13" fill="#334155">3. Нажмите «IDLE»</text>
 
-                 <text x="338" y="242" font-family="Segoe UI, sans-serif" font-size="12" fill="#475569">Откроется чёрное окно с приглашением:</text>
-                 <rect x="338" y="252" width="242" height="42" rx="8" fill="#0f172a"/>
-                 <text x="352" y="278" font-family="Consolas, monospace" font-size="12" fill="#4ade80">student@astra:~$</text>
-                 <text x="470" y="278" font-family="Consolas, monospace" font-size="12" fill="#f8fafc">▌</text>
+                 <rect x="324" y="264" width="280" height="54" rx="10" fill="#ffffff" stroke="#cbd5e1"/>
+                 <text x="340" y="286" font-family="Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#334155">Python Shell</text>
+                 <text x="340" y="306" font-family="Consolas, monospace" font-size="13" font-weight="700" fill="#1d4ed8">&gt;&gt;&gt;</text>
+                 <text x="366" y="306" font-family="Segoe UI, sans-serif" font-size="12" fill="#64748b">Python ждёт команду</text>
                </svg>
-               <div class="fig-cap">Рис. 2. Терминал в Astra Linux можно открыть через меню или сочетанием клавиш</div>
+               <div class="fig-cap">Рис. 2. IDLE открывается из меню Astra Linux, как обычная программа</div>
              </div>
 
-             <p>Появится окно, в котором написано примерно так:</p>
-             <div class="term">
-               <div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">Терминал</span></div>
-               <div class="term-body">
-                 <div><span class="prompt">student@astra:~$</span> <span class="cursor">▌</span></div>
-               </div>
-             </div>
+             <p>Если пункта <b>IDLE</b> не видно, введите слово <b>IDLE</b> в строке поиска меню. Если и поиск не помог — <b>позовите учителя</b>: значит, на этом компьютере IDLE не установлен. Не пытайтесь устанавливать программы самостоятельно.</p>
+             <p>После запуска откроется окно <b>IDLE</b> с заголовком, например <code class="inline">IDLE (Python 3.11.2)</code>, и приглашением <code class="inline">&gt;&gt;&gt;</code>. Это и есть <b>Python Shell</b>.</p>
 
-             <p><b>Как читать приглашение:</b></p>
              <table class="fig-table">
-               <thead><tr><th>Часть строки</th><th>Что означает</th></tr></thead>
+               <thead><tr><th>Что видно в окне</th><th>Что это значит</th></tr></thead>
                <tbody>
-                 <tr><td><code>student</code></td><td>Имя пользователя, под которым вы вошли</td></tr>
-                 <tr><td><code>astra</code></td><td>Имя компьютера</td></tr>
-                 <tr><td><code>~</code></td><td>Домашняя папка пользователя</td></tr>
-                 <tr><td><code>$</code></td><td>Терминал готов выполнить команду</td></tr>
+                 <tr><td>Заголовок окна <code>IDLE (Python 3.x)</code></td><td>IDLE запущен, версия Python видна прямо в заголовке</td></tr>
+                 <tr><td>Строка меню <code>File</code>, <code>Edit</code>, <code>Run</code>…</td><td>Через неё создают файлы, сохраняют и запускают программы</td></tr>
+                 <tr><td>Приглашение <code>&gt;&gt;&gt;</code></td><td>Python готов выполнить команду</td></tr>
                </tbody>
              </table>
 
-             <p>Саму строку <code class="inline">student@astra:~$</code> набирать не нужно — это подсказка. Вы пишете только команду и нажимаете <kbd>Enter</kbd>.</p>
-             <p class="note">⚠️ В терминале копирование — <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>, вставка — <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>. Привычное <kbd>Ctrl</kbd>+<kbd>C</kbd> здесь <b>прерывает</b> команду, а не копирует.</p>`
+             <p class="note blue">💡 В разных версиях Astra Linux меню может называться «Образование», «Разработка» или «Программирование». Ищите пункт со словом <b>IDLE</b>.</p>`
     },
     {
-      title: "✅ Проверяем, установлен ли Python",
-      body: `<p>Первая команда — проверка версии. Наберите в терминале:</p>
-             <div class="term">
-               <div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">Терминал</span></div>
-               <div class="term-body">
-                 <div><span class="prompt">student@astra:~$</span> <span class="cmd">python3 --version</span></div>
-                 <div class="out">Python 3.11.2</div>
-                 <div><span class="prompt">student@astra:~$</span> <span class="cursor">▌</span></div>
-               </div>
-             </div>
+      title: "💬 Python Shell: первый диалог с Python",
+      body: `<p><b>Python Shell</b> — это окно, в котором команды выполняются сразу после нажатия <kbd>Enter</kbd>. Здесь удобно экспериментировать и проверять небольшие примеры.</p>
+             <p>Найдите приглашение <code class="inline">&gt;&gt;&gt;</code> и попробуйте первые команды:</p>
 
-             <p>Число может быть другим: <code class="inline">3.9.2</code>, <code class="inline">3.10.8</code>, <code class="inline">3.12.1</code> — это нормально. Главное, что версия начинается с <b>3</b>.</p>
-             <p>Если в ответ появилось сообщение об ошибке:</p>
-             <div class="term">
-               <div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">Терминал</span></div>
-               <div class="term-body">
-                 <div><span class="prompt">student@astra:~$</span> <span class="cmd">python3 --version</span></div>
-                 <div class="err">bash: python3: command not found</div>
-               </div>
-             </div>
-             <p class="note">⚠️ <b>Command not found</b> означает, что Python не установлен или команда написана с ошибкой. Проверьте, что набрано <code class="inline">python3</code> (латиницей, с тройкой). Если не помогло — <b>позовите учителя</b>. Не устанавливайте программы самостоятельно через <code class="inline">sudo</code>.</p>
-
-             <details class="answer">
-               <summary>Для учителя: если Python действительно не установлен</summary>
-               <p>В Astra Linux пакет ставится командами <code class="inline">sudo apt update</code> и <code class="inline">sudo apt install python3</code>. Для работы в графическом редакторе IDLE может понадобиться пакет <code class="inline">idle3</code>. Устанавливать ПО на школьных компьютерах должен администратор.</p>
-             </details>
-
-             <p class="note blue">💡 На Windows команда обычно называется <code class="inline">python</code>, а в Astra Linux и других Linux-системах — <code class="inline">python3</code>. Если написать <code class="inline">python</code> в Linux, система может ответить «command not found».</p>`
-    },
-    {
-      title: "💬 Первый запуск: интерактивный режим",
-      body: `<p>У Python есть два режима работы: <b>интерактивный</b> (команды выполняются сразу) и <b>файловый</b> (сначала пишем программу, потом запускаем).</p>
-             <p>Введите <code class="inline">python3</code> без имени файла и нажмите <kbd>Enter</kbd>. Появится приглашение <code class="inline">&gt;&gt;&gt;</code> — значит, Python запущен и ждёт команду.</p>
-
-             <div class="term">
-               <div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">Терминал — интерактивный режим Python</span></div>
-               <div class="term-body">
-                 <div><span class="prompt">student@astra:~$</span> <span class="cmd">python3</span></div>
-                 <div class="out">Python 3.11.2 (main, ...) [GCC ...] on linux</div>
-                 <div class="out">Type "help", "copyright", "credits" or "license" for more information.</div>
-                 <div><span class="ok">&gt;&gt;&gt;</span> <span class="cmd">print("Привет, школа!")</span></div>
+             <div class="idle">
+               <div class="idle-bar"><span class="idle-dot r"></span><span class="idle-dot y"></span><span class="idle-dot g"></span><span class="idle-title">IDLE (Python 3.11.2) — Python Shell</span></div>
+               <div class="idle-menu"><span>File</span><span>Edit</span><span>Shell</span><span>Debug</span><span>Options</span><span>Window</span><span>Help</span></div>
+               <div class="idle-body">
+                 <div><span class="prompt">&gt;&gt;&gt;</span> <span class="cmd">print("Привет, школа!")</span></div>
                  <div class="out">Привет, школа!</div>
-                 <div><span class="ok">&gt;&gt;&gt;</span> <span class="cmd">2 + 2</span></div>
+                 <div><span class="prompt">&gt;&gt;&gt;</span> <span class="cmd">2 + 2</span></div>
                  <div class="out">4</div>
-                 <div><span class="ok">&gt;&gt;&gt;</span> <span class="cmd">2 ** 10</span></div>
+                 <div><span class="prompt">&gt;&gt;&gt;</span> <span class="cmd">2 ** 10</span></div>
                  <div class="out">1024</div>
-                 <div><span class="ok">&gt;&gt;&gt;</span> <span class="cmd">exit()</span></div>
-                 <div><span class="prompt">student@astra:~$</span> <span class="cursor">▌</span></div>
+                 <div><span class="prompt">&gt;&gt;&gt;</span> <span class="cmd">print("Мне нравится Python!")</span></div>
+                 <div class="out">Мне нравится Python!</div>
                </div>
              </div>
 
@@ -488,136 +463,200 @@ const LESSON_DATA = {
                <li>текст заключается в обычные двойные кавычки: <code class="inline">"Привет"</code>;</li>
                <li>числа пишутся без кавычек: <code class="inline">2 + 2</code>;</li>
                <li><code class="inline">**</code> — возведение в степень: <code class="inline">2 ** 10</code> — это 2 в десятой степени;</li>
-               <li><code class="inline">exit()</code> или <kbd>Ctrl</kbd>+<kbd>D</kbd> — выход из Python.</li>
+               <li>результат появляется сразу под командой.</li>
              </ul>
 
-             <p class="note blue">💡 В интерактивном режиме программа <b>не сохраняется</b>. Он удобен для экспериментов, но настоящие программы пишут в файле — сейчас научимся.</p>`
+             <p><b>Как выйти из IDLE:</b> выберите в меню <b>File → Exit</b> или закройте окно кнопкой <b>×</b>.</p>
+
+             <p class="note blue">💡 В Python Shell команды <b>не сохраняются</b> в файл. Shell удобен для экспериментов, но настоящие программы пишут в редакторе — сейчас научимся.</p>`
     },
     {
-      title: "📄 Первая программа в файле",
-      body: `<p>Создадим папку для программ и файл <code class="inline">hello.py</code>. В терминале выполните по очереди:</p>
+      title: "📄 Создаём первую программу и сохраняем её на Рабочий стол",
+      body: `<p>В окне IDLE выберите <b>File → New File</b> (или нажмите <kbd>Ctrl</kbd>+<kbd>N</kbd>). Откроется <b>редактор</b> — окно, в котором мы напишем программу.</p>
+             <p>Наберите две строки:</p>
 
-             <div class="term">
-               <div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">Терминал</span></div>
-               <div class="term-body">
-                 <div><span class="prompt">student@astra:~$</span> <span class="cmd">mkdir ~/python</span></div>
-                 <div><span class="prompt">student@astra:~$</span> <span class="cmd">cd ~/python</span></div>
-                 <div><span class="prompt">student@astra:~/python$</span> <span class="cmd">nano hello.py</span></div>
+             <div class="idle idle-editor">
+               <div class="idle-bar"><span class="idle-dot r"></span><span class="idle-dot y"></span><span class="idle-dot g"></span><span class="idle-title">hello.py — IDLE Editor</span></div>
+               <div class="idle-menu"><span>File</span><span>Edit</span><span>Format</span><span>Run</span><span>Options</span><span>Window</span><span>Help</span></div>
+               <div class="idle-body">
+                 <div><span class="kw">print</span>(<span class="str">"Привет, я знаю Python!"</span>)</div>
+                 <div><span class="kw">print</span>(<span class="str">"Это моя первая программа."</span>)</div>
                </div>
              </div>
 
-             <p>Откроется простой текстовый редактор <b>nano</b>. Наберите две строки:</p>
-             <pre class="code"><span class="k">print</span>(<span class="s">"Привет, я знаю Python!"</span>)
-<span class="k">print</span>(<span class="s">"Это моя первая программа."</span>)</pre>
-
-             <p><b>Сохранить:</b> <kbd>Ctrl</kbd>+<kbd>O</kbd>, затем <kbd>Enter</kbd>. <b>Выйти:</b> <kbd>Ctrl</kbd>+<kbd>X</kbd>.</p>
-             <p>Теперь запустите файл:</p>
-
-             <div class="term">
-               <div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">Терминал</span></div>
-               <div class="term-body">
-                 <div><span class="prompt">student@astra:~/python$</span> <span class="cmd">python3 hello.py</span></div>
-                 <div class="out">Привет, я знаю Python!</div>
-                 <div class="out">Это моя первая программа.</div>
-                 <div><span class="prompt">student@astra:~/python$</span> <span class="cursor">▌</span></div>
-               </div>
+             <p><b>Теперь сохраним файл по правилу урока:</b></p>
+             <div class="path-flow">
+               <div class="path-step">🖥️ Рабочий стол<small>левая панель окна сохранения</small></div>
+               <div class="path-arrow">→</div>
+               <div class="path-step">📁 Фамилия Класс<small>например, «Иванов 7А»</small></div>
+               <div class="path-arrow">→</div>
+               <div class="path-step">📄 hello.py<small>имя файла программы</small></div>
              </div>
 
-             <div class="editor">
-               <div class="editor-bar">hello.py — так выглядит файл в текстовом редакторе</div>
-               <pre class="code"><span class="k">print</span>(<span class="s">"Привет, я знаю Python!"</span>)
-<span class="k">print</span>(<span class="s">"Это моя первая программа."</span>)</pre>
-             </div>
+             <ol>
+               <li>Нажмите <kbd>Ctrl</kbd>+<kbd>S</kbd> или выберите <b>File → Save</b>.</li>
+               <li>В левой панели окна сохранения нажмите <b>«Рабочий стол»</b>.</li>
+               <li>Нажмите кнопку <b>«Создать папку»</b> и назовите её <b>своей фамилией и классом</b>: например, <b>«Иванов 7А»</b>.</li>
+               <li>Откройте эту папку двойным щелчком.</li>
+               <li>В поле «Имя файла» напишите <code class="inline">hello.py</code>.</li>
+               <li>Нажмите <b>«Сохранить»</b>.</li>
+             </ol>
 
-             <p>Можно использовать и обычный текстовый редактор из меню Astra Linux. Главное — сохранить файл с именем <code class="inline">hello.py</code> и расширением <code class="inline">.py</code>.</p>
-             <p>Если файл находится в другой папке, укажите путь целиком:</p>
-             <pre class="code"><span class="k">python3</span> ~/python/hello.py</pre>
+             <p class="note pink">🔒 <b>Обязательное правило:</b> все файлы по Python сохраняем <b>только в свою папку на Рабочем столе</b>. Папка называется <b>«Фамилия Класс»</b>, например «Иванов 7А». Так учитель быстро найдёт вашу работу, а вы не потеряете файл среди чужих.</p>
 
-             <p class="note">⚠️ Имя файла лучше писать латинскими буквами, без пробелов: <code class="inline">hello.py</code>, <code class="inline">first.py</code>, <code class="inline">my_program.py</code>. Расширение <code class="inline">.py</code> обязательно.</p>
-             <p class="note blue">💡 Если вы запускаете файл из другой папки и видите <code class="inline">FileNotFoundError</code>, значит, Python не нашёл файл. Проверьте, где вы находитесь командой <code class="inline">pwd</code>, и посмотрите список файлов командой <code class="inline">ls</code>.</p>`
+             <p class="note">⚠️ Имя файла пишите латинскими буквами, без пробелов: <code class="inline">hello.py</code>, <code class="inline">first.py</code>, <code class="inline">my_program.py</code>. Расширение <code class="inline">.py</code> обязательно. В названии папки можно использовать русские буквы и класс.</p>
+
+             <p class="note green">✅ Если папка «Фамилия Класс» уже создана на Рабочем столе, просто откройте её и сохраните файл туда. Создавать новую папку каждый раз не нужно.</p>`
     },
     {
-      title: "🧭 Мини-навигация: где находится файл",
-      body: `<p>Чтобы запускать программы, полезно понимать, в какой папке вы находитесь. Вот пять команд, которых хватит для начала:</p>
+      title: "▶️ Запускаем программу клавишей F5",
+      body: `<p>Когда код набран и файл сохранён, запустим программу. В IDLE это делается клавишей <kbd>F5</kbd> или через меню <b>Run → Run Module</b>.</p>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 320" role="img" aria-label="Редактор IDLE с файлом hello.py запускается клавишей F5, результат появляется в окне Python Shell">
+                 <defs>
+                   <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                     <path d="M0,0 L10,5 L0,10 Z" fill="#3b82f6"/>
+                   </marker>
+                 </defs>
+                 <rect x="4" y="4" width="632" height="312" rx="16" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <rect x="20" y="40" width="350" height="230" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+                 <rect x="20" y="40" width="350" height="28" rx="12" fill="#e2e8f0"/>
+                 <rect x="20" y="54" width="350" height="14" fill="#e2e8f0"/>
+                 <text x="34" y="59" font-family="Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#334155">hello.py — IDLE Editor</text>
+
+                 <text x="34" y="86" font-family="Consolas, monospace" font-size="10" fill="#64748b">File   Edit   Format   Run   Options   Window</text>
+                 <line x1="28" y1="94" x2="362" y2="94" stroke="#e2e8f0" stroke-width="1.5"/>
+
+                 <text x="34" y="120" font-family="Consolas, monospace" font-size="10" fill="#94a3b8">1</text>
+                 <text x="54" y="120" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#c2410c">print</text>
+                 <text x="92" y="120" font-family="Consolas, monospace" font-size="11" fill="#0f172a">(</text>
+                 <text x="100" y="120" font-family="Consolas, monospace" font-size="11" fill="#15803d">"Привет, я знаю Python!"</text>
+                 <text x="262" y="120" font-family="Consolas, monospace" font-size="11" fill="#0f172a">)</text>
+
+                 <text x="34" y="144" font-family="Consolas, monospace" font-size="10" fill="#94a3b8">2</text>
+                 <text x="54" y="144" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#c2410c">print</text>
+                 <text x="92" y="144" font-family="Consolas, monospace" font-size="11" fill="#0f172a">(</text>
+                 <text x="100" y="144" font-family="Consolas, monospace" font-size="11" fill="#15803d">"Это моя первая программа."</text>
+                 <text x="286" y="144" font-family="Consolas, monospace" font-size="11" fill="#0f172a">)</text>
+
+                 <text x="34" y="196" font-family="Segoe UI, sans-serif" font-size="10" fill="#64748b">Файл сохранён в папке:</text>
+                 <text x="34" y="218" font-family="Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#1e3a8a">Рабочий стол → Иванов 7А → hello.py</text>
+                 <text x="34" y="240" font-family="Segoe UI, sans-serif" font-size="10" fill="#64748b">Папка с фамилией и классом</text>
+
+                 <rect x="390" y="218" width="58" height="38" rx="8" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/>
+                 <text x="419" y="243" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="16" font-weight="700" fill="#1e3a8a">F5</text>
+                 <text x="419" y="270" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="10" fill="#64748b">запуск</text>
+
+                 <line x1="376" y1="150" x2="424" y2="150" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow2)"/>
+
+                 <rect x="432" y="40" width="188" height="230" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+                 <rect x="432" y="40" width="188" height="28" rx="12" fill="#e2e8f0"/>
+                 <rect x="432" y="54" width="188" height="14" fill="#e2e8f0"/>
+                 <text x="446" y="59" font-family="Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#334155">IDLE — Python Shell</text>
+
+                 <text x="446" y="86" font-family="Consolas, monospace" font-size="10" fill="#94a3b8">RESTART: hello.py</text>
+                 <text x="446" y="112" font-family="Consolas, monospace" font-size="11" fill="#1d4ed8">Привет, я знаю Python!</text>
+                 <text x="446" y="132" font-family="Consolas, monospace" font-size="11" fill="#1d4ed8">Это моя первая программа.</text>
+                 <text x="446" y="160" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="#1d4ed8">&gt;&gt;&gt;</text>
+
+                 <text x="526" y="244" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#3b82f6">результат</text>
+                 <text x="526" y="260" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#3b82f6">после F5</text>
+
+                 <text x="320" y="300" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#475569">Код из редактора выполняется, а вывод появляется в Python Shell</text>
+               </svg>
+               <div class="fig-cap">Рис. 3. Нажали F5 — программа выполнилась, результат виден в окне Python Shell</div>
+             </div>
+
+             <p><b>Порядок работы с программой:</b></p>
+             <ol>
+               <li>Изменили код в редакторе.</li>
+               <li>Сохранили изменения: <kbd>Ctrl</kbd>+<kbd>S</kbd>.</li>
+               <li>Запустили программу: <kbd>F5</kbd>.</li>
+               <li>Посмотрели результат в окне <b>Python Shell</b>.</li>
+             </ol>
+
+             <p class="note blue">💡 Если при запуске IDLE спрашивает, сохранить ли файл, ответьте <b>«Сохранить»</b>. Программа запускается из сохранённого файла.</p>
+             <p class="note green">✅ Окно редактора и окно Python Shell можно переключать через меню <b>Window</b> или кнопками на панели задач. Не закрывайте Shell: именно там появляется результат.</p>`
+    },
+    {
+      title: "📁 Где найти свой файл и как открыть его снова",
+      body: `<p>Все файлы урока лежат в вашей папке на Рабочем столе. Найти её можно без команд — через обычный файловый менеджер.</p>
+
+             <div class="path-flow">
+               <div class="path-step">🖥️ Рабочий стол<small>ярлык на рабочем столе</small></div>
+               <div class="path-arrow">→</div>
+               <div class="path-step">📁 Фамилия Класс<small>ваша папка</small></div>
+               <div class="path-arrow">→</div>
+               <div class="path-step">📄 hello.py<small>файл программы</small></div>
+             </div>
 
              <table class="fig-table">
-               <thead><tr><th>Команда</th><th>Что делает</th><th>Пример</th></tr></thead>
+               <thead><tr><th>Что нужно</th><th>Как сделать</th></tr></thead>
                <tbody>
-                 <tr><td><code>pwd</code></td><td>Показывает, в какой папке вы находитесь</td><td><code>/home/student/python</code></td></tr>
-                 <tr><td><code>ls</code></td><td>Показывает файлы и папки рядом</td><td><code>hello.py  first.py</code></td></tr>
-                 <tr><td><code>cd python</code></td><td>Переходит в папку <code>python</code></td><td>Было <code>~</code>, стало <code>~/python</code></td></tr>
-                 <tr><td><code>cd ..</code></td><td>Возвращается на одну папку вверх</td><td>Из <code>~/python</code> в <code>~</code></td></tr>
-                 <tr><td><code>cd ~</code></td><td>Возвращает в домашнюю папку</td><td>В <code>/home/student</code></td></tr>
-                 <tr><td><code>mkdir python</code></td><td>Создаёт папку <code>python</code></td><td>Новая папка в текущей</td></tr>
-                 <tr><td><code>cat hello.py</code></td><td>Показывает содержимое файла</td><td>Текст программы на экране</td></tr>
+                 <tr><td>Открыть Рабочий стол</td><td>Нажмите на Рабочем столе папку или откройте файловый менеджер и выберите «Рабочий стол» в левой панели</td></tr>
+                 <tr><td>Найти свою папку</td><td>Найдите папку с надписью «Фамилия Класс», например «Иванов 7А»</td></tr>
+                 <tr><td>Открыть файл в IDLE</td><td>Щёлкните по <code>hello.py</code> правой кнопкой → «Открыть с помощью» → <b>IDLE</b></td></tr>
+                 <tr><td>Или открыть через IDLE</td><td>В IDLE выберите <b>File → Open</b>, найдите Рабочий стол → свою папку → <code>hello.py</code></td></tr>
+                 <tr><td>Сохранить изменения</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td></tr>
+                 <tr><td>Запустить снова</td><td><kbd>F5</kbd> или <b>Run → Run Module</b></td></tr>
                </tbody>
              </table>
 
-             <div class="term">
-               <div class="term-bar"><span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span><span class="term-title">Терминал — типичный сеанс</span></div>
-               <div class="term-body">
-                 <div><span class="prompt">student@astra:~$</span> <span class="cmd">pwd</span></div>
-                 <div class="out">/home/student</div>
-                 <div><span class="prompt">student@astra:~$</span> <span class="cmd">ls</span></div>
-                 <div class="out">Документы  Загрузки  python</div>
-                 <div><span class="prompt">student@astra:~$</span> <span class="cmd">cd python</span></div>
-                 <div><span class="prompt">student@astra:~/python$</span> <span class="cmd">ls</span></div>
-                 <div class="out">hello.py</div>
-                 <div><span class="prompt">student@astra:~/python$</span> <span class="cmd">python3 hello.py</span></div>
-                 <div class="out">Привет, я знаю Python!</div>
-                 <div class="out">Это моя первая программа.</div>
-               </div>
-             </div>
-
-             <p class="note">⚠️ Если в имени файла есть пробел, его нужно заключать в кавычки: <code class="inline">python3 "моя программа.py"</code>. Но лучше пробелов избегать — так проще.</p>
-             <p class="note pink">🔒 Не вводите команды <code class="inline">rm</code>, <code class="inline">sudo</code> и другие незнакомые команды без разрешения учителя. Удалить чужой файл или изменить систему можно одной строкой.</p>`
+             <p class="note pink">🔒 Не переименовывайте и не перемещайте папку с фамилией и классом. Если файл всё-таки потерялся, откройте IDLE и выберите <b>File → Open</b> — там можно найти нужную папку заново.</p>
+             <p class="note blue">💡 В названии папки достаточно фамилии и класса. Если в классе есть однофамильцы, добавьте имя: «Иванов Иван 7А».</p>`
     },
     {
-      title: "🚑 Типичные ошибки и как их читать",
-      body: `<p>Ошибка — это не провал, а подсказка. Python сам сообщает, что ему не понравилось. Научитесь читать сообщение — и половина проблем решится сама.</p>
+      title: "🚑 Ошибки в IDLE и как их читать",
+      body: `<p>Ошибка — это не провал, а подсказка. IDLE сам сообщает, что ему не понравилось: текст ошибки появляется <b>красным</b> в окне Python Shell или в отдельном окне <b>Syntax Error</b>.</p>
 
              <div class="fig">
-               <svg viewBox="0 0 640 300" role="img" aria-label="Разбор сообщения об ошибке: файл и строка, место ошибки, тип и объяснение">
-                 <rect x="4" y="4" width="632" height="292" rx="16" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
-                 <text x="26" y="34" font-family="Segoe UI, sans-serif" font-size="12" fill="#94a3b8">student@astra:~/python$ python3 hello.py</text>
-                 <text x="26" y="64" font-family="Consolas, monospace" font-size="13" fill="#e2e8f0">Traceback (most recent call last):</text>
-                 <text x="26" y="88" font-family="Consolas, monospace" font-size="13" fill="#e2e8f0">  File "hello.py", line 1, in &lt;module&gt;</text>
-                 <text x="26" y="112" font-family="Consolas, monospace" font-size="13" fill="#fca5a5">    print(«Привет!»)</text>
-                 <text x="58" y="132" font-family="Consolas, monospace" font-size="13" fill="#fca5a5">          ^</text>
-                 <text x="26" y="160" font-family="Consolas, monospace" font-size="13" font-weight="700" fill="#f87171">SyntaxError: invalid character '«' (U+00AB)</text>
+               <svg viewBox="0 0 640 300" role="img" aria-label="Окно IDLE с сообщением об ошибке: файл и строка, место ошибки, тип ошибки">
+                 <rect x="4" y="4" width="632" height="292" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+                 <rect x="4" y="4" width="632" height="30" rx="16" fill="#e2e8f0"/>
+                 <rect x="4" y="20" width="632" height="14" fill="#e2e8f0"/>
+                 <text x="20" y="24" font-family="Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#334155">IDLE — Python Shell</text>
 
-                 <line x1="300" y1="82" x2="420" y2="70" stroke="#3b82f6" stroke-width="2"/>
-                 <circle cx="300" cy="82" r="4" fill="#3b82f6"/>
-                 <rect x="424" y="52" width="190" height="34" rx="8" fill="#1e293b" stroke="#3b82f6"/>
-                 <text x="438" y="74" font-family="Segoe UI, sans-serif" font-size="12" fill="#bfdbfe">файл и номер строки</text>
+                 <text x="20" y="54" font-family="Consolas, monospace" font-size="10" fill="#64748b">File   Edit   Shell   Debug   Options   Window   Help</text>
+                 <line x1="12" y1="62" x2="628" y2="62" stroke="#e2e8f0" stroke-width="1.5"/>
 
-                 <line x1="300" y1="128" x2="420" y2="150" stroke="#f59e0b" stroke-width="2"/>
-                 <circle cx="300" cy="128" r="4" fill="#f59e0b"/>
-                 <rect x="424" y="132" width="190" height="34" rx="8" fill="#1e293b" stroke="#f59e0b"/>
-                 <text x="438" y="154" font-family="Segoe UI, sans-serif" font-size="12" fill="#fde68a">место ошибки</text>
+                 <text x="24" y="88" font-family="Consolas, monospace" font-size="11" fill="#94a3b8">================ RESTART: hello.py ================</text>
+                 <text x="24" y="114" font-family="Consolas, monospace" font-size="12" fill="#0f172a">Traceback (most recent call last):</text>
+                 <text x="24" y="138" font-family="Consolas, monospace" font-size="12" fill="#0f172a">  File "…/Иванов 7А/hello.py", line 1, in &lt;module&gt;</text>
+                 <text x="24" y="162" font-family="Consolas, monospace" font-size="12" fill="#dc2626">    print(«Привет!»)</text>
+                 <text x="70" y="180" font-family="Consolas, monospace" font-size="12" fill="#dc2626">          ^</text>
+                 <text x="24" y="208" font-family="Consolas, monospace" font-size="12" font-weight="700" fill="#dc2626">SyntaxError: invalid character '«' (U+00AB)</text>
 
-                 <line x1="300" y1="156" x2="420" y2="214" stroke="#ef4444" stroke-width="2"/>
-                 <circle cx="300" cy="156" r="4" fill="#ef4444"/>
-                 <rect x="424" y="196" width="190" height="52" rx="8" fill="#1e293b" stroke="#ef4444"/>
-                 <text x="438" y="218" font-family="Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#fca5a5">тип ошибки</text>
-                 <text x="438" y="236" font-family="Segoe UI, sans-serif" font-size="11" fill="#fecaca">и объяснение</text>
+                 <line x1="306" y1="134" x2="404" y2="112" stroke="#3b82f6" stroke-width="2"/>
+                 <circle cx="306" cy="134" r="4" fill="#3b82f6"/>
+                 <rect x="408" y="96" width="206" height="32" rx="8" fill="#eff6ff" stroke="#3b82f6"/>
+                 <text x="422" y="117" font-family="Segoe UI, sans-serif" font-size="12" font-weight="600" fill="#1e3a8a">файл и номер строки</text>
 
-                 <text x="26" y="276" font-family="Segoe UI, sans-serif" font-size="12" fill="#94a3b8">Читайте снизу вверх: последняя строка — самая важная</text>
+                 <line x1="306" y1="176" x2="404" y2="168" stroke="#f59e0b" stroke-width="2"/>
+                 <circle cx="306" cy="176" r="4" fill="#f59e0b"/>
+                 <rect x="408" y="152" width="206" height="32" rx="8" fill="#fffbeb" stroke="#f59e0b"/>
+                 <text x="422" y="173" font-family="Segoe UI, sans-serif" font-size="12" font-weight="600" fill="#78350f">место ошибки</text>
+
+                 <line x1="306" y1="204" x2="404" y2="218" stroke="#ef4444" stroke-width="2"/>
+                 <circle cx="306" cy="204" r="4" fill="#ef4444"/>
+                 <rect x="408" y="202" width="206" height="46" rx="8" fill="#fef2f2" stroke="#ef4444"/>
+                 <text x="422" y="222" font-family="Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#991b1b">тип ошибки</text>
+                 <text x="422" y="240" font-family="Segoe UI, sans-serif" font-size="11" fill="#b91c1c">и объяснение</text>
+
+                 <text x="24" y="266" font-family="Segoe UI, sans-serif" font-size="12" fill="#64748b">Читайте последнюю строку — там тип ошибки</text>
                </svg>
-               <div class="fig-cap">Рис. 3. Анатомия сообщения об ошибке: файл, строка, место и объяснение</div>
+               <div class="fig-cap">Рис. 4. Анатомия сообщения об ошибке в IDLE: файл, строка, место и объяснение</div>
              </div>
 
              <table class="fig-table">
                <thead><tr><th>Сообщение</th><th>Причина</th><th>Что делать</th></tr></thead>
                <tbody>
-                 <tr><td><code>python3: command not found</code></td><td>Python не установлен или опечатка в команде</td><td>Проверить написание, позвать учителя</td></tr>
-                 <tr><td><code>python: command not found</code></td><td>В Linux команда называется <code>python3</code></td><td>Писать <code>python3</code>, а не <code>python</code></td></tr>
                  <tr><td><code>SyntaxError: invalid character '«'</code></td><td>Русские кавычки «…» вместо обычных "…"</td><td>Заменить на английские двойные кавычки</td></tr>
                  <tr><td><code>SyntaxError: Missing parentheses in call to 'print'</code></td><td>Написано <code>print "Привет"</code> без скобок</td><td>Писать <code>print("Привет")</code></td></tr>
                  <tr><td><code>NameError: name 'prin' is not defined</code></td><td>Опечатка в имени команды</td><td>Проверить, что написано <code>print</code></td></tr>
                  <tr><td><code>IndentationError: unexpected indent</code></td><td>Лишний пробел в начале строки</td><td>Убрать пробел перед <code>print</code></td></tr>
-                 <tr><td><code>FileNotFoundError: ... 'hello.py'</code></td><td>Файл не найден: не та папка или имя</td><td>Проверить <code>pwd</code>, <code>ls</code>, имя файла</td></tr>
-                 <tr><td><code>Permission denied</code></td><td>Нет прав на запись в папку</td><td>Сохранять в домашнюю папку, позвать учителя</td></tr>
+                 <tr><td><code>SyntaxError: expected ':'</code></td><td>Забыли двоеточие после условия или цикла</td><td>Поставить двоеточие в конце строки</td></tr>
                </tbody>
              </table>
 
@@ -633,7 +672,8 @@ print("Привет!")</pre>
                <li>Прочитайте <b>последнюю строку</b> сообщения — там тип ошибки.</li>
                <li>Найдите <b>файл и номер строки</b>.</li>
                <li>Проверьте кавычки, скобки и опечатки в этой строке.</li>
-               <li>Сохраните файл (<kbd>Ctrl</kbd>+<kbd>O</kbd> в nano) и запустите снова.</li>
+               <li>Сохраните файл: <kbd>Ctrl</kbd>+<kbd>S</kbd>.</li>
+               <li>Запустите снова: <kbd>F5</kbd>.</li>
              </ol>
 
              <p class="note blue">💡 Программисты видят ошибки каждый день. Ошибка не значит «я не умею» — она значит «компьютер подсказывает, что поправить».</p>`
@@ -643,31 +683,32 @@ print("Привет!")</pre>
       body: `<p><b>Самое главное:</b></p>
              <ol>
                <li><b>Python</b> — язык программирования с коротким и понятным кодом.</li>
-               <li>В Astra Linux терминал открывается через <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd> или меню → Системные → Терминал.</li>
-               <li>Проверка версии: <code class="inline">python3 --version</code>.</li>
-               <li>Интерактивный режим: <code class="inline">python3</code>, приглашение <code class="inline">&gt;&gt;&gt;</code>, выход <code class="inline">exit()</code>.</li>
-               <li>Файл программы: <code class="inline">hello.py</code>, запуск: <code class="inline">python3 hello.py</code>.</li>
-               <li>Команды навигации: <code class="inline">pwd</code>, <code class="inline">ls</code>, <code class="inline">cd</code>, <code class="inline">mkdir</code>, <code class="inline">cat</code>.</li>
+               <li><b>IDLE</b> открывается из меню Astra Linux: «Пуск» → «Образование» или «Разработка» → IDLE.</li>
+               <li><b>Python Shell</b> — окно с приглашением <code class="inline">&gt;&gt;&gt;</code>, где команды выполняются сразу.</li>
+               <li>Новый файл создаётся через <b>File → New File</b> или <kbd>Ctrl</kbd>+<kbd>N</kbd>.</li>
+               <li>Файл программы сохраняется в папку <b>«Фамилия Класс»</b> на <b>Рабочем столе</b>, имя — <code class="inline">hello.py</code>.</li>
+               <li>Программа запускается клавишей <kbd>F5</kbd> или через <b>Run → Run Module</b>.</li>
                <li>Ошибку читают снизу вверх: тип, файл, строка, место.</li>
              </ol>
 
              <p><b>Чек-лист «Я умею»:</b></p>
              <ul class="checklist">
-               <li>открыть терминал в Astra Linux;</li>
-               <li>проверить, установлен ли Python;</li>
-               <li>запустить Python и выйти из него;</li>
-               <li>создать файл <code class="inline">hello.py</code> и запустить его;</li>
+               <li>открыть IDLE из меню Astra Linux;</li>
+               <li>выполнить команду в окне Python Shell;</li>
+               <li>создать файл через File → New File;</li>
+               <li>сохранить файл в папку «Фамилия Класс» на Рабочем столе;</li>
+               <li>запустить программу клавишей F5;</li>
                <li>объяснить, что означают <code class="inline">print</code>, кавычки и скобки;</li>
                <li>прочитать простое сообщение об ошибке и исправить код.</li>
              </ul>
 
              <details class="answer">
-               <summary>Проверь себя: чем отличается интерактивный режим от файла?</summary>
-               <p>В интерактивном режиме команда выполняется сразу после нажатия Enter и нигде не сохраняется. В файле программа хранится целиком, её можно изменить, сохранить и запустить снова.</p>
+               <summary>Проверь себя: чем отличается Python Shell от редактора?</summary>
+               <p>В Python Shell команда выполняется сразу после нажатия Enter и нигде не сохраняется. В редакторе программа хранится целиком: её можно изменить, сохранить в файл и запустить снова.</p>
              </details>
              <details class="answer">
-               <summary>Проверь себя: почему в Linux пишут python3, а не python?</summary>
-               <p>В современных Linux-системах интерпретатор Python 3 называется <code>python3</code>. Команды <code>python</code> может не быть или она может запускать старую версию Python 2.</p>
+               <summary>Проверь себя: почему файлы нужно сохранять в папку «Фамилия Класс»?</summary>
+               <p>Это ваша личная рабочая папка на Рабочем столе. Учитель быстро находит работу каждого ученика, а файлы разных учеников не перемешиваются.</p>
              </details>
              <details class="answer">
                <summary>Проверь себя: что выведет print("2 + 2")?</summary>
@@ -678,89 +719,91 @@ print("Привет!")</pre>
                <p>В последней строке сообщения — тип и объяснение. Выше указаны файл, номер строки и место, на которое указывает <code>^</code>.</p>
              </details>
 
-             <p class="note blue">🚀 <b>Что дальше:</b> на следующем уроке — переменные, <code class="inline">input()</code> и программы, которые разговаривают с пользователем. А пока потренируйтесь запускать готовые примеры и не бойтесь ошибок.</p>`
+             <p class="note blue">🚀 <b>Что дальше:</b> на следующем уроке — переменные, <code class="inline">input()</code> и программы, которые разговаривают с пользователем. А пока потренируйтесь открывать IDLE и запускать готовые примеры.</p>`
     }
   ],
 
   mindmap: {
-    center: "Python: первый запуск",
+    center: "Python: первая программа в IDLE",
     branches: [
-      { text: "Astra Linux", color: "#3b82f6",
-        children: ["Ctrl+Alt+T", "Меню → Терминал", "Приглашение в терминале"] },
-      { text: "Запуск", color: "#8b5cf6",
-        children: ["python3 --version", "Интерактивный режим", "Файл .py", "python3 hello.py"] },
-      { text: "Команды", color: "#22c55e",
-        children: ["pwd", "ls", "cd", "mkdir", "cat"] },
-      { text: "Первая программа", color: "#f59e0b",
-        children: ["print()", "Кавычки", "Скобки", "Имя файла"] },
+      { text: "Запуск IDLE", color: "#3b82f6",
+        children: ["Пуск", "Образование / Разработка", "Поиск в меню"] },
+      { text: "Python Shell", color: "#8b5cf6",
+        children: [">>>", "print()", "Вычисления", "File → Exit"] },
+      { text: "Файл", color: "#22c55e",
+        children: ["File → New File", "Ctrl+S", "hello.py", ".py"] },
+      { text: "Рабочий стол", color: "#f59e0b",
+        children: ["Папка «Фамилия Класс»", "hello.py", "Учитель найдёт работу"] },
+      { text: "Запуск", color: "#ef4444",
+        children: ["F5", "Run → Run Module", "Вывод в Shell"] },
       { text: "Ошибки", color: "#ec4899",
-        children: ["command not found", "SyntaxError", "NameError", "FileNotFoundError"] }
+        children: ["Красный текст", "SyntaxError", "NameError", "Последняя строка"] }
     ]
   },
 
   variants: {
     A: [
       { level:"easy", weight:1, type:"choice",
-        q:"Какая команда проверит, установлен ли Python 3 в Astra Linux?",
-        options:["<code>python --version</code>","<code>version python3</code>","<code>python3 --version</code>","<code>install python3</code>"],
-        answer:2, exp:"Команда python3 --version показывает версию Python 3. В Linux обычно используется именно python3." },
+        q:"Как открыть IDLE в Astra Linux?",
+        options:["Открыть браузер и найти Python","Нажать F5 на Рабочем столе","Через «Пуск» → «Образование» или «Разработка» → IDLE","Создать текстовый файл на Рабочем столе"],
+        answer:2, exp:"IDLE открывается из меню Astra Linux, как обычная программа." },
       { level:"easy", weight:1, type:"choice",
-        q:"Что означает приглашение <code>&gt;&gt;&gt;</code> в терминале?",
-        options:["Терминал закрыт","Python запущен и ждёт команду","В системе произошла ошибка","Нужно ввести пароль"],
-        answer:1, exp:"Три знака «больше» — приглашение интерактивного режима Python." },
+        q:"Что означает приглашение <code>&gt;&gt;&gt;</code> в окне Python Shell?",
+        options:["Python запущен и ждёт команду","Файл сохранён","В программе ошибка","IDLE закрыт"],
+        answer:0, exp:"Три знака «больше» — приглашение Python Shell. После него можно вводить команду." },
       { level:"medium", weight:2, type:"choice",
         q:"Что сделает команда <code>print(\"Привет\")</code>?",
-        options:["Создаст файл с именем Привет","Запустит Python заново","Удалит папку python","Выведет на экран слово Привет"],
+        options:["Создаст файл с именем Привет","Запустит IDLE заново","Удалит программу","Выведет на экран слово Привет"],
         answer:3, exp:"print выводит значение на экран. Текст в кавычках печатается как есть." },
       { level:"medium", weight:2, type:"choice",
-        q:"Как запустить файл <code>hello.py</code>, который лежит в текущей папке?",
-        options:["<code>hello.py</code>","<code>run hello.py</code>","<code>python3 hello.py</code>","<code>python3 --hello</code>"],
-        answer:2, exp:"Интерпретатору передают имя файла: python3 hello.py." },
+        q:"Какая клавиша запускает программу в IDLE?",
+        options:["<kbd>Ctrl</kbd>+<kbd>S</kbd>","<kbd>F5</kbd>","<kbd>Ctrl</kbd>+<kbd>N</kbd>","<kbd>Esc</kbd>"],
+        answer:1, exp:"F5 запускает программу. Ctrl+S сохраняет файл, Ctrl+N создаёт новый файл." },
       { level:"hard", weight:3, type:"text",
-        q:"Какая команда завершает интерактивный режим Python? (запишите без пробелов)",
-        answer:"exit()", exp:"Выход из Python — exit() или сочетание Ctrl+D. Скобки обязательны." }
+        q:"Бонус: что выведет <code>print(2 ** 3 + 1)</code>? (запишите только число)",
+        answer:"9", exp:"Сначала выполняется возведение в степень: 2 ** 3 = 8, затем сложение: 8 + 1 = 9." }
     ],
     B: [
       { level:"easy", weight:1, type:"choice",
-        q:"Как быстрее всего открыть терминал в Astra Linux?",
-        options:["Нажать Ctrl+C","Открыть калькулятор","Нажать F1","Нажать Ctrl+Alt+T"],
-        answer:3, exp:"Ctrl+Alt+T — стандартное сочетание для запуска терминала. Можно также найти его в меню." },
+        q:"Где в IDLE создают новый файл программы?",
+        options:["File → New File","Run → Run Module","Edit → Undo","Help → About IDLE"],
+        answer:0, exp:"Новый файл открывается через File → New File или сочетанием Ctrl+N." },
       { level:"easy", weight:1, type:"choice",
         q:"Какое расширение обычно у файлов с программами на Python?",
         options:[".txt",".py",".exe",".html"],
         answer:1, exp:"Программы на Python сохраняют в файлах с расширением .py." },
       { level:"medium", weight:2, type:"choice",
-        q:"Что выведет <code>2 + 3</code> в интерактивном режиме Python?",
-        options:["23","2 + 3","5","Ошибку"],
+        q:"Что выведет <code>2 + 3</code> в окне Python Shell?",
+        options:["23","Ошибку","5","2 + 3"],
         answer:2, exp:"Числа без кавычек складываются как числа: 2 + 3 = 5." },
       { level:"medium", weight:2, type:"choice",
-        q:"Терминал пишет <code>python3: command not found</code>. Что сделать?",
-        options:["Ввести команду ещё десять раз","Позвать учителя: Python не установлен","Переустановить Astra Linux","Заменить python3 на python"],
-        answer:1, exp:"Если команда не найдена, Python не установлен или допущена опечатка. Установку выполняет учитель или администратор." },
+        q:"Где появляется результат работы программы после нажатия F5?",
+        options:["В окне Python Shell","В папке «Документы»","В браузере","В меню «Пуск»"],
+        answer:0, exp:"Результат выполнения программы появляется в окне Python Shell." },
       { level:"hard", weight:3, type:"text",
-        q:"Что выведет <code>print(\"2\" + \"3\")</code>? (запишите только ответ)",
+        q:"Бонус: что выведет <code>print(\"2\" + \"3\")</code>? (запишите только ответ)",
         answer:"23", exp:"Кавычки превращают числа в строки, а строки склеиваются: «2» + «3» = «23»." }
     ],
     C: [
       { level:"easy", weight:1, type:"choice",
-        q:"Что такое интерпретатор Python?",
-        options:["Текстовый редактор","Файл с картинками","Программа, которая выполняет код Python","Команда выключения компьютера"],
-        answer:2, exp:"Интерпретатор читает код и сразу выполняет команды." },
+        q:"Что такое IDLE?",
+        options:["Текстовый редактор без Python","Браузер для интернета","Графическая среда для работы с Python","Игра для изучения клавиатуры"],
+        answer:2, exp:"IDLE — графическая среда Python: в ней есть Python Shell и редактор программ." },
       { level:"easy", weight:1, type:"choice",
-        q:"Куда перейдёт терминал по команде <code>cd ~/python</code>?",
-        options:["В корневую папку системы","Создаст новую папку","Запустит Python","В папку python внутри домашней папки"],
-        answer:3, exp:"cd меняет текущую папку, ~ обозначает домашнюю папку пользователя." },
+        q:"Где должна находиться папка с вашей фамилией и классом?",
+        options:["В корзине","На Рабочем столе","В браузере","В меню «Пуск»"],
+        answer:1, exp:"По правилу урока папка «Фамилия Класс» находится на Рабочем столе." },
       { level:"medium", weight:2, type:"choice",
         q:"Что выведет <code>print(\"2\" + \"3\")</code>?",
         options:["5","23","2 + 3","Ошибку"],
         answer:1, exp:"В кавычках записаны строки, поэтому они не складываются как числа, а соединяются." },
       { level:"medium", weight:2, type:"choice",
         q:"Почему <code>print(«Привет»)</code> не работает?",
-        options:["В Python нет команды print","Слово слишком длинное","Использованы русские кавычки, а нужны обычные","Нужна точка с запятой"],
-        answer:2, exp:"Python понимает только обычные прямые кавычки \"...\" или '...'. Русские «…» вызывают SyntaxError." },
+        options:["В Python нет команды print","Слово слишком длинное","Нужна точка с запятой","Использованы русские кавычки, а нужны обычные"],
+        answer:3, exp:"Python понимает только обычные прямые кавычки. Русские «…» вызывают SyntaxError." },
       { level:"hard", weight:3, type:"text",
-        q:"Бонус: что выведет <code>print(2 ** 3 + 1)</code>? (запишите только число)",
-        answer:"9", exp:"Сначала выполняется возведение в степень: 2 ** 3 = 8, затем сложение: 8 + 1 = 9." }
+        q:"Бонус: что выведет <code>print(2 ** 4)</code>? (запишите только число)",
+        answer:"16", exp:"** — возведение в степень: 2 в четвёртой степени равно 16." }
     ]
   },
 
@@ -774,29 +817,30 @@ print("Привет!")</pre>
     },
     {
       type: "choice",
-      q: "Какая команда покажет версию Python?",
-      options: ["<code>python3 hello.py</code>", "<code>ls</code>", "<code>pwd</code>", "<code>python3 --version</code>"],
-      answer: 3,
-      exp: "Версию показывает python3 --version."
+      q: "Как открыть IDLE в Astra Linux?",
+      options: ["Через «Пуск» → «Образование» или «Разработка» → IDLE", "Через корзину", "Кнопкой F5", "Через калькулятор"],
+      answer: 0,
+      exp: "IDLE открывается из меню Astra Linux, как обычная программа."
     },
     {
       type: "choice",
-      q: "Терминал пишет <code>command not found</code>. Что разумнее сделать?",
-      options: ["Вводить команду до победного", "Удалить файл hello.py", "Позвать учителя и проверить написание команды", "Выключить компьютер"],
-      answer: 2,
-      exp: "Command not found означает, что команда не найдена. Нужно проверить написание, а установку доверить учителю."
-    },
-    {
-      type: "text",
-      q: "Запишите команду запуска файла <code>hello.py</code>.",
-      answer: "python3 hello.py",
-      exp: "Сначала пишем python3, затем через пробел — имя файла."
-    },
-    {
-      type: "text",
-      q: "Что выведет <code>print(\"Привет\")</code>? (запишите без кавычек)",
-      answer: "Привет",
+      q: "Что выведет <code>print(\"Привет\")</code>?",
+      options: ["Привет", "print", "Ошибку", "Ничего"],
+      answer: 0,
       exp: "print выводит текст без кавычек: Привет."
+    },
+    {
+      type: "text",
+      q: "Какая клавиша запускает программу в IDLE? (запишите обозначение)",
+      answer: "F5",
+      exp: "Программа в IDLE запускается клавишей F5 или через Run → Run Module."
+    },
+    {
+      type: "choice",
+      q: "Куда нужно сохранять файлы ученика?",
+      options: ["В папку с фамилией и классом на Рабочем столе", "В корень диска", "В корзину", "В папку программы IDLE"],
+      answer: 0,
+      exp: "Все файлы урока сохраняются в личную папку «Фамилия Класс» на Рабочем столе."
     },
     {
       type: "text",
@@ -808,42 +852,45 @@ print("Привет!")</pre>
 
   solutions: [
     {
-      title: "Задача 1. Проверка версии Python",
-      task: "Вы открыли терминал в Astra Linux. Проверьте, установлен ли Python 3, и объясните ответ системы.",
+      title: "Задача 1. Открываем IDLE",
+      task: "Откройте IDLE в Astra Linux и найдите окно Python Shell. Объясните, как вы это сделали.",
       template: [
-        "1. Открываем терминал: <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd> или меню → Системные → Терминал.",
-        "2. Набираем команду <code>python3 --version</code> и нажимаем Enter.",
-        "3. Если появилось <code>Python 3.x.x</code> — интерпретатор установлен.",
-        "4. Если появилось <code>command not found</code> — проверяем написание и зовём учителя."
+        "1. Нажимаем «Пуск» в левом нижнем углу экрана.",
+        "2. Открываем раздел «Образование» или «Разработка».",
+        "3. Выбираем <b>IDLE (Python 3.x)</b>.",
+        "4. Появляется окно с заголовком <code>IDLE (Python 3.x)</code> и приглашением <code>&gt;&gt;&gt;</code>.",
+        "5. Если пункта нет — ищем IDLE в поиске меню и зовём учителя."
       ],
-      answer: "python3 --version. Ответ Python 3.x.x означает, что Python установлен; command not found — не установлен.",
-      hint: "Команда состоит из имени программы python3 и ключа --version."
+      answer: "Нужно открыть меню «Пуск» → «Образование» или «Разработка» → IDLE. Приглашение >>> означает, что Python готов к работе.",
+      hint: "IDLE — обычная программа в меню, а не файл на Рабочем столе."
     },
     {
-      title: "Задача 2. Интерактивный режим",
-      task: "Запустите Python без файла и выведите строку «Привет, Python!».",
+      title: "Задача 2. Первый диалог в Python Shell",
+      task: "Выведите в окне Python Shell строку «Привет, Python!» и посчитайте 2 + 2.",
       template: [
-        "1. В терминале вводим <code>python3</code> и нажимаем Enter.",
-        "2. Появляется приглашение <code>&gt;&gt;&gt;</code> — Python ждёт команду.",
-        "3. Пишем <code>print(\"Привет, Python!\")</code> и нажимаем Enter.",
-        "4. Видим результат <code>Привет, Python!</code>.",
-        "5. Выходим командой <code>exit()</code> или сочетанием Ctrl+D."
+        "1. Открываем IDLE и находим приглашение <code>&gt;&gt;&gt;</code>.",
+        "2. Пишем <code>print(\"Привет, Python!\")</code> и нажимаем Enter.",
+        "3. Видим результат <code>Привет, Python!</code>.",
+        "4. Пишем <code>2 + 2</code> и нажимаем Enter — получаем <code>4</code>.",
+        "5. Выходим через <b>File → Exit</b>."
       ],
-      answer: "Привет, Python!",
+      answer: "Привет, Python! и 4. Команды в Shell выполняются сразу и не сохраняются в файл.",
       hint: "Текст обязательно заключается в обычные двойные кавычки, а команда print — в скобки."
     },
     {
       title: "Задача 3. Первая программа в файле",
-      task: "Создайте файл hello.py с двумя строками вывода и запустите его.",
+      task: "Создайте файл hello.py с двумя строками вывода, сохраните его в папку «Фамилия Класс» на Рабочем столе и запустите.",
       template: [
-        "1. Создаём папку: <code>mkdir ~/python</code>, заходим в неё: <code>cd ~/python</code>.",
-        "2. Открываем редактор: <code>nano hello.py</code>.",
-        "3. Пишем две строки: <code>print(\"Привет, я знаю Python!\")</code> и <code>print(\"Это моя первая программа.\")</code>.",
-        "4. Сохраняем: Ctrl+O, Enter. Выходим: Ctrl+X.",
-        "5. Запускаем: <code>python3 hello.py</code>."
+        "1. В IDLE выбираем <b>File → New File</b> (Ctrl+N).",
+        "2. Пишем две строки: <code>print(\"Привет, я знаю Python!\")</code> и <code>print(\"Это моя первая программа.\")</code>.",
+        "3. Нажимаем <b>Ctrl+S</b>.",
+        "4. В окне сохранения выбираем <b>«Рабочий стол»</b>.",
+        "5. Создаём папку <b>«Фамилия Класс»</b>, например «Иванов 7А», и открываем её.",
+        "6. Пишем имя файла <code>hello.py</code> и нажимаем «Сохранить».",
+        "7. Запускаем программу клавишей <b>F5</b>."
       ],
-      answer: "Файл hello.py с двумя командами print запускается командой python3 hello.py и выводит две строки.",
-      hint: "Файл должен лежать в той папке, из которой вы запускаете команду, либо укажите путь целиком."
+      answer: "Файл hello.py лежит в папке «Фамилия Класс» на Рабочем столе. После F5 в Python Shell появляются две строки: «Привет, я знаю Python!» и «Это моя первая программа.»",
+      hint: "Папка должна быть на Рабочем столе и называться фамилией и классом. Имя файла — hello.py."
     },
     {
       title: "Задача 4. Найдите ошибку в коде",
@@ -853,7 +900,7 @@ print("Привет!")</pre>
         "2. Понимаем: использованы русские кавычки «…».",
         "3. Python понимает только обычные прямые кавычки: <code>\"…\"</code> или <code>'…'</code>.",
         "4. Исправляем: <code>print(\"Привет!\")</code>.",
-        "5. Сохраняем файл и запускаем снова."
+        "5. Сохраняем файл (Ctrl+S) и запускаем снова (F5)."
       ],
       answer: "print(\"Привет!\") — нужно заменить русские кавычки на обычные двойные.",
       hint: "Посмотрите на форму кавычек: «ёлочки» — русские, \"прямые\" — английские."
@@ -885,7 +932,7 @@ print("Привет!")</pre>
     var student = Account.currentStudent();
     if (student && student.class) {
       LESSON_DATA.className = student.class;
-      LESSON_DATA.subtitle = student.class + ' · Astra Linux · Первая программа';
+      LESSON_DATA.subtitle = student.class + ' · Astra Linux · Графическая среда IDLE';
     }
   })();
 </script>
