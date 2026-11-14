@@ -3,146 +3,358 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Практическая работа · Текст и компьютер — 5 класс</title>
+<title>Практическая работа №1 · Текст как форма представления информации — 5 класс</title>
 <link rel="stylesheet" href="../shared/style.css">
 <style>
-  .practice-wrap{max-width:900px;margin:24px auto;padding:0 20px;}
+  .practice-wrap{max-width:920px;margin:0 auto;padding:44px 20px 64px;}
 
   .practice-header{
     background:linear-gradient(135deg,#eff6ff,#fdf4ff,#f0fdf4);
-    border-radius:20px;padding:28px;margin-bottom:24px;
+    border-radius:22px;padding:30px 26px;margin-bottom:24px;
     border:2px solid #c7d2fe;text-align:center;
+    box-shadow:0 10px 30px rgba(59,130,246,.10);
   }
   .practice-header h1{
-    margin:0 0 8px;font-size:1.8rem;
+    margin:0 0 6px;font-size:1.85rem;line-height:1.25;
     background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899);
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
-  .practice-header .meta{color:#64748b;font-size:.95rem;}
+  .practice-header .task-title{
+    font-size:1.2rem;font-weight:800;color:#1e293b;
+    margin:6px auto 10px;max-width:620px;line-height:1.4;
+  }
+  .practice-header .lead{
+    margin:12px auto 0;max-width:640px;color:#334155;
+    font-size:.98rem;line-height:1.6;
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:5px;
+    background:#fff;border:1px solid #cbd5e1;border-radius:20px;
+    padding:6px 12px;font-size:.8rem;font-weight:600;color:#334155;
+  }
+  .chip.blue{background:#eff6ff;border-color:#93c5fd;color:#1e40af;}
+  .chip.green{background:#f0fdf4;border-color:#86efac;color:#166534;}
+  .chip.pink{background:#fdf2f8;border-color:#f9a8d4;color:#9d174d;}
+
+  .toc{
+    display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    margin:0 0 24px;
+  }
+  .toc a{
+    display:flex;align-items:center;gap:10px;text-decoration:none;
+    background:#fff;border:2px solid #e2e8f0;border-radius:14px;
+    padding:12px 14px;color:#1e293b;font-weight:700;font-size:.9rem;
+    transition:.2s;
+  }
+  .toc a:hover{border-color:#3b82f6;background:#eff6ff;transform:translateY(-2px);}
+  .toc .toc-letter{
+    width:32px;height:32px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;
+    font-size:.95rem;font-weight:900;
+  }
+
+  .stage{
+    display:flex;align-items:center;gap:12px;margin:30px 0 16px;
+    padding:12px 18px;border-radius:14px;
+    background:linear-gradient(90deg,#1e40af,#3b82f6);
+    color:#fff;font-weight:800;font-size:1.05rem;
+    box-shadow:0 6px 18px rgba(59,130,246,.25);
+  }
+  .stage .stage-letter{
+    width:34px;height:34px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    background:#fff;color:#1e40af;font-size:1.05rem;font-weight:900;
+  }
+  .stage small{display:block;font-weight:500;font-size:.78rem;opacity:.9;margin-top:2px;}
 
   .step{
-    background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;
-    box-shadow:0 6px 20px rgba(59,130,246,.1);border:1px solid #e2e8f0;
+    background:#fff;border-radius:18px;padding:24px;margin-bottom:18px;
+    box-shadow:0 6px 20px rgba(59,130,246,.08);border:1px solid #e2e8f0;
+    scroll-margin-top:90px;
   }
   .step-num{
-    display:inline-block;width:42px;height:42px;line-height:42px;
-    text-align:center;border-radius:50%;font-weight:900;font-size:1.2rem;
+    display:inline-flex;align-items:center;justify-content:center;
+    width:42px;height:42px;border-radius:50%;font-weight:900;font-size:1.15rem;
     background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;
-    margin-right:12px;vertical-align:middle;
+    margin-right:10px;vertical-align:middle;flex:none;
   }
-  .step h2{display:inline-block;vertical-align:middle;margin:0 0 12px;font-size:1.25rem;color:#1e293b;}
-
-  .step p{margin:10px 0;line-height:1.6;color:#334155;}
-  .step ul, .step ol{margin:10px 0;padding-left:26px;line-height:1.7;color:#334155;}
+  .step h2{
+    display:inline-block;vertical-align:middle;margin:0 0 12px;
+    font-size:1.22rem;color:#1e293b;line-height:1.35;
+  }
+  .step h3{margin:22px 0 8px;font-size:1rem;color:#1e40af;}
+  .step p{margin:10px 0;line-height:1.65;color:#334155;}
+  .step ul,.step ol{margin:10px 0;padding-left:26px;line-height:1.7;color:#334155;}
   .step li{margin:6px 0;}
+  .step li::marker{color:#3b82f6;font-weight:700;}
 
-  .callout{
-    border-radius:12px;padding:14px 18px;margin:14px 0;
-    font-size:.95rem;line-height:1.5;
-  }
+  .callout{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:.95rem;line-height:1.55;}
   .callout.tip{background:#eff6ff;border-left:4px solid #3b82f6;color:#1e40af;}
   .callout.warn{background:#fffbeb;border-left:4px solid #f59e0b;color:#92400e;}
-  .callout.ok{background:#f0fdf4;border-left:4px solid #22c55e;color:#15803d;}
+  .callout.ok{background:#f0fdf4;border-left:4px solid #22c55e;color:#14532d;}
+  .callout.pink{background:#fdf2f8;border-left:4px solid #ec4899;color:#831843;}
+  .callout b{font-weight:800;}
 
   .kbd{
     display:inline-block;padding:2px 8px;border-radius:6px;
-    background:#f1f5f9;border:1px solid #cbd5e1;border-bottom-width:2px;
-    font-family:monospace;font-size:.9rem;color:#1e293b;
+    background:#f1f5f9;border:1px solid #cbd5e1;border-bottom-width:3px;
+    font-family:Consolas,monospace;font-size:.88rem;color:#1e293b;
+    white-space:nowrap;
+  }
+  code.inline{background:#f1f5f9;padding:1px 6px;border-radius:6px;
+    font-family:Consolas,monospace;font-size:.9em;color:#0f172a;}
+
+  .path-flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin:18px 0;}
+  .path-step{
+    background:#fff;border:2px solid #93c5fd;border-radius:12px;
+    padding:10px 13px;font-size:.86rem;font-weight:700;color:#1e3a8a;text-align:center;
+  }
+  .path-step small{display:block;font-weight:400;font-size:.72rem;color:#64748b;margin-top:2px;}
+  .path-arrow{color:#3b82f6;font-size:1.2rem;font-weight:900;}
+
+  .fig{
+    margin:18px 0;padding:14px;border-radius:16px;
+    background:linear-gradient(135deg,#f8fafc,#eff6ff);
+    border:1px solid #dbeafe;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  }
+  .fig-scroll{min-width:560px;}
+  .fig-cap{text-align:center;font-size:.82rem;color:#64748b;margin-top:10px;line-height:1.45;}
+  .fig-cap b{color:#1e40af;}
+
+  .num-badge{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:20px;height:20px;border-radius:50%;flex:none;
+    background:#2563eb;color:#fff;font-size:.68rem;font-weight:800;
+    font-family:'Segoe UI',sans-serif;line-height:1;margin-right:5px;
   }
 
-  /* Визуальные схемы */
-  .visual{
-    background:#f8fafc;border-radius:14px;padding:20px;margin:16px 0;
-    text-align:center;border:2px dashed #cbd5e1;
-  }
-  .visual .caption{font-size:.85rem;color:#64748b;margin-top:10px;}
+  /* ---------- Макет файлового менеджера ---------- */
+  .fm{background:#fff;border:1px solid #cbd5e1;border-radius:10px;overflow:visible;
+    box-shadow:0 8px 24px rgba(15,23,42,.12);font-family:'Segoe UI',sans-serif;}
+  .fm-title{display:flex;justify-content:space-between;align-items:center;
+    background:#e8eef6;padding:7px 10px;font-size:.76rem;font-weight:700;color:#1e293b;
+    border-radius:10px 10px 0 0;border-bottom:1px solid #cbd5e1;}
+  .fm-winbtns{display:flex;gap:10px;color:#64748b;font-weight:400;}
+  .fm-toolbar{display:flex;align-items:center;gap:7px;padding:6px 10px;
+    background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.78rem;color:#475569;}
+  .fm-path{flex:1;background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:3px 8px;}
+  .fm-body{display:grid;grid-template-columns:150px 1fr;min-height:238px;}
+  .fm-side{background:#f1f5f9;border-right:1px solid #e2e8f0;padding:8px;border-radius:0 0 0 10px;}
+  .fm-side div{padding:6px 8px;border-radius:6px;font-size:.76rem;color:#334155;}
+  .fm-side .active{background:#dbeafe;color:#1d4ed8;font-weight:700;}
+  .fm-main{position:relative;display:flex;flex-wrap:wrap;gap:12px;padding:14px;align-content:flex-start;}
+  .fm-folder{width:92px;text-align:center;font-size:.72rem;color:#334155;padding:8px 4px;border-radius:8px;border:2px solid transparent;}
+  .fm-folder .ico{font-size:2rem;display:block;line-height:1.1;}
+  .fm-folder.selected{background:#dbeafe;border-color:#3b82f6;}
+  .fm-menu{position:absolute;right:10px;top:10px;width:178px;background:#fff;
+    border:1px solid #cbd5e1;border-radius:8px;box-shadow:0 12px 26px rgba(15,23,42,.20);
+    font-size:.75rem;z-index:3;}
+  .fm-menu > div{padding:7px 10px;display:flex;justify-content:space-between;}
+  .fm-menu .hl{background:#dbeafe;color:#1d4ed8;font-weight:700;}
+  .fm-menu .sep{height:1px;background:#e2e8f0;padding:0;}
+  .fm-menu > .fm-sub{display:block;padding:0;position:absolute;right:100%;left:auto;top:56px;width:168px;background:#fff;
+    border:1px solid #cbd5e1;border-radius:8px;box-shadow:0 12px 26px rgba(15,23,42,.20);
+    font-size:.74rem;z-index:4;}
+  .fm-sub div{padding:7px 9px;}
+  .fm-sub .hl{background:#dbeafe;color:#1d4ed8;font-weight:700;}
 
-  /* Иллюстрация окна Writer */
-  .writer-window{
-    background:#fff;border-radius:10px;overflow:hidden;
-    box-shadow:0 4px 16px rgba(0,0,0,.12);max-width:640px;margin:0 auto;
-    border:1px solid #cbd5e1;
+  /* ---------- Макет меню Astra Linux ---------- */
+  .desktop-mock{position:relative;background:linear-gradient(135deg,#0f172a,#1e3a8a 58%,#0e7490);
+    border-radius:12px;overflow:hidden;color:#fff;min-height:330px;border:1px solid #1e293b;
+    font-family:'Segoe UI',sans-serif;}
+  .desktop-top{display:flex;justify-content:space-between;padding:7px 12px;
+    background:rgba(15,23,42,.55);font-size:.72rem;}
+  .desktop-icons{display:flex;gap:16px;padding:18px;}
+  .desk-icon{text-align:center;font-size:.66rem;width:76px;line-height:1.3;}
+  .desk-icon .ico{display:block;font-size:2rem;}
+  .start-menu{position:absolute;left:10px;bottom:44px;width:248px;background:#fff;color:#1e293b;
+    border-radius:10px;box-shadow:0 14px 40px rgba(0,0,0,.35);padding:9px;font-size:.78rem;z-index:2;}
+  .sm-title{font-size:.76rem;font-weight:800;color:#64748b;padding:3px 8px 7px;}
+  .sm-item{display:flex;justify-content:space-between;padding:7px 8px;border-radius:6px;}
+  .sm-item.hl{background:#dbeafe;color:#1d4ed8;font-weight:700;}
+  .sm-sub{position:absolute;left:256px;bottom:74px;width:226px;background:#fff;border-radius:10px;
+    box-shadow:0 14px 40px rgba(0,0,0,.35);padding:7px;font-size:.78rem;z-index:3;}
+  .sm-sub div{padding:6px 8px;border-radius:6px;}
+  .sm-sub .hl{background:#dbeafe;color:#1d4ed8;font-weight:700;}
+  .taskbar{position:absolute;left:0;right:0;bottom:0;height:38px;
+    background:rgba(15,23,42,.88);display:flex;align-items:center;gap:12px;
+    padding:0 12px;font-size:.72rem;}
+  .start-btn{background:#2563eb;padding:5px 10px;border-radius:6px;font-weight:700;}
+
+  /* ---------- Макет окна Writer ---------- */
+  .lo{background:#fff;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden;
+    box-shadow:0 8px 24px rgba(15,23,42,.12);font-family:'Segoe UI',sans-serif;}
+  .lo-titlebar{display:flex;align-items:center;gap:6px;background:linear-gradient(90deg,#dbe7f3,#eef4fa);
+    padding:7px 10px;font-size:.76rem;font-weight:700;color:#1e293b;}
+  .lo-winbtns{margin-left:auto;display:flex;gap:10px;color:#64748b;font-weight:400;}
+  .lo-menubar{display:flex;align-items:center;flex-wrap:wrap;gap:11px;padding:5px 10px;
+    background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.72rem;color:#334155;}
+  .lo-toolbar,.lo-formatbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:5px 10px;
+    background:#f1f5f9;border-bottom:1px solid #e2e8f0;font-size:.7rem;color:#475569;}
+  .lo-tb-icon{background:#fff;border:1px solid #cbd5e1;border-radius:4px;padding:2px 6px;line-height:1.2;}
+  .lo-ruler{background:#fef3c7;border-bottom:1px solid #fcd34d;height:19px;display:flex;
+    align-items:center;gap:22px;padding:0 10px;font-size:.58rem;color:#92400e;}
+  .lo-canvas{background:#cbd5e1;padding:14px;display:flex;justify-content:center;}
+  .lo-page{background:#fff;width:78%;min-height:170px;padding:16px 18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.18);font-family:'Liberation Serif',serif;
+    font-size:.74rem;color:#334155;line-height:1.55;}
+  .lo-status{display:flex;align-items:center;flex-wrap:wrap;gap:12px;background:#f1f5f9;
+    border-top:1px solid #e2e8f0;padding:4px 10px;font-size:.63rem;color:#64748b;}
+
+  /* ---------- Макеты диалогов ---------- */
+  .dialog{background:#fff;border-radius:10px;border:1px solid #94a3b8;
+    box-shadow:0 10px 28px rgba(15,23,42,.18);overflow:hidden;max-width:690px;margin:0 auto;
+    font-family:'Segoe UI',sans-serif;}
+  .dlg-title{background:#e8eef6;padding:8px 12px;font-size:.78rem;font-weight:700;color:#1e293b;
+    display:flex;justify-content:space-between;border-bottom:1px solid #cbd5e1;}
+  .dlg-body{display:grid;grid-template-columns:158px 1fr;min-height:212px;}
+  .dlg-side{background:#f1f5f9;border-right:1px solid #e2e8f0;padding:8px;font-size:.74rem;}
+  .dlg-side div{padding:6px 8px;border-radius:6px;}
+  .dlg-side .hl{background:#dbeafe;color:#1d4ed8;font-weight:700;}
+  .dlg-main{padding:12px;}
+  .dlg-path{display:flex;align-items:center;flex-wrap:wrap;gap:4px;background:#f8fafc;
+    border:1px solid #cbd5e1;border-radius:6px;padding:5px 8px;font-size:.7rem;color:#334155;}
+  .dlg-empty{display:flex;align-items:center;justify-content:center;text-align:center;
+    min-height:72px;border:2px dashed #e2e8f0;border-radius:8px;margin:10px 0;
+    color:#94a3b8;font-size:.72rem;line-height:1.4;padding:8px;}
+  .dlg-row{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:.72rem;color:#334155;}
+  .dlg-row label{min-width:78px;font-weight:600;}
+  .field{flex:1;background:#fff;border:1px solid #94a3b8;border-radius:5px;padding:5px 8px;
+    font-size:.72rem;color:#0f172a;}
+  .field.name{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15);font-weight:700;}
+  .dlg-foot{display:flex;justify-content:flex-end;gap:8px;padding:9px 12px;
+    background:#f8fafc;border-top:1px solid #e2e8f0;}
+  .btn-mock{border:1px solid #94a3b8;background:#fff;border-radius:6px;padding:6px 14px;
+    font-size:.74rem;font-weight:600;color:#334155;}
+  .btn-mock.primary{background:#2563eb;border-color:#2563eb;color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.35);}
+
+  .mini-dialog{max-width:460px;margin:0 auto;background:#fff;border:1px solid #94a3b8;
+    border-radius:10px;box-shadow:0 10px 28px rgba(15,23,42,.16);overflow:hidden;
+    font-family:'Segoe UI',sans-serif;}
+  .mini-dialog .dlg-title{background:#e8eef6;}
+  .mini-body{padding:14px 16px;font-size:.78rem;color:#334155;line-height:1.5;}
+  .mini-buttons{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;
+    padding:9px 12px;background:#f8fafc;border-top:1px solid #e2e8f0;}
+  .mini-dialog .primary{outline:3px solid #fbbf24;outline-offset:1px;}
+
+  /* ---------- Панель форматирования крупным планом ---------- */
+  .toolbar-demo{background:#f1f5f9;border:1px solid #cbd5e1;border-radius:10px;
+    padding:12px;display:flex;flex-direction:column;gap:9px;font-family:'Segoe UI',sans-serif;}
+  .tb-row{display:flex;align-items:center;flex-wrap:wrap;gap:7px;background:#fff;
+    border:1px solid #e2e8f0;border-radius:8px;padding:6px 8px;}
+  .tb-field{background:#fff;border:1px solid #94a3b8;border-radius:5px;padding:4px 8px;
+    font-size:.72rem;color:#1e293b;min-width:114px;display:flex;justify-content:space-between;gap:8px;}
+  .tb-field.size{min-width:48px;}
+  .tb-btn{background:#fff;border:1px solid #cbd5e1;border-radius:5px;padding:4px 8px;
+    font-size:.78rem;color:#334155;line-height:1.2;min-width:28px;text-align:center;}
+  .tb-btn.bold{font-weight:800;}
+  .tb-btn.italic{font-style:italic;}
+  .tb-btn.underline{text-decoration:underline;}
+  .tb-btn.active{background:#dbeafe;border-color:#3b82f6;color:#1d4ed8;}
+  .tb-sep{width:1px;height:22px;background:#cbd5e1;}
+
+  /* ---------- Диалог «Абзац» ---------- */
+  .para-dialog{max-width:560px;}
+  .para-tabs{display:flex;gap:4px;padding:7px 10px 0;background:#f1f5f9;border-bottom:1px solid #cbd5e1;font-size:.68rem;}
+  .para-tabs span{padding:5px 8px;border:1px solid #cbd5e1;border-bottom:none;border-radius:5px 5px 0 0;background:#e2e8f0;color:#475569;}
+  .para-tabs .active{background:#fff;color:#1d4ed8;font-weight:700;}
+  .para-body{padding:12px 14px;display:grid;grid-template-columns:1fr 118px;gap:8px 10px;align-items:center;font-size:.72rem;color:#334155;}
+  .para-body label{font-weight:600;}
+  .para-body .field{padding:4px 7px;}
+
+  /* ---------- Документ-образец ---------- */
+  .doc-sample{
+    background:#fff;border:1px solid #cbd5e1;border-radius:10px;
+    padding:28px 32px;margin:16px 0;box-shadow:0 6px 18px rgba(15,23,42,.08);
+    font-family:'Liberation Serif','Times New Roman',serif;
+    font-size:1.04rem;line-height:1.6;color:#111827;
   }
-  .writer-titlebar{
-    background:linear-gradient(90deg,#1e40af,#3b82f6);color:#fff;
-    padding:8px 14px;font-size:.85rem;font-weight:600;
-    display:flex;justify-content:space-between;align-items:center;
+  .doc-sample .doc-title{text-align:center;font-weight:700;font-size:1.28rem;
+    margin:0 0 20px;line-height:1.35;text-indent:0;}
+  .doc-sample p{margin:0 0 12px;text-indent:1.25cm;text-align:justify;}
+  .doc-sample p:last-child{margin-bottom:0;}
+  .doc-sample .u{text-decoration:underline;}
+  .doc-sample .b{font-weight:700;}
+  .doc-sample .i{font-style:italic;}
+
+  .type-card{
+    background:#fffbeb;border:2px dashed #f59e0b;border-radius:12px;
+    padding:20px 24px;margin:16px 0;color:#1e293b;
+    font-family:'Liberation Serif','Times New Roman',serif;
+    font-size:1.04rem;line-height:1.65;
   }
-  .writer-titlebar .dots{display:flex;gap:6px;}
-  .writer-titlebar .dots span{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.5);}
-  .writer-toolbar{
-    background:#f1f5f9;padding:8px 12px;display:flex;gap:6px;
-    border-bottom:1px solid #e2e8f0;flex-wrap:wrap;
-  }
-  .writer-toolbar .tool{
-    background:#fff;border:1px solid #cbd5e1;border-radius:6px;
-    padding:4px 10px;font-size:.8rem;color:#334155;font-weight:600;
-  }
-  .writer-ruler{
-    background:#fef3c7;height:16px;border-bottom:1px solid #fcd34d;
-    display:flex;align-items:center;padding:0 8px;font-size:.6rem;color:#92400e;
-    justify-content:space-between;
-  }
-  .writer-page{
-    background:#fff;padding:20px 24px;min-height:140px;
-    font-family:'Times New Roman',serif;font-size:1rem;line-height:1.6;
-    color:#1e293b;
-  }
-  .writer-page h4{margin:0 0 8px;font-family:'Segoe UI',sans-serif;font-size:1.1rem;color:#1e40af;}
-  .writer-status{
-    background:#f1f5f9;padding:4px 12px;font-size:.75rem;color:#64748b;
-    border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;
+  .type-card .tt-title{font-weight:700;text-align:center;font-size:1.18rem;margin:0 0 16px;line-height:1.35;}
+  .type-card p{margin:0 0 10px;text-indent:1.25cm;text-align:justify;}
+  .type-card p:last-child{margin-bottom:0;}
+
+  /* ---------- Таблицы ---------- */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:14px 0;}
+  table.tbl{width:100%;border-collapse:collapse;font-size:.88rem;min-width:480px;}
+  table.tbl th,table.tbl td{border:1px solid #e2e8f0;padding:8px 10px;text-align:left;vertical-align:top;word-break:break-word;}
+  table.tbl th{background:#eff6ff;color:#1e293b;font-weight:700;}
+  table.tbl tr:nth-child(even) td{background:#f8fafc;}
+  table.tbl td b{color:#1e40af;}
+
+  /* ---------- Чек-лист ---------- */
+  .checklist{background:#f0fdf4;border:2px solid #bbf7d0;border-radius:14px;padding:18px;margin:8px 0 0;}
+  .checklist-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .checklist-head h3{margin:0;color:#15803d;font-size:1.05rem;}
+  .check-progress{font-weight:800;color:#15803d;background:#dcfce7;padding:4px 11px;border-radius:20px;font-size:.82rem;}
+  .check-bar{height:10px;background:#dcfce7;border-radius:6px;overflow:hidden;margin:10px 0 10px;}
+  .check-bar > div{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#16a34a);transition:width .25s;}
+  .checklist label{display:block;position:relative;padding:8px 0 8px 30px;font-size:.93rem;
+    color:#166534;cursor:pointer;border-bottom:1px dashed #bbf7d0;line-height:1.45;}
+  .checklist label:last-of-type{border-bottom:none;}
+  .checklist label b{word-break:break-word;}
+  .checklist input{position:absolute;left:0;top:9px;width:20px;height:20px;
+    accent-color:#22c55e;cursor:pointer;}
+
+  .goals{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin:14px 0;}
+  .goal-card{background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:14px;}
+  .goal-card .big{font-size:1.7rem;line-height:1;}
+  .goal-card h4{margin:6px 0 4px;font-size:.9rem;color:#1e293b;}
+  .goal-card p{margin:0;font-size:.8rem;color:#64748b;line-height:1.45;}
+  .goal-card.blue{border-color:#93c5fd;background:#eff6ff;}
+  .goal-card.green{border-color:#86efac;background:#f0fdf4;}
+  .goal-card.amber{border-color:#fcd34d;background:#fffbeb;}
+  .goal-card.pink{border-color:#f9a8d4;background:#fdf2f8;}
+
+  .final-card{background:linear-gradient(135deg,#f0fdf4,#eff6ff);border:2px solid #86efac;
+    border-radius:18px;padding:26px;text-align:center;margin-top:24px;}
+  .final-card h2{justify-content:center;margin-bottom:8px;color:#166534;}
+  .final-card p{color:#334155;line-height:1.6;max-width:620px;margin:8px auto;}
+
+  @media(max-width:640px){
+    .practice-wrap{padding:70px 12px 48px;}
+    .practice-header{padding:20px 16px;}
+    .practice-header h1{font-size:1.45rem;}
+    .practice-header .task-title{font-size:1.05rem;}
+    .step{padding:18px 15px;}
+    .step-num{width:36px;height:36px;font-size:1rem;margin-right:8px;}
+    .step h2{font-size:1.08rem;}
+    .stage{font-size:.95rem;padding:10px 14px;}
+    .fig{padding:10px;}
+    .doc-sample,.type-card{padding:18px 16px;font-size:1rem;}
+    .doc-sample .doc-title{font-size:1.15rem;}
+    .path-step{font-size:.78rem;padding:8px 10px;}
+    .dlg-body{grid-template-columns:120px 1fr;}
+    .dlg-side{font-size:.68rem;}
+    .para-body{grid-template-columns:1fr 96px;}
+    table.tbl{min-width:0;font-size:.8rem;}
+    table.tbl th,table.tbl td{padding:6px 7px;}
+    .floating-nav{top:12px;right:12px;}
+    .floating-btn{padding:6px 10px;font-size:.8rem;}
   }
 
-  /* Пример готового текста */
-  .example-text{
-    background:#fff;border:2px solid #e2e8f0;border-radius:12px;
-    padding:20px 26px;margin:16px 0;
-    font-family:'Times New Roman',serif;font-size:1rem;line-height:1.7;color:#1e293b;
+  @media print{
+    body{background:#fff;padding:0;}
+    .practice-wrap{max-width:none;padding:0;}
+    .floating-nav,.toc{display:none;}
+    .step,.fig,.doc-sample,.type-card,.checklist{break-inside:avoid;box-shadow:none;}
+    .practice-header{box-shadow:none;}
   }
-  .example-text h3{
-    font-family:'Segoe UI',sans-serif;color:#3b82f6;margin:0 0 10px;font-size:1.15rem;
-  }
-  .example-text .center{text-align:center;}
-  .example-text .bold{font-weight:700;}
-  .example-text .italic{font-style:italic;}
-  .example-text .underline{text-decoration:underline;}
-
-  /* Чек-лист */
-  .checklist{
-    background:#f0fdf4;border-radius:14px;padding:20px;margin:20px 0;
-    border:2px solid #bbf7d0;
-  }
-  .checklist h3{margin:0 0 12px;color:#15803d;font-size:1.1rem;}
-  .checklist label{
-    display:flex;align-items:center;gap:10px;padding:8px 0;
-    cursor:pointer;font-size:.95rem;color:#166534;
-  }
-  .checklist input[type=checkbox]{
-    width:20px;height:20px;accent-color:#22c55e;cursor:pointer;
-  }
-
-  /* Отправка */
-  .send-block{
-    background:linear-gradient(135deg,#eff6ff,#fdf4ff);
-    border-radius:16px;padding:24px;margin-top:24px;
-    border:2px solid #c7d2fe;
-  }
-  .send-block h2{margin:0 0 14px;color:#3b82f6;font-size:1.25rem;}
-  .send-block label{display:block;font-weight:700;margin:14px 0 6px;color:#1e293b;}
-  .send-block input{
-    width:100%;padding:12px 14px;border-radius:10px;
-    border:2px solid #e2e8f0;font-size:1rem;outline:none;
-  }
-  .send-block input:focus{border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.15);}
-  .send-block .mailto-btn{
-    display:inline-block;margin-top:18px;padding:14px 30px;
-    border-radius:12px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);
-    color:#fff;font-weight:700;font-size:1rem;text-decoration:none;
-    box-shadow:0 6px 18px rgba(59,130,246,.35);transition:.2s;
-  }
-  .send-block .mailto-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(139,92,246,.45);}
-  .send-block .muted{margin-top:10px;}
 </style>
 </head>
 <body>
@@ -150,183 +362,833 @@
 <div class="practice-wrap">
 
   <div class="practice-header">
-    <h1>🖥 Практическая работа</h1>
-    <div class="meta">5 класс · «Текст и компьютер» · LibreOffice Writer</div>
-    <p style="margin:14px 0 0;color:#334155;line-height:1.6;">
-      Вы создадите текстовый документ в LibreOffice Writer, оформите его по образцу,
-      сохраните и отправите на почту учителя.
-    </p>
-  </div>
-
-  <!-- ================== ШАГ 1 ================== -->
-  <div class="step">
-    <span class="step-num">1</span><h2>Откройте LibreOffice Writer</h2>
-    <p>Запустите программу одним из способов:</p>
-    <ul>
-      <li>Нажмите <span class="kbd">Пуск</span> → найдите <b>LibreOffice Writer</b> → откройте.</li>
-      <li>Или дважды кликните по значку <b>Writer</b> на рабочем столе (если он есть).</li>
-    </ul>
-
-    <div class="visual">
-      <div class="writer-window">
-        <div class="writer-titlebar">
-          <span>Безымянный 1 — LibreOffice Writer</span>
-          <div class="dots"><span></span><span></span><span></span></div>
-        </div>
-        <div class="writer-toolbar">
-          <span class="tool">Файл</span>
-          <span class="tool">Правка</span>
-          <span class="tool">Вид</span>
-          <span class="tool">Вставка</span>
-          <span class="tool">Формат</span>
-          <span class="tool">Таблица</span>
-        </div>
-        <div class="writer-ruler">
-          <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-        </div>
-        <div class="writer-page">
-          <p style="color:#94a3b8;font-style:italic;">Здесь вы будете набирать текст…</p>
-        </div>
-        <div class="writer-status">
-          <span>Страница 1 из 1</span>
-          <span>Символов: 0</span>
-        </div>
-      </div>
-      <div class="caption">Так выглядит окно LibreOffice Writer</div>
+    <h1>🖥 Практическая работа №1</h1>
+    <div class="task-title">Текст как форма представления информации</div>
+    <div class="lead">
+      Вы создадите текстовый документ в LibreOffice Writer, оформите его по образцу
+      и сохраните в свою папку на Рабочем столе.
     </div>
-
-    <div class="callout tip">
-      💡 <b>Совет:</b> если окно открылось не на весь экран — нажмите квадратик в правом верхнем углу, чтобы развернуть.
+    <div class="chips">
+      <span class="chip blue">🏫 5 класс</span>
+      <span class="chip green">📄 LibreOffice Writer</span>
+      <span class="chip pink">🐧 Astra Linux 1.8</span>
+      <span class="chip">⏱ 40–45 минут</span>
     </div>
   </div>
 
-  <!-- ================== ШАГ 2 ================== -->
-  <div class="step">
-    <span class="step-num">2</span><h2>Наберите текст</h2>
-    <p>Наберите текст <b>ровно такой, как в примере</b>. Следите за пробелами и знаками препинания.</p>
+  <div class="toc">
+    <a href="#stage-a"><span class="toc-letter">А</span> Подготовка</a>
+    <a href="#stage-b"><span class="toc-letter">Б</span> Набор текста</a>
+    <a href="#stage-c"><span class="toc-letter">В</span> Оформление</a>
+    <a href="#stage-d"><span class="toc-letter">Г</span> Завершение</a>
+  </div>
 
-    <div class="example-text">
-      <h3 class="center">Мой первый текст</h3>
-      <p>Я учусь в <span class="bold">5 классе</span>. На уроке информатики мы узнали, что <span class="italic">текст</span> — это информация, записанная с помощью символов.</p>
-      <p>Компьютер помогает <span class="underline">создавать</span>, редактировать и хранить тексты. Для этого используют <span class="bold">текстовые процессоры</span>, например LibreOffice Writer.</p>
-      <p>Я умею набирать текст, исправлять ошибки и сохранять документ.</p>
+    <div class="step">
+    <h2 style="display:block;margin-bottom:8px;">🎯 Что должно получиться</h2>
+    <p>Вот образец готового документа. У вас должен получиться такой же текст с таким же оформлением.</p>
+
+    <div class="doc-sample" aria-label="Образец готового документа">
+      <p class="doc-title">Текст как форма представления информации</p>
+      <p><span class="i">Текст</span> — это информация, записанная с помощью символов. Мы читаем тексты в книгах, видим их на экране компьютера и пишем сами.</p>
+      <p>Компьютер помогает <span class="u">создавать</span>, редактировать и хранить тексты. Для этого используют <span class="b">текстовые процессоры</span>. Один из них — LibreOffice Writer.</p>
+      <p>Я учусь в <span class="b">5 классе</span>. На уроке информатики я узнал, что текст можно оформить: изменить шрифт, размер букв и выравнивание.</p>
+    </div>
+
+    <div class="goals">
+      <div class="goal-card blue"><div class="big">🪟</div><h4>Открыть Writer</h4><p>Найти программу в меню Astra Linux и запустить её.</p></div>
+      <div class="goal-card green"><div class="big">⌨️</div><h4>Набрать текст</h4><p>Ввести заголовок и три абзаца без ошибок.</p></div>
+      <div class="goal-card amber"><div class="big">🎨</div><h4>Оформить</h4><p>Изменить шрифт, размер, выравнивание и выделить слова.</p></div>
+      <div class="goal-card pink"><div class="big">💾</div><h4>Сохранить</h4><p>Положить файл в свою папку на Рабочем столе.</p></div>
     </div>
 
     <div class="callout warn">
-      ⚠️ <b>Правила набора:</b>
-      <ul style="margin:8px 0 0;">
-        <li>После знака препинания — <b>один пробел</b>, перед ним — нет.</li>
-        <li>Между словами — <b>ровно один пробел</b>.</li>
-        <li>Каждое новое предложение начинается с <b>заглавной буквы</b>.</li>
-      </ul>
+      ⚠️ <b>Не спешите.</b> Сначала прочитайте шаг целиком, потом выполняйте. Если что-то непонятно —
+      поднимите руку и позовите учителя. Ошибку всегда можно исправить.
+    </div>
+
+    <div class="callout tip">
+      💡 <b>Главное правило урока:</b> файл сохраняется только в вашу личную папку
+      <b>«Фамилия Имя»</b> по пути <b>Рабочий стол → 5класс → 5А / 5Б / 5В → Фамилия Имя</b>.
+      Ничего не сохраняйте в «Документы» или на чужие папки.
     </div>
   </div>
 
-  <!-- ================== ШАГ 3 ================== -->
+  <!-- ================== ЭТАП А ================== -->
+  <div class="stage" id="stage-a">
+    <span class="stage-letter">А</span>
+    <div>Подготовка<small>папка, запуск программы и первое сохранение</small></div>
+  </div>
+
+  <!-- ШАГ 1 -->
   <div class="step">
-    <span class="step-num">3</span><h2>Оформите заголовок</h2>
-    <p>Сделайте заголовок «Мой первый текст» крупным, жирным и по центру:</p>
+    <span class="step-num">1</span><h2>Откройте свою папку на Рабочем столе</h2>
+
+    <p>Все работы по информатике хранятся на <b>Рабочем столе</b> в папке вашего класса.</p>
+
+    <div class="path-flow">
+      <div class="path-step">🖥 Рабочий стол<small>начало пути</small></div>
+      <div class="path-arrow">→</div>
+      <div class="path-step">📁 5класс<small>папка класса</small></div>
+      <div class="path-arrow">→</div>
+      <div class="path-step">📁 5А<small>ваша буква</small></div>
+      <div class="path-arrow">→</div>
+      <div class="path-step">📁 Иванов Иван<small>фамилия и имя</small></div>
+    </div>
+
+    <div class="callout tip">
+      💡 В примере показана папка <b>5А</b>. Если вы учитесь в <b>5Б</b>, <b>5В</b> или другом классе,
+      открывайте папку со <b>своей буквой</b>.
+    </div>
+
     <ol>
-      <li>Выделите строку с заголовком (кликните в начало, зажмите <span class="kbd">Shift</span> и кликните в конец).</li>
-      <li>Нажмите кнопку <b>«По центру»</b> на панели инструментов (или <span class="kbd">Ctrl+E</span>).</li>
-      <li>Нажмите кнопку <b>«Полужирный»</b> <b>Ж</b> (или <span class="kbd">Ctrl+B</span>).</li>
-      <li>Увеличьте размер шрифта: выберите <b>16</b> или <b>18</b> в поле размера шрифта.</li>
+      <li>Сверните все открытые окна, чтобы увидеть Рабочий стол.</li>
+      <li>Дважды щёлкните левой кнопкой мыши по папке <b>5класс</b>.</li>
+      <li>Дважды щёлкните по папке своей буквы: <b>5А</b>, <b>5Б</b> или <b>5В</b>.</li>
+      <li>Найдите папку со своей фамилией и именем, например <b>Иванов Иван</b>, и откройте её двойным щелчком.</li>
     </ol>
 
-    <div class="visual">
-      <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
-        <span class="tool" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;font-weight:700;color:#334155;">Ж</span>
-        <span class="tool" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;font-style:italic;color:#334155;">К</span>
-        <span class="tool" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;text-decoration:underline;color:#334155;">Ч</span>
-        <span class="tool" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;color:#334155;">≡</span>
-        <span class="tool" style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;color:#334155;">16</span>
-      </div>
-      <div class="caption">Кнопки: Ж — жирный, К — курсив, Ч — подчёркнутый, ≡ — выравнивание, 16 — размер шрифта</div>
-    </div>
-  </div>
+    <p><b>Если папки со своим именем нет:</b></p>
+    <ol>
+      <li>Щёлкните <b>правой</b> кнопкой мыши по пустому месту внутри папки класса.</li>
+      <li>В появившемся меню наведите курсор на пункт <b>«Создать»</b>.</li>
+      <li>Выберите <b>«Папку»</b>.</li>
+      <li>Напечатайте <b>свою фамилию и имя</b> без лишних пробелов: <b>Иванов Иван</b>.</li>
+      <li>Нажмите <span class="kbd">Enter</span> и откройте созданную папку.</li>
+    </ol>
 
-  <!-- ================== ШАГ 4 ================== -->
-  <div class="step">
-    <span class="step-num">4</span><h2>Выделите ключевые слова</h2>
-    <p>В основном тексте выделите слова так, как в примере:</p>
-    <ul>
-      <li><b>«5 классе»</b> — полужирным (<span class="kbd">Ctrl+B</span>).</li>
-      <li><i>«текст»</i> — курсивом (<span class="kbd">Ctrl+I</span>).</li>
-      <li><u>«создавать»</u> — подчёркнутым (<span class="kbd">Ctrl+U</span>).</li>
-      <li><b>«текстовые процессоры»</b> — полужирным.</li>
-    </ul>
+    <div class="fig">
+      <div class="fig-scroll">
+        <div class="fm" role="img" aria-label="Окно файлов: открыта папка 5А, выделена папка Иванов Иван, открыто меню Создать — Папку">
+          <div class="fm-title"><span>📁 Файлы — 5А</span><span class="fm-winbtns">— □ ×</span></div>
+          <div class="fm-toolbar"><span>←</span><span>→</span><span>↑</span><span class="fm-path">Рабочий стол / 5класс / 5А</span></div>
+          <div class="fm-body">
+            <div class="fm-side">
+              <div class="active">🖥 Рабочий стол</div>
+              <div>🏠 Домашняя папка</div>
+              <div>📄 Документы</div>
+              <div>⬇ Загрузки</div>
+            </div>
+            <div class="fm-main">
+              <div class="fm-folder selected"><span class="ico">📁</span>Иванов Иван</div>
+              <div class="fm-folder"><span class="ico">📁</span>Петров Пётр</div>
+              <div class="fm-folder"><span class="ico">📁</span>Сидорова Анна</div>
+              <div class="fm-menu">
+                <div>Открыть</div>
+                <div class="sep"></div>
+                <div class="hl">Создать <span>▸</span></div>
+                <div>Переименовать</div>
+                <div>Свойства</div>
+                <div class="fm-sub">
+                  <div class="hl">📁 Папку</div>
+                  <div>📄 Документ</div>
+                  <div>📊 Таблицу</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fig-cap">Рис. 1. Откройте <b>Рабочий стол → 5класс → 5А</b>. Если своей папки нет, нажмите правой кнопкой → <b>Создать → Папку</b>.</div>
+    </div>
 
     <div class="callout ok">
-      ✅ <b>Проверьте себя:</b> в примере выше ровно 4 выделенных фрагмента. Если у вас столько же — всё верно.
+      ✅ <b>Проверьте себя:</b> вы видите папку со своей фамилией и именем. Внутри неё пока пусто —
+      скоро здесь появится файл <b>Практическая1</b>.
     </div>
   </div>
 
-  <!-- ================== ШАГ 5 ================== -->
+  <!-- ШАГ 2 -->
   <div class="step">
-    <span class="step-num">5</span><h2>Проверьте орфографию</h2>
-    <p>LibreOffice Writer подчёркивает слова с ошибками <b>красной волнистой линией</b>.</p>
+    <span class="step-num">2</span><h2>Запустите LibreOffice Writer</h2>
+
+    <p><b>LibreOffice Writer</b> — это программа для создания текстовых документов.
+    В ней мы будем набирать и оформлять текст.</p>
+
     <ol>
-      <li>Кликните <b>правой кнопкой</b> по подчёркнутому слову.</li>
-      <li>В меню выберите правильный вариант написания (если он есть).</li>
-      <li>Или нажмите <b>«Добавить в словарь»</b>, если слово верное, но программа его не знает.</li>
+      <li>Нажмите кнопку меню в левом нижнем углу экрана. В Astra Linux она называется <b>«Пуск»</b>
+        и часто обозначена значком <b>✦</b> или эмблемой Astra.</li>
+      <li>В открывшемся меню найдите раздел <b>«Офис»</b> и наведите на него курсор.</li>
+      <li>В появившемся списке выберите <b>LibreOffice Writer</b>.</li>
+      <li>Подождите несколько секунд, пока программа откроется.</li>
+    </ol>
+
+    <div class="fig">
+      <div class="fig-scroll">
+        <div class="desktop-mock" role="img" aria-label="Меню Astra Linux: раздел Офис, подменю с программой LibreOffice Writer">
+          <div class="desktop-top"><span>Astra Linux</span><span>12:00</span></div>
+          <div class="desktop-icons">
+            <div class="desk-icon"><span class="ico">🖥</span>Рабочий стол</div>
+            <div class="desk-icon"><span class="ico">📁</span>5класс</div>
+          </div>
+          <div class="start-menu">
+            <div class="sm-title">Меню</div>
+            <div class="sm-item">📚 Образование</div>
+            <div class="sm-item hl">🗂 Офис <span>▸</span></div>
+            <div class="sm-item">🌐 Интернет</div>
+            <div class="sm-item">🎨 Графика</div>
+            <div class="sm-item">⚙ Настройки</div>
+          </div>
+          <div class="sm-sub">
+            <div class="hl">📄 LibreOffice Writer</div>
+            <div>📊 LibreOffice Calc</div>
+            <div>📽 LibreOffice Impress</div>
+            <div>🗄 LibreOffice Base</div>
+          </div>
+          <div class="taskbar"><span class="start-btn">✦ Пуск</span><span>🖥</span><span>📁</span><span style="margin-left:auto;">🔊 🌐 12:00</span></div>
+        </div>
+      </div>
+      <div class="fig-cap">Рис. 2. Путь запуска: <b>Пуск → Офис → LibreOffice Writer</b>. Нужен именно Writer, а не Calc или Impress.</div>
+    </div>
+
+    <div class="callout tip">
+      💡 <b>Если не можете найти пункт «Офис»:</b> введите слово <b>Writer</b> в строку поиска меню.
+      Если программа всё равно не находится — позовите учителя. Устанавливать ничего самостоятельно нельзя.
+    </div>
+
+    <p>После запуска откроется окно с заголовком <b>«Безымянный 1 — LibreOffice Writer»</b>.
+    Внутри — белый лист, на котором мы будем работать.</p>
+
+    <div class="callout warn">
+      ⚠️ <b>Не перепутайте:</b> Writer — это работа с текстом (значок с синей буквой «W» или документом).
+      Calc — таблицы, Impress — презентации. Нам нужен <b>Writer</b>.
+    </div>
+  </div>
+
+  <!-- ШАГ 3 -->
+  <div class="step">
+    <span class="step-num">3</span><h2>Рассмотрите окно Writer</h2>
+
+    <p>Чтобы уверенно работать, найдём главные части окна. На рисунке они отмечены номерами.</p>
+
+    <div class="fig">
+      <div class="fig-scroll">
+        <div class="lo" role="img" aria-label="Окно LibreOffice Writer с отмеченными частями: заголовок, меню, панели инструментов, линейка, лист, строка состояния">
+          <div class="lo-titlebar"><span class="num-badge">1</span> Безымянный 1 — LibreOffice Writer <span class="lo-winbtns">— □ ×</span></div>
+          <div class="lo-menubar"><span class="num-badge">2</span> <span>Файл</span><span>Правка</span><span>Вид</span><span>Вставка</span><span>Формат</span><span>Таблица</span><span>Сервис</span><span>Окно</span><span>Справка</span></div>
+          <div class="lo-toolbar"><span class="num-badge">3</span><span class="lo-tb-icon">🖫</span><span class="lo-tb-icon">🖨</span><span class="lo-tb-icon">↶</span><span class="lo-tb-icon">↷</span><span class="lo-tb-icon">🔍</span><span class="lo-tb-icon">📋</span></div>
+          <div class="lo-formatbar"><span class="num-badge">4</span><span class="lo-tb-icon">Liberation Serif ▾</span><span class="lo-tb-icon">12 ▾</span><span class="lo-tb-icon"><b>Ж</b></span><span class="lo-tb-icon"><i>К</i></span><span class="lo-tb-icon"><u>Ч</u></span><span class="lo-tb-icon">≡</span><span class="lo-tb-icon">☰</span></div>
+          <div class="lo-ruler"><span class="num-badge">5</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+          <div class="lo-canvas">
+            <div class="lo-page">
+              <span style="color:#94a3b8;font-style:italic;">Здесь вы будете набирать текст…</span>
+              <span style="display:inline-block;width:1px;height:14px;background:#2563eb;vertical-align:-2px;"></span>
+            </div>
+          </div>
+          <div class="lo-status"><span class="num-badge">6</span><span>Страница 1 из 1</span><span>Слов: 0</span><span>Символов: 0</span><span>Русский</span></div>
+        </div>
+      </div>
+      <div class="fig-cap">Рис. 3. Главные части окна Writer. Найдите их на своём экране.</div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>№</th><th>Часть окна</th><th>Зачем нужна</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><b>Строка заголовка</b></td><td>Показывает имя документа. После сохранения здесь появится <b>Практическая1.odt</b>.</td></tr>
+          <tr><td>2</td><td><b>Строка меню</b></td><td>Команды <b>Файл</b>, <b>Правка</b>, <b>Формат</b> и другие. Через неё сохраняют и настраивают документ.</td></tr>
+          <tr><td>3</td><td><b>Панель «Стандартная»</b></td><td>Кнопки сохранения, печати, отмены действия.</td></tr>
+          <tr><td>4</td><td><b>Панель «Форматирование»</b></td><td>Шрифт, размер, кнопки <b>Ж</b>, <b>К</b>, <b>Ч</b>, выравнивание.</td></tr>
+          <tr><td>5</td><td><b>Линейка</b></td><td>Помогает видеть ширину страницы и отступы.</td></tr>
+          <tr><td>6</td><td><b>Строка состояния</b></td><td>Внизу окна: номер страницы, количество слов и язык проверки.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Белый лист в центре — это <b>страница документа</b>. Мигающая вертикальная черта на ней —
+    <b>курсор</b>. Он показывает, где появится следующая буква.</p>
+
+    <div class="callout tip">
+      💡 <b>Если панелей инструментов не видно:</b> в меню выберите <b>Вид → Панели инструментов</b>
+      и поставьте галочки у пунктов <b>«Стандартная»</b> и <b>«Форматирование»</b>.
+    </div>
+  </div>
+
+  <!-- ШАГ 4 -->
+  <div class="step">
+    <span class="step-num">4</span><h2>Сразу сохраните документ</h2>
+
+    <p>Это очень важный шаг. Если компьютер выключится или программа закроется,
+    сохранённая работа останется, а несохранённая — пропадёт. Поэтому сохраняем файл
+    <b>до того, как начнём печатать</b>.</p>
+
+    <ol>
+      <li>Нажмите <span class="kbd">Ctrl</span>+<span class="kbd">S</span> или выберите <b>Файл → Сохранить</b>.</li>
+      <li>Откроется окно <b>«Сохранение документа»</b>.</li>
+      <li>В левой панели нажмите <b>«Рабочий стол»</b>.</li>
+      <li>Откройте папку <b>5класс</b> двойным щелчком.</li>
+      <li>Откройте папку своей буквы: <b>5А</b>, <b>5Б</b> или <b>5В</b>.</li>
+      <li>Откройте папку <b>«Фамилия Имя»</b>, например <b>Иванов Иван</b>.</li>
+      <li>В поле <b>«Имя файла»</b> напишите <b>Практическая1</b> — без пробелов и без расширения.</li>
+      <li>Нажмите кнопку <b>«Сохранить»</b>.</li>
+    </ol>
+
+    <div class="path-flow">
+      <div class="path-step">🖥 Рабочий стол</div>
+      <div class="path-arrow">→</div>
+      <div class="path-step">📁 5класс</div>
+      <div class="path-arrow">→</div>
+      <div class="path-step">📁 5А</div>
+      <div class="path-arrow">→</div>
+      <div class="path-step">📁 Иванов Иван</div>
+      <div class="path-arrow">→</div>
+      <div class="path-step">📄 Практическая1</div>
+    </div>
+
+    <div class="fig">
+      <div class="fig-scroll">
+        <div class="dialog" role="img" aria-label="Окно сохранения документа: выбран Рабочий стол, путь 5класс, 5А, Иванов Иван, имя файла Практическая1, кнопка Сохранить">
+          <div class="dlg-title"><span>Сохранение документа</span><span>×</span></div>
+          <div class="dlg-body">
+            <div class="dlg-side">
+              <div>🕘 Последние</div>
+              <div class="hl"><span class="num-badge">1</span> 🖥 Рабочий стол</div>
+              <div>🏠 Домашняя папка</div>
+              <div>📄 Документы</div>
+              <div>⬇ Загрузки</div>
+              <div>🌐 Сеть</div>
+            </div>
+            <div class="dlg-main">
+              <div class="dlg-path"><span class="num-badge">2</span> Рабочий стол <span>›</span> 5класс <span>›</span> 5А <span>›</span> <b>Иванов Иван</b></div>
+              <div class="dlg-empty">Папка пустая.<br>Сюда сохранится ваш документ.</div>
+              <div class="dlg-row"><label><span class="num-badge">3</span> Имя файла:</label><span class="field name">Практическая1</span></div>
+              <div class="dlg-row"><label>Тип файла:</label><span class="field">Документ ODF (.odt)</span></div>
+            </div>
+          </div>
+          <div class="dlg-foot"><button class="btn-mock" type="button">Отмена</button><button class="btn-mock primary" type="button"><span class="num-badge">4</span> Сохранить</button></div>
+        </div>
+      </div>
+      <div class="fig-cap">Рис. 4. Окно сохранения: <b>1</b> — выберите «Рабочий стол»; <b>2</b> — пройдите по папкам; <b>3</b> — введите имя; <b>4</b> — нажмите «Сохранить».</div>
+    </div>
+
+    <p><b>Что делать, если появилось окно про формат файла?</b> LibreOffice может предложить сохранить документ
+    в другом формате. Нам нужен <b>ODF</b> — это родной формат программы.</p>
+
+    <div class="fig">
+      <div class="fig-scroll">
+        <div class="mini-dialog" role="img" aria-label="Диалог выбора формата файла с выделенной кнопкой Использовать формат ODF">
+          <div class="dlg-title"><span>Формат файла</span><span>×</span></div>
+          <div class="mini-body">
+            Документ может быть сохранён в формате <b>ODF</b> или в формате Microsoft Word.
+            Для школьных работ выбирайте <b>ODF</b>.
+          </div>
+          <div class="mini-buttons">
+            <button class="btn-mock primary" type="button">Использовать формат ODF!</button>
+            <button class="btn-mock" type="button">Сохранить в Word</button>
+          </div>
+        </div>
+      </div>
+      <div class="fig-cap">Рис. 5. Нажмите <b>«Использовать формат ODF!»</b>. Не выбирайте формат Word.</div>
+    </div>
+
+    <div class="callout ok">
+      ✅ <b>Проверьте:</b> в заголовке окна появилось имя <b>Практическая1.odt — LibreOffice Writer</b>.
+      Значит, файл сохранён, и можно спокойно работать дальше.
+    </div>
+
+    <div class="callout pink">
+      🔒 <b>Запомните путь:</b> Рабочий стол → 5класс → 5А (или 5Б / 5В) → Фамилия Имя → Практическая1.
+      Если учитель спросит, где работа, вы сможете показать её без поиска.
+    </div>
+
+    <div class="callout tip">
+      💡 <b>Совет:</b> нажимайте <span class="kbd">Ctrl</span>+<span class="kbd">S</span> каждые 2–3 минуты.
+      Тогда даже при сбое почти ничего не потеряется.
+    </div>
+  </div>
+
+  <!-- ================== ЭТАП Б ================== -->
+  <div class="stage" id="stage-b">
+    <span class="stage-letter">Б</span>
+    <div>Набор текста<small>раскладка клавиатуры, правила и сам текст</small></div>
+  </div>
+
+  <!-- ШАГ 5 -->
+  <div class="step">
+    <span class="step-num">5</span><h2>Проверьте русскую раскладку клавиатуры</h2>
+
+    <p>Если печатать английскими буквами, получится <b>vext</b> вместо <b>текст</b>.
+    Поэтому сначала проверьте язык ввода.</p>
+
+    <ul>
+      <li>Посмотрите в <b>правый нижний угол экрана</b>. Там показан язык: <b>RU</b> или <b>EN</b>.</li>
+      <li>Переключить язык можно сочетанием клавиш <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>
+        или <span class="kbd">Alt</span>+<span class="kbd">Shift</span> — зависит от настроек компьютера.</li>
+      <li>Можно также щёлкнуть по значку языка <b>RU / EN</b> на нижней панели и выбрать <b>Русский</b>.</li>
+    </ul>
+
+    <div class="callout tip">
+      💡 <b>Проверка:</b> напечатайте в документе слово <b>Текст</b>. Если появились русские буквы —
+      всё правильно. Удалите пробное слово клавишей <span class="kbd">Backspace</span>.
+    </div>
+
+    <div class="callout warn">
+      ⚠️ Если вместо русских букв появляются английские, не продолжайте печатать. Переключите язык
+      и только потом набирайте текст. Иначе придётся всё переделывать.
+    </div>
+  </div>
+
+  <!-- ШАГ 6 -->
+  <div class="step">
+    <span class="step-num">6</span><h2>Запомните правила набора текста</h2>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Правило</th><th>Как правильно</th><th>Как неправильно</th></tr></thead>
+        <tbody>
+          <tr><td>Между словами</td><td><b>один</b> пробел</td><td>два, три пробела</td></tr>
+          <tr><td>Перед запятой и точкой</td><td>пробела <b>нет</b>: «слово, слово.»</td><td>«слово , слово .»</td></tr>
+          <tr><td>После запятой и точки</td><td><b>один</b> пробел</td><td>«слово,слово»</td></tr>
+          <tr><td>Новый абзац</td><td>клавиша <span class="kbd">Enter</span></td><td>много пробелов подряд</td></tr>
+          <tr><td>Конец строки</td><td>текст переносится <b>сам</b></td><td><span class="kbd">Enter</span> в конце каждой строки</td></tr>
+          <tr><td>Начало предложения</td><td><b>Заглавная</b> буква</td><td>строчная буква</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout ok">
+      ✅ <b>Красная волнистая линия</b> под словом — это не поломка. Так Writer показывает,
+      что слово может быть написано с ошибкой. Проверим орфографию позже.
+    </div>
+
+    <p><b>Если ошиблись:</b> удалите последний символ клавишей <span class="kbd">Backspace</span>
+    или отмените действие сочетанием <span class="kbd">Ctrl</span>+<span class="kbd">Z</span>.</p>
+  </div>
+
+  <!-- ШАГ 7 -->
+  <div class="step">
+    <span class="step-num">7</span><h2>Наберите текст</h2>
+
+    <p>Щёлкните левой кнопкой мыши по белому листу — появится курсор. Теперь наберите текст
+    <b>точно так, как в рамке</b>. Пока не оформляйте его: сначала просто наберите.</p>
+
+    <div class="type-card" aria-label="Текст, который нужно набрать">
+      <p class="tt-title">Текст как форма представления информации</p>
+      <p>Текст — это информация, записанная с помощью символов. Мы читаем тексты в книгах, видим их на экране компьютера и пишем сами.</p>
+      <p>Компьютер помогает создавать, редактировать и хранить тексты. Для этого используют текстовые процессоры. Один из них — LibreOffice Writer.</p>
+      <p>Я учусь в 5 классе. На уроке информатики я узнал, что текст можно оформить: изменить шрифт, размер букв и выравнивание.</p>
+    </div>
+
+    <ol>
+      <li>Напечатайте заголовок и нажмите <span class="kbd">Enter</span>.</li>
+      <li>Напечатайте первый абзац и снова нажмите <span class="kbd">Enter</span>.</li>
+      <li>Так же напечатайте второй и третий абзацы.</li>
+      <li>В конце третьего абзаца <span class="kbd">Enter</span> нажимать не нужно.</li>
     </ol>
 
     <div class="callout tip">
-      💡 <b>Совет:</b> если подчёркнуто всё подряд — проверьте, что в настройках выбран <b>русский язык</b> (внизу окна, в строке состояния).
+      💡 <b>Не бойтесь ошибок.</b> Если заметили опечатку, исправьте её сразу: поставьте курсор
+      после неправильной буквы и нажмите <span class="kbd">Backspace</span>.
+      Отменить последнее действие можно через <span class="kbd">Ctrl</span>+<span class="kbd">Z</span>.
     </div>
-  </div>
-
-  <!-- ================== ШАГ 6 ================== -->
-  <div class="step">
-    <span class="step-num">6</span><h2>Сохраните документ</h2>
-    <ol>
-      <li>Нажмите <span class="kbd">Ctrl+S</span> или меню <b>Файл → Сохранить</b>.</li>
-      <li>В окне сохранения выберите папку <b>Desktop</b>, затем папку с вашим <b>классом</b> и папку с вашей <b>фамилией</b>.</li>
-      <li>В поле «Имя файла» введите: <b>Tekst_komp</b>.</li>
-      <li>Нажмите <b>«Сохранить»</b>.</li>
-      <li>Если появится окно «Использовать формат ODF?» — нажмите <b>«Использовать формат ODF»</b>.</li>
-    </ol>
 
     <div class="callout warn">
-      ⚠️ <b>Важно:</b> имя файла должно быть на латинице или кириллице <b>без пробелов</b> — используйте нижнее подчёркивание <span class="kbd">_</span>.
+      ⚠️ Не выравнивайте текст пробелами и не нажимайте <span class="kbd">Enter</span> в конце каждой строки.
+      Writer сам переносит слова на новую строку. Для отступов и выравнивания есть специальные кнопки — о них дальше.
     </div>
   </div>
 
-  <!-- ================== ШАГ 7 ================== -->
+  <!-- ================== ЭТАП В ================== -->
+  <div class="stage" id="stage-c">
+    <span class="stage-letter">В</span>
+    <div>Оформление<small>шрифт, выравнивание, заголовок и выделение слов</small></div>
+  </div>
+
+  <!-- ШАГ 8 -->
   <div class="step">
-    <span class="step-num">7</span><h2>Проверьте себя по чек-листу</h2>
+    <span class="step-num">8</span><h2>Научитесь выделять текст</h2>
+
+    <p>Чтобы изменить текст, его сначала нужно <b>выделить</b>. Выделенный текст становится
+    тёмным, а на экране появляется синяя полоса.</p>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Что нужно выделить</th><th>Как это сделать</th></tr></thead>
+        <tbody>
+          <tr><td><b>Одно слово</b></td><td>Дважды щёлкните по нему левой кнопкой мыши.</td></tr>
+          <tr><td><b>Строку</b></td><td>Щёлкните в начало строки, нажмите <span class="kbd">Home</span>, затем <span class="kbd">Shift</span>+<span class="kbd">End</span>.</td></tr>
+          <tr><td><b>Несколько слов или абзац</b></td><td>Нажмите в начало и, не отпуская кнопку мыши, проведите до конца. Или щёлкните в начало, зажмите <span class="kbd">Shift</span> и щёлкните в конец.</td></tr>
+          <tr><td><b>Весь текст</b></td><td>Нажмите <span class="kbd">Ctrl</span>+<span class="kbd">A</span>.</td></tr>
+          <tr><td><b>Снять выделение</b></td><td>Щёлкните мышью в любом месте листа.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn">
+      ⚠️ Если случайно удалили выделенный текст — сразу нажмите <span class="kbd">Ctrl</span>+<span class="kbd">Z</span>.
+      Текст вернётся. После нескольких отмен подряд можно вернуть ещё более раннее состояние.
+    </div>
+  </div>
+
+  <!-- ШАГ 9 -->
+  <div class="step">
+    <span class="step-num">9</span><h2>Настройте шрифт и выравнивание всего текста</h2>
+
+    <ol>
+      <li>Нажмите <span class="kbd">Ctrl</span>+<span class="kbd">A</span>, чтобы выделить весь текст.</li>
+      <li>В панели форматирования найдите поле со шрифтом. Выберите <b>Liberation Serif</b>
+        (или <b>Times New Roman</b>, если он есть в списке).</li>
+      <li>В поле размера шрифта выберите <b>14</b>.</li>
+      <li>Нажмите кнопку <b>«По ширине»</b> — это последняя из кнопок выравнивания.
+        Можно нажать <span class="kbd">Ctrl</span>+<span class="kbd">J</span>.</li>
+      <li>Щёлкните по листу, чтобы снять выделение, и посмотрите на результат.</li>
+    </ol>
+
+    <div class="fig">
+      <div class="fig-scroll">
+        <div class="toolbar-demo" role="img" aria-label="Панель форматирования Writer: шрифт, размер, Ж, К, Ч, выравнивание">
+          <div class="tb-row">
+            <span class="num-badge">1</span><span class="tb-field"><span>Liberation Serif</span><span>▾</span></span>
+            <span class="num-badge">2</span><span class="tb-field size"><span>14</span><span>▾</span></span>
+            <span class="tb-sep"></span>
+            <span class="num-badge">3</span><span class="tb-btn bold">Ж</span>
+            <span class="num-badge">4</span><span class="tb-btn italic">К</span>
+            <span class="num-badge">5</span><span class="tb-btn underline">Ч</span>
+            <span class="tb-sep"></span>
+            <span class="num-badge">6</span><span class="tb-btn">Слева</span>
+            <span class="tb-btn active">По центру</span>
+            <span class="tb-btn">Справа</span>
+            <span class="tb-btn">По ширине</span>
+          </div>
+          <div class="tb-row" style="font-size:.72rem;color:#64748b;">
+            <span>Подсказка: наведите курсор на кнопку и подождите — появится её название.</span>
+          </div>
+        </div>
+      </div>
+      <div class="fig-cap">Рис. 6. Панель форматирования: <b>1</b> — шрифт, <b>2</b> — размер, <b>3</b> — Ж (полужирный), <b>4</b> — К (курсив), <b>5</b> — Ч (подчёркнутый), <b>6</b> — выравнивание.</div>
+    </div>
+
+    <div class="callout tip">
+      💡 Если кнопки не подписаны словами, ищите значки: <b>Ж</b> — жирный, <b>К</b> — курсив,
+      <b>Ч</b> — подчёркнутый. Кнопки выравнивания выглядят как несколько горизонтальных линий.
+    </div>
+  </div>
+
+  <!-- ШАГ 10 -->
+  <div class="step">
+    <span class="step-num">10</span><h2>Оформите заголовок</h2>
+
+    <p>Сейчас заголовок такого же размера, как остальной текст. Сделаем его крупным, жирным и по центру.</p>
+
+    <ol>
+      <li>Щёлкните мышью по строке с заголовком <b>«Текст как форма представления информации»</b>.</li>
+      <li>Нажмите <span class="kbd">Home</span>, затем <span class="kbd">Shift</span>+<span class="kbd">End</span> —
+        строка выделится целиком.</li>
+      <li>Нажмите <span class="kbd">Ctrl</span>+<span class="kbd">E</span> или кнопку <b>«По центру»</b>.</li>
+      <li>Нажмите <span class="kbd">Ctrl</span>+<span class="kbd">B</span> или кнопку <b>Ж</b>.</li>
+      <li>В поле размера шрифта выберите <b>18</b>.</li>
+      <li>Щёлкните по листу и проверьте результат.</li>
+    </ol>
+
+    <div class="callout ok">
+      ✅ <b>Должно получиться так:</b> заголовок стоит посередине строки, буквы крупные и жирные.
+      Если заголовок «прилип» к левому краю — повторите шаг 3. Если размер не изменился — проверьте,
+      что строка была выделена целиком.
+    </div>
+  </div>
+
+  <!-- ШАГ 11 -->
+  <div class="step">
+    <span class="step-num">11</span><h2>Сделайте красную строку и интервал</h2>
+
+    <p><b>Красная строка</b> — это небольшой отступ в начале каждого абзаца. Благодаря нему текст
+    выглядит аккуратно, как в учебнике.</p>
+
+    <ol>
+      <li>Выделите <b>три абзаца</b> основного текста, не захватывая заголовок:
+        щёлкните в начало первого абзаца, зажмите <span class="kbd">Shift</span> и щёлкните в конец третьего.</li>
+      <li>В меню выберите <b>Формат → Абзац</b>.</li>
+      <li>Откройте вкладку <b>«Отступы и интервалы»</b>.</li>
+      <li>В поле <b>«Первая строка»</b> выберите <b>1,25 см</b>.</li>
+      <li>В поле <b>«Междустрочный интервал»</b> выберите <b>1,5 строки</b>.</li>
+      <li>Нажмите <b>OK</b>.</li>
+    </ol>
+
+    <div class="fig">
+      <div class="fig-scroll">
+        <div class="dialog para-dialog" role="img" aria-label="Диалог Абзац, вкладка Отступы и интервалы: первая строка 1,25 см, междустрочный интервал 1,5 строки">
+          <div class="dlg-title"><span>Абзац</span><span>×</span></div>
+          <div class="para-tabs">
+            <span class="active">Отступы и интервалы</span>
+            <span>Выравнивание</span>
+            <span>Положение на странице</span>
+          </div>
+          <div class="para-body">
+            <label><span class="num-badge">1</span> Первая строка</label><span class="field">1,25 см</span>
+            <label>Перед текстом</label><span class="field">0 см</span>
+            <label>После текста</label><span class="field">0 см</span>
+            <label><span class="num-badge">2</span> Междустрочный</label><span class="field">1,5 строки</span>
+          </div>
+          <div class="dlg-foot">
+            <button class="btn-mock" type="button">Справка</button>
+            <button class="btn-mock" type="button">Отмена</button>
+            <button class="btn-mock primary" type="button"><span class="num-badge">3</span> OK</button>
+          </div>
+        </div>
+      </div>
+      <div class="fig-cap">Рис. 7. Диалог «Абзац»: <b>1</b> — первая строка 1,25 см; <b>2</b> — интервал 1,5 строки; <b>3</b> — нажмите OK.</div>
+    </div>
+
+    <div class="callout tip">
+      💡 Если пункт <b>«Абзац»</b> не находится, проверьте, что выделен текст, и откройте меню
+      <b>Формат</b> ещё раз. В некоторых версиях пункт называется <b>«Абзац…»</b>.
+    </div>
+  </div>
+
+  <!-- ШАГ 12 -->
+  <div class="step">
+    <span class="step-num">12</span><h2>Выделите ключевые слова</h2>
+
+    <p>Теперь сделаем так, чтобы важные слова были заметны. Найдите в своём тексте нужные фрагменты
+    и оформите их по таблице.</p>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Слово или фраза</th><th>Что сделать</th><th>Кнопка</th><th>Горячие клавиши</th></tr></thead>
+        <tbody>
+          <tr><td><b>Текст</b> (первое слово первого абзаца)</td><td>Курсив</td><td><b>К</b></td><td><span class="kbd">Ctrl</span>+<span class="kbd">I</span></td></tr>
+          <tr><td><b>создавать</b></td><td>Подчёркнутый</td><td><b>Ч</b></td><td><span class="kbd">Ctrl</span>+<span class="kbd">U</span></td></tr>
+          <tr><td><b>текстовые процессоры</b></td><td>Полужирный</td><td><b>Ж</b></td><td><span class="kbd">Ctrl</span>+<span class="kbd">B</span></td></tr>
+          <tr><td><b>5 классе</b></td><td>Полужирный</td><td><b>Ж</b></td><td><span class="kbd">Ctrl</span>+<span class="kbd">B</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><b>Порядок действий для каждого слова:</b></p>
+    <ol>
+      <li>Дважды щёлкните по слову — оно выделится.</li>
+      <li>Нажмите нужную кнопку: <b>Ж</b>, <b>К</b> или <b>Ч</b>.</li>
+      <li>Щёлкните по пустому месту, чтобы снять выделение, и проверьте результат.</li>
+    </ol>
+
+    <div class="callout ok">
+      ✅ <b>Проверьте себя:</b> в тексте должно быть ровно <b>4</b> выделенных фрагмента:
+      курсив, подчёркивание и два полужирных. Если получилось больше — выделите лишнее и нажмите
+      ту же кнопку ещё раз, чтобы снять оформление.
+    </div>
+
+    <div class="callout warn">
+      ⚠️ Не выделяйте слово вместе с пробелом после него. Иначе пробел тоже станет жирным или
+      подчёркнутым, и расстояние между словами изменится.
+    </div>
+  </div>
+
+  <!-- ШАГ 13 -->
+  <div class="step">
+    <span class="step-num">13</span><h2>Проверьте орфографию</h2>
+
+    <p>Writer подчёркивает красной волнистой линией слова, в которых видит ошибку.
+    Это помощник, а не наказание.</p>
+
+    <ol>
+      <li>Нажмите <span class="kbd">F7</span> или выберите <b>Сервис → Правописание</b>.</li>
+      <li>Writer будет показывать слова по очереди. Если слово написано верно, нажмите <b>«Пропустить»</b>.</li>
+      <li>Если есть правильный вариант в списке — выберите его и нажмите <b>«Заменить»</b>.</li>
+      <li>Если Writer не знает слово, но оно верное (например, фамилия), нажмите <b>«Добавить»</b> или <b>«Пропустить»</b>.</li>
+      <li>Когда проверка закончится, закройте окно.</li>
+    </ol>
+
+    <div class="callout tip">
+      💡 <b>Проверьте язык:</b> внизу окна в строке состояния должно быть написано <b>«Русский»</b>.
+      Если там «Английский», щёлкните по нему и выберите русский язык. Иначе все русские слова
+      будут подчёркнуты красным.
+    </div>
+
+    <div class="callout ok">
+      ✅ Красные волнистые линии <b>не печатаются</b> и не портят документ. Они видны только на экране.
+      Но ошибки всё равно лучше исправить.
+    </div>
+  </div>
+
+  <!-- ================== ЭТАП Г ================== -->
+  <div class="stage" id="stage-d">
+    <span class="stage-letter">Г</span>
+    <div>Завершение<small>сохранение, проверка и сдача работы</small></div>
+  </div>
+
+  <!-- ШАГ 14 -->
+  <div class="step">
+    <span class="step-num">14</span><h2>Сохраните и проверьте документ</h2>
+
+    <ol>
+      <li>Нажмите <span class="kbd">Ctrl</span>+<span class="kbd">S</span>. Если документ уже сохранялся,
+        окно выбора папки не появится — изменения запишутся сразу.</li>
+      <li>Посмотрите на заголовок окна: там должно быть <b>Практическая1.odt — LibreOffice Writer</b>.</li>
+      <li>Закройте Writer кнопкой <b>×</b> в правом верхнем углу.</li>
+      <li>Если появится вопрос «Сохранить изменения?» — нажмите <b>«Сохранить»</b>.</li>
+      <li>Снова откройте Рабочий стол → 5класс → свою букву → свою папку.</li>
+      <li>Дважды щёлкните по файлу <b>Практическая1</b>. Документ должен открыться с вашим текстом.</li>
+    </ol>
+
+    <div class="callout ok">
+      ✅ Если файл открылся и текст на месте — работа сохранена правильно. Можно показывать учителю.
+    </div>
+
+    <div class="callout warn">
+      ⚠️ Если файл не открывается или открылся пустой документ — позовите учителя.
+      Не создавайте новый файл и не удаляйте старый: возможно, работа лежит в другой папке.
+    </div>
+
+    <div class="fig">
+      <div class="fig-scroll">
+        <div class="doc-sample" role="img" aria-label="Готовый документ: заголовок по центру, три абзаца с красной строкой и выделенными словами">
+          <p class="doc-title">Текст как форма представления информации</p>
+          <p><span class="i">Текст</span> — это информация, записанная с помощью символов. Мы читаем тексты в книгах, видим их на экране компьютера и пишем сами.</p>
+          <p>Компьютер помогает <span class="u">создавать</span>, редактировать и хранить тексты. Для этого используют <span class="b">текстовые процессоры</span>. Один из них — LibreOffice Writer.</p>
+          <p>Я учусь в <span class="b">5 классе</span>. На уроке информатики я узнал, что текст можно оформить: изменить шрифт, размер букв и выравнивание.</p>
+        </div>
+      </div>
+      <div class="fig-cap">Рис. 8. Так должен выглядеть готовый документ: заголовок по центру, абзацы с красной строкой, четыре выделенных фрагмента.</div>
+    </div>
+  </div>
+
+  <!-- ШАГ 15 -->
+  <div class="step">
+    <span class="step-num">15</span><h2>Проверьте себя по чек-листу</h2>
+    <p>Отмечайте пункты по одному. Когда все галочки будут стоять, работа готова.</p>
 
     <div class="checklist">
-      <h3>✅ Чек-лист готовности</h3>
-      <label><input type="checkbox" data-check> Заголовок «Мой первый текст» — по центру, жирный, размер 16–18</label>
-      <label><input type="checkbox" data-check> Текст набран без ошибок, пробелы по правилам</label>
-      <label><input type="checkbox" data-check> Слово «5 классе» — жирным</label>
-      <label><input type="checkbox" data-check> Слово «текст» — курсивом</label>
-      <label><input type="checkbox" data-check> Слово «создавать» — подчёркнутым</label>
-      <label><input type="checkbox" data-check> Слово «текстовые процессоры» — жирным</label>
-      <label><input type="checkbox" data-check> Документ сохранён с именем <b>Tekst_komp</b></label>
-      <label><input type="checkbox" data-check> Я знаю, что 1 байт = 8 бит</label>
-    </div>    
-  </div>
+      <div class="checklist-head">
+        <h3>✅ Чек-лист готовности</h3>
+        <span class="check-progress" id="checkProgress">Выполнено 0 из 11</span>
+      </div>
+      <div class="check-bar"><div id="checkBar"></div></div>
 
-  <div class="step">
-    <span class="step-num">8</span><h2>Отлично!</h2>
-    <div class="callout ok" >     
-      🎉 <b>Все пункты выполнены.</b> Теперь покажите работу учителю.
+      <label><input type="checkbox" class="pcheck"> Я открыл LibreOffice Writer.</label>
+      <label><input type="checkbox" class="pcheck"> Файл <b>Практическая1</b> сохранён в папку <b>Рабочий стол → 5класс → 5А/5Б/5В → Фамилия Имя</b>.</label>
+      <label><input type="checkbox" class="pcheck"> Заголовок стоит по центру, написан полужирным шрифтом, размер 18.</label>
+      <label><input type="checkbox" class="pcheck"> Основной текст набран шрифтом 14 и выровнен по ширине.</label>
+      <label><input type="checkbox" class="pcheck"> У абзацев есть красная строка 1,25 см и интервал 1,5 строки.</label>
+      <label><input type="checkbox" class="pcheck"> Слово <b>«Текст»</b> выделено курсивом.</label>
+      <label><input type="checkbox" class="pcheck"> Слово <b>«создавать»</b> подчёркнуто.</label>
+      <label><input type="checkbox" class="pcheck"> Слова <b>«текстовые процессоры»</b> написаны полужирным.</label>
+      <label><input type="checkbox" class="pcheck"> Слова <b>«5 классе»</b> написаны полужирным.</label>
+      <label><input type="checkbox" class="pcheck"> Я проверил орфографию и исправил ошибки.</label>
+      <label><input type="checkbox" class="pcheck"> Я закрыл и снова открыл файл — текст сохранился.</label>
+    </div>
+
+    <div class="callout tip">
+      💡 Если какой-то пункт не выполняется, вернитесь к нужному шагу. Номер шага указан в заголовке.
+      Например, за заголовок отвечает шаг 10, за выделение слов — шаг 12.
     </div>
   </div>
 
-  <div style="text-align:center;margin:24px 0 8px;">
-    <a href="lesson-08-tekst.html" style="display:inline-block;padding:12px 28px;
-      background:#fff;border:2px solid #3b82f6;color:#3b82f6;
-      text-decoration:none;border-radius:12px;font-weight:700;transition:.2s;">
-      ← Вернуться к уроку
-    </a>
+  <!-- ШАГ 16 -->
+  <div class="step">
+    <span class="step-num">16</span><h2>Как оценивается работа</h2>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Оценка</th><th>Что должно быть сделано</th></tr></thead>
+        <tbody>
+          <tr><td><b>5</b></td><td>Все пункты чек-листа выполнены. Текст набран без ошибок, оформление совпадает с образцом, файл лежит в правильной папке.</td></tr>
+          <tr><td><b>4</b></td><td>Работа выполнена, но есть 1–2 небольшие неточности: например, не всё выровнено или один фрагмент выделен не тем способом.</td></tr>
+          <tr><td><b>3</b></td><td>Текст набран и файл сохранён, но оформление выполнено частично.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="font-size:.85rem;">Итоговую оценку ставит учитель. Главное — не бросать работу на середине: даже недоделанный, но сохранённый файл можно продолжить на следующем уроке.</p>
+  </div>
+
+  <!-- ШАГ 17 -->
+  <div class="step">
+    <span class="step-num">17</span><h2>Если что-то пошло не так</h2>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Проблема</th><th>Что делать</th></tr></thead>
+        <tbody>
+          <tr><td>Печатаются английские буквы</td><td>Переключите язык: <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>, <span class="kbd">Alt</span>+<span class="kbd">Shift</span> или щёлкните по значку <b>RU/EN</b> внизу экрана.</td></tr>
+          <tr><td>Пропали панели с кнопками</td><td>Меню <b>Вид → Панели инструментов</b> → поставьте галочки <b>«Стандартная»</b> и <b>«Форматирование»</b>.</td></tr>
+          <tr><td>Не могу найти свою папку</td><td>Проверьте путь: <b>Рабочий стол → 5класс → 5А/5Б/5В → Фамилия Имя</b>. Не ищите в «Документах».</td></tr>
+          <tr><td>Сохранил файл не туда</td><td>Откройте <b>Файл → Сохранить как</b> и сохраните заново по правильному пути с тем же именем <b>Практическая1</b>.</td></tr>
+          <tr><td>Появилось окно про формат</td><td>Нажмите <b>«Использовать формат ODF!»</b>. Это родной формат Writer.</td></tr>
+          <tr><td>Случайно удалил текст</td><td>Сразу нажмите <span class="kbd">Ctrl</span>+<span class="kbd">Z</span>. Если не помогло — наберите удалённый фрагмент снова.</td></tr>
+          <tr><td>Закрыл программу без сохранения</td><td>Откройте файл снова. Если текст пропал — придётся набрать заново. В следующий раз сохраняйте каждые 2–3 минуты.</td></tr>
+          <tr><td>Все слова подчёркнуты красным</td><td>Проверьте язык в строке состояния: должен быть <b>«Русский»</b>. Красные линии не печатаются.</td></tr>
+          <tr><td>Текст «съехал» или стоит криво</td><td>Не выравнивайте пробелами. Выделите абзацы и используйте кнопки выравнивания и диалог <b>Формат → Абзац</b>.</td></tr>
+          <tr><td>Не получается выделить фразу</td><td>Щёлкните в начало фразы, зажмите <span class="kbd">Shift</span> и щёлкните в её конец. Или проведите мышью при нажатой левой кнопке.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout pink">
+      🔒 <b>Никогда не удаляйте</b> папки <b>5класс</b>, <b>5А</b>, <b>5Б</b>, <b>5В</b> и чужие папки.
+      В них лежат работы других учеников. Если случайно что-то удалили — сразу скажите учителю.
+    </div>
+  </div>
+
+  <!-- ШАГ 18 -->
+  <div class="step">
+    <span class="step-num">18</span><h2>Мини-словарик</h2>
+
+    <div class="goals">
+      <div class="goal-card blue"><h4>Текстовый документ</h4><p>Информация, записанная буквами, цифрами и знаками на листе или в файле.</p></div>
+      <div class="goal-card green"><h4>Текстовый процессор</h4><p>Программа для создания и оформления текстов. Пример — LibreOffice Writer.</p></div>
+      <div class="goal-card amber"><h4>Курсор</h4><p>Мигающая черта, которая показывает, где появится следующая буква.</p></div>
+      <div class="goal-card pink"><h4>Абзац</h4><p>Часть текста, которая начинается с новой строки и имеет отступ.</p></div>
+      <div class="goal-card blue"><h4>Форматирование</h4><p>Изменение внешнего вида текста: шрифта, размера, цвета, выравнивания.</p></div>
+      <div class="goal-card green"><h4>Шрифт</h4><p>Рисунок букв. Например, Liberation Serif или Times New Roman.</p></div>
+      <div class="goal-card amber"><h4>Размер шрифта</h4><p>Высота букв. Чем больше число, тем крупнее текст.</p></div>
+      <div class="goal-card pink"><h4>ODF</h4><p>Формат файлов LibreOffice. Файл Writer имеет расширение <b>.odt</b>.</p></div>
+    </div>
+  </div>
+
+  <!-- ШАГ 19 -->
+  <div class="step">
+    <span class="step-num">19</span><h2>Работа готова!</h2>
+    <p>Вы научились открывать Writer, набирать текст, оформлять заголовок и абзацы, выделять слова
+    и сохранять документ в свою папку.</p>
+
+    <div class="callout ok">
+      🎉 <b>Что сделать в конце:</b>
+      <ul style="margin:8px 0 0;">
+        <li>ещё раз нажмите <span class="kbd">Ctrl</span>+<span class="kbd">S</span>;</li>
+        <li>закройте документ;</li>
+        <li>покажите учителю файл <b>Практическая1</b> в папке <b>5класс → 5А/5Б/5В → Фамилия Имя</b>;</li>
+        <li>не удаляйте файл — он понадобится на следующем уроке.</li>
+      </ul>
+    </div>
+
+    <div class="callout tip">
+      💡 <b>Что дальше:</b> на следующих занятиях вы научитесь вставлять в документ картинки и таблицы,
+      менять цвет текста и оформлять титульный лист.
+    </div>
+  </div>
+
+  <div class="final-card">
+    <h2>🏆 Отличная работа!</h2>
+    <p>Теперь вы умеете создавать текстовый документ в LibreOffice Writer
+    и сохранять его по правилам класса.</p>
+    <p style="font-weight:700;color:#166534;">Рабочий стол → 5класс → 5А/5Б/5В → Фамилия Имя → Практическая1</p>
+    <p style="font-size:.9rem;color:#64748b;">Практическая работа №1 · 5 класс · LibreOffice Writer · Astra Linux 1.8</p>
   </div>
 
 </div>
 
 <script src="../shared/account.js"></script>
 <script src="../shared/nav-auth.js"></script>
+<script>
+(function () {
+  var boxes = Array.from(document.querySelectorAll('.pcheck'));
+  var label = document.getElementById('checkProgress');
+  var bar = document.getElementById('checkBar');
+  if (!boxes.length || !label || !bar) return;
+
+  function update() {
+    var done = boxes.filter(function (b) { return b.checked; }).length;
+    var total = boxes.length;
+    bar.style.width = (done / total * 100) + '%';
+    if (done === total) {
+      label.textContent = 'Всё готово! 🎉';
+    } else {
+      label.textContent = 'Выполнено ' + done + ' из ' + total;
+    }
+  }
+
+  boxes.forEach(function (b) { b.addEventListener('change', update); });
+  update();
+})();
+</script>
 </body>
 </html>

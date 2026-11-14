@@ -20,6 +20,11 @@
   .lessons-section{margin-bottom:30px;}
   .lessons-section .section-title{font-size:1.15rem;margin:0 0 12px;color:#1e293b;display:flex;align-items:center;gap:8px;}
   .section-empty{background:#f8fafc;border:2px dashed #cbd5e1;border-radius:12px;padding:14px 18px;color:#64748b;font-size:.92rem;line-height:1.45;}
+  .practice-class-title{font-size:1rem;margin:0 0 10px;color:#166534;display:flex;align-items:center;gap:8px;}
+  .practice-class-title:before{content:"📁";font-size:1.05rem;}
+  .practice-card{border-left-color:#22c55e;background:linear-gradient(180deg,#fff,#f7fdf9);}
+  .practice-card:hover{border-left-color:#16a34a;box-shadow:0 8px 20px rgba(34,197,94,.22);}
+  .practice-card .tag{color:#15803d;}
 </style>
 </head>
 <body>
@@ -91,6 +96,17 @@
     { file: "python-class/lesson-01-start.html", title: "Python для начинающих. Урок 1. Первая программа в IDLE (Astra Linux)", tag: "5–11 классы · Astra Linux · IDLE" }
   ];
 
+  /* Практические работы по классам */
+  const PRACTS_CATALOG = {
+    "5 класс": [
+      {
+        file: "5-class/practice.html",
+        title: "Практическая работа №1. Текст как форма представления информации",
+        tag: "5 класс · LibreOffice Writer · Astra Linux 1.8"
+      }
+    ]
+  };
+
   const CATALOG_EGE = {
     "9 класс": [
       { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
@@ -140,6 +156,38 @@
     container.appendChild(section);
   }
 
+  function renderPracticeSection() {
+    const items = PRACTS_CATALOG[student.class];
+    if (!items || !items.length) return;
+
+    const section = document.createElement('section');
+    section.className = 'lessons-section practices-section';
+
+    const heading = document.createElement('h2');
+    heading.className = 'section-title';
+    heading.textContent = '🖥 Практические работы';
+    section.appendChild(heading);
+
+    const subheading = document.createElement('h3');
+    subheading.className = 'practice-class-title';
+    subheading.textContent = student.class;
+    section.appendChild(subheading);
+
+    const listEl = document.createElement('div');
+    listEl.className = 'lesson-list';
+
+    items.forEach(function (practice) {
+      const a = document.createElement('a');
+      a.className = 'lesson-card practice-card';
+      a.href = practice.file;
+      a.innerHTML = `${practice.title}<span class="tag">${practice.tag}</span>`;
+      listEl.appendChild(a);
+    });
+
+    section.appendChild(listEl);
+    container.appendChild(section);
+  }
+
   renderSection('🐍 Python для начинающих', PYTHON_CATALOG, '');
 
   if (isSenior) {
@@ -160,6 +208,8 @@
       `Для ${student.class} пока нет уроков. Обратитесь к учителю.`
     );
   }
+
+  renderPracticeSection();
 
   /* ---------- Мои результаты ---------- */
   const refreshBtn = document.getElementById('refreshResultsBtn');
