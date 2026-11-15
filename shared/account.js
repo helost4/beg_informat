@@ -356,6 +356,7 @@
       case 'homework': return 'Домашнее задание';
       case 'trainer-level': return 'Тренажёр · уровень';
       case 'trainer': return 'Тренажёр · итог';
+      case 'exam-task': return 'Тренажёр · экзамен';
       case 'test': return 'Тест урока';
       default: return 'Работа';
     }

@@ -1,0 +1,308 @@
+/* ============================================================
+   ТРЕНАЖЁР ПОДГОТОВКИ К ЭКЗАМЕНАМ (ВПР / ОГЭ / ЕГЭ)
+   ============================================================ */
+
+.trainer-wrap{max-width:960px;margin:0 auto;padding:40px 0 60px;}
+
+/* ---------- Шапка урока ---------- */
+.lesson-head{text-align:center;margin-bottom:22px;padding:24px 18px 6px;}
+.exam-badge{
+  display:inline-block;padding:6px 16px;border-radius:20px;
+  background:linear-gradient(90deg,#3b82f6,#8b5cf6);color:#fff;
+  font-weight:800;font-size:.82rem;letter-spacing:.4px;
+  box-shadow:0 4px 12px rgba(59,130,246,.35);margin-bottom:10px;
+}
+.exam-badge.vpr7{background:linear-gradient(90deg,#0ea5e9,#22c55e);}
+.exam-badge.vpr8{background:linear-gradient(90deg,#06b6d4,#6366f1);}
+.exam-badge.oge{background:linear-gradient(90deg,#8b5cf6,#ec4899);}
+.exam-badge.ege{background:linear-gradient(90deg,#f59e0b,#ef4444);}
+.lesson-head h1{font-size:1.72rem;line-height:1.3;margin:0 0 8px;}
+.lesson-head .sub{color:var(--muted);font-size:.95rem;line-height:1.5;}
+.student-line{margin-top:10px;font-size:.88rem;color:#475569;font-weight:600;}
+.lesson-meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px;}
+.meta-chip{
+  background:#fff;border:1px solid #cbd5e1;border-radius:20px;
+  padding:5px 12px;font-size:.8rem;font-weight:600;color:#334155;
+}
+.meta-chip b{color:#1e40af;}
+
+/* ---------- Вкладки ---------- */
+.trainer-tabs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:6px 0 20px;}
+.trainer-tabs .tab{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 22px;border-radius:12px;border:2px solid var(--line);
+  background:#fff;color:#334155;font-size:.95rem;font-weight:700;cursor:pointer;
+  transition:.2s;
+}
+.trainer-tabs .tab:hover{border-color:#93c5fd;background:#f8fafc;}
+.trainer-tabs .tab.active{
+  background:linear-gradient(90deg,#3b82f6,#8b5cf6);color:#fff;border-color:transparent;
+  box-shadow:0 6px 18px rgba(59,130,246,.3);
+}
+.tab-count{
+  background:rgba(255,255,255,.25);border-radius:12px;padding:1px 8px;
+  font-size:.78rem;font-weight:800;
+}
+.trainer-tabs .tab:not(.active) .tab-count{background:#e2e8f0;color:#475569;}
+
+/* ---------- Теория ---------- */
+#theoryTab .theory-lead{
+  background:linear-gradient(135deg,#eff6ff,#fdf4ff);border:1px solid #c7d2fe;
+  border-radius:14px;padding:16px 18px;margin-bottom:16px;line-height:1.6;color:#334155;
+}
+.theory-block{background:#fff;border-radius:16px;border:1px solid var(--line);
+  box-shadow:0 6px 18px rgba(59,130,246,.08);padding:22px 24px;margin-bottom:16px;}
+.theory-block h3{margin:0 0 12px;font-size:1.08rem;color:#1e40af;}
+.theory-block h4{margin:18px 0 6px;font-size:.98rem;color:#1e293b;}
+.theory-block p{margin:8px 0;line-height:1.65;color:#334155;}
+.theory-block ul,.theory-block ol{margin:8px 0;padding-left:24px;line-height:1.65;color:#334155;}
+.theory-block li{margin:4px 0;}
+.theory-block b{color:#1d4ed8;}
+.theory-block table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.9rem;}
+.theory-block th,.theory-block td{border:1px solid #cbd5e1;padding:7px 9px;text-align:left;vertical-align:top;}
+.theory-block th{background:#eff6ff;color:#1e293b;}
+.theory-block .formula{
+  background:#0f172a;color:#e2e8f0;border-radius:10px;padding:12px 16px;margin:12px 0;
+  font-family:Consolas,'Courier New',monospace;font-size:.95rem;overflow-x:auto;line-height:1.7;
+}
+.theory-block .note{
+  border-radius:10px;padding:12px 16px;margin:12px 0;font-size:.92rem;line-height:1.55;
+}
+.theory-block .note.tip{background:#eff6ff;border-left:4px solid #3b82f6;color:#1e40af;}
+.theory-block .note.warn{background:#fffbeb;border-left:4px solid #f59e0b;color:#92400e;}
+.theory-block .note.ok{background:#f0fdf4;border-left:4px solid #22c55e;color:#14532d;}
+.theory-block .example{
+  background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:12px 16px;margin:12px 0;
+}
+.theory-block .example .ex-title{font-weight:800;color:#7c3aed;margin-bottom:6px;}
+.sources-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:16px 18px;margin-top:8px;}
+.sources-box h3{margin:0 0 10px;font-size:.98rem;color:#1e293b;}
+.source-links{display:flex;flex-wrap:wrap;gap:8px;}
+.source-link{
+  display:inline-flex;align-items:center;gap:6px;text-decoration:none;
+  background:#fff;border:1px solid #93c5fd;border-radius:20px;padding:6px 13px;
+  font-size:.82rem;font-weight:600;color:#1e40af;transition:.2s;
+}
+.source-link:hover{background:#eff6ff;transform:translateY(-1px);}
+
+/* ---------- Блоки задач ---------- */
+.block-chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;}
+.block-chip{
+  display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left;
+  background:#fff;border:2px solid var(--line);border-radius:14px;
+  padding:10px 15px;font-size:.88rem;font-weight:700;color:#334155;transition:.2s;
+}
+.block-chip:hover{border-color:#93c5fd;background:#f8fafc;}
+.block-chip.active{border-color:#3b82f6;background:#eff6ff;color:#1e40af;
+  box-shadow:0 4px 14px rgba(59,130,246,.15);}
+.block-chip .chip-num{
+  width:26px;height:26px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+  background:#e2e8f0;color:#334155;font-size:.8rem;font-weight:800;
+}
+.block-chip.active .chip-num{background:#3b82f6;color:#fff;}
+.block-chip .chip-status{font-size:.76rem;font-weight:700;color:#64748b;}
+.block-chip.done .chip-status{color:#15803d;}
+
+.block-panel{background:#fff;border-radius:18px;border:1px solid var(--line);
+  box-shadow:var(--shadow);padding:22px;margin-bottom:18px;}
+.block-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
+.block-head h2{margin:0;font-size:1.15rem;}
+.block-progress{font-size:.82rem;font-weight:700;color:#475569;white-space:nowrap;}
+.block-progress b{color:#1e40af;}
+.block-bar{height:9px;background:#e2e8f0;border-radius:6px;overflow:hidden;margin:10px 0 4px;}
+.block-bar > div{height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#8b5cf6);transition:width .3s;}
+.block-hint{font-size:.84rem;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+
+/* ---------- Карточка задачи ---------- */
+.task-card{
+  border:2px solid #e2e8f0;border-radius:16px;padding:18px 20px;margin-bottom:16px;
+  background:#fff;transition:.2s;scroll-margin-top:80px;
+}
+.task-card:hover{border-color:#c7d2fe;}
+.task-card.solved{border-color:#86efac;background:linear-gradient(180deg,#fff,#f7fdf9);}
+.task-card.wrong{border-color:#fca5a5;background:linear-gradient(180deg,#fff,#fff7f7);}
+.task-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.task-num{
+  width:34px;height:34px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-weight:900;font-size:.95rem;
+}
+.task-card.solved .task-num{background:linear-gradient(135deg,#22c55e,#16a34a);}
+.task-card.wrong .task-num{background:linear-gradient(135deg,#f97316,#ef4444);}
+.diff{display:flex;gap:3px;align-items:center;}
+.diff i{width:7px;height:7px;border-radius:50%;background:#cbd5e1;display:inline-block;}
+.diff i.on{background:#f59e0b;}
+.diff-label{font-size:.76rem;color:#64748b;font-weight:600;margin-left:4px;}
+.task-q{line-height:1.64;color:#1e293b;font-size:.97rem;margin-bottom:14px;}
+.task-q p{margin:6px 0;}
+.task-q center{display:block;text-align:center;}
+.task-q table{border-collapse:collapse;margin:10px auto;font-size:.9rem;}
+.task-q th,.task-q td{border:1px solid #94a3b8;padding:6px 10px;text-align:center;min-width:26px;}
+.task-q th{background:#f1f5f9;}
+.task-q img{max-width:100%;height:auto;display:block;margin:10px auto;border-radius:8px;}
+.task-q i{font-style:italic;}
+.task-q sup{font-size:.75em;}
+.task-q sub{font-size:.75em;}
+
+.answer-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.answer-input{
+  flex:1;min-width:180px;padding:11px 14px;font-size:.97rem;
+  border:2px solid #cbd5e1;border-radius:10px;background:#fff;color:#0f172a;
+}
+.answer-input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.15);}
+.answer-input:disabled{background:#f1f5f9;color:#334155;}
+.btn-check{
+  padding:11px 22px;border:none;border-radius:10px;cursor:pointer;
+  background:linear-gradient(90deg,#3b82f6,#8b5cf6);color:#fff;font-weight:700;font-size:.92rem;
+  box-shadow:0 4px 14px rgba(59,130,246,.3);transition:.2s;
+}
+.btn-check:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(59,130,246,.38);}
+.btn-check:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none;}
+.btn-soft{
+  padding:10px 16px;border-radius:10px;border:2px solid #cbd5e1;background:#fff;
+  color:#334155;font-weight:600;font-size:.88rem;cursor:pointer;transition:.2s;
+}
+.btn-soft:hover{border-color:#93c5fd;background:#f8fafc;}
+
+.task-feedback{margin-top:10px;font-weight:700;font-size:.92rem;line-height:1.5;}
+.task-feedback.ok{color:#15803d;}
+.task-feedback.bad{color:#b91c1c;}
+.task-feedback .expected{font-weight:600;color:#475569;}
+
+.task-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+
+.task-hint{
+  margin-top:10px;background:#fffbeb;border-left:4px solid #f59e0b;border-radius:8px;
+  padding:10px 14px;font-size:.9rem;color:#92400e;line-height:1.55;
+}
+.task-solution{
+  margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;
+  padding:14px 16px;font-size:.93rem;line-height:1.65;color:#334155;
+}
+.task-solution p{margin:6px 0;}
+.task-solution b{color:#1e40af;}
+.task-solution table{border-collapse:collapse;margin:8px 0;font-size:.88rem;}
+.task-solution th,.task-solution td{border:1px solid #cbd5e1;padding:5px 8px;text-align:center;}
+.task-solution center{display:block;text-align:center;}
+.task-solution img{max-width:100%;height:auto;display:block;margin:8px auto;}
+.task-video{
+  margin-top:12px;border:2px dashed #cbd5e1;border-radius:12px;padding:12px 16px;
+  font-size:.87rem;color:#64748b;background:#fbfdff;line-height:1.5;
+}
+.task-video.ready{border-style:solid;border-color:#c7d2fe;background:#eff6ff;color:#1e40af;padding:0;overflow:hidden;}
+.task-video .video-frame{position:relative;padding-top:56.25%;}
+.task-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.task-video .video-title{padding:10px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+.task-video .video-title a{color:#1e40af;font-size:.84rem;}
+.task-source{margin-top:10px;font-size:.78rem;color:#94a3b8;}
+.task-source a{color:#64748b;}
+
+/* ---------- Итог урока ---------- */
+.lesson-summary{
+  background:linear-gradient(135deg,#f0fdf4,#eff6ff);border:2px solid #86efac;
+  border-radius:16px;padding:20px 22px;margin-top:8px;line-height:1.6;color:#166534;
+}
+.lesson-summary h3{margin:0 0 8px;font-size:1.05rem;color:#15803d;}
+.lesson-summary b{color:#166534;}
+.lesson-nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:22px;}
+.lesson-nav .btn, .lesson-nav a.btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+
+/* ---------- Страница раздела ---------- */
+.exam-hero{
+  background:linear-gradient(135deg,#eff6ff,#fdf4ff,#f0fdf4);
+  border:2px solid #c7d2fe;border-radius:20px;padding:26px 24px;text-align:center;
+  margin-bottom:22px;box-shadow:0 10px 26px rgba(59,130,246,.09);
+}
+.exam-hero h1{font-size:1.85rem;margin:0 0 6px;}
+.exam-hero .sub{font-size:.98rem;line-height:1.55;max-width:640px;margin:0 auto;}
+.exam-legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px;}
+.legend-item{background:#fff;border:1px solid #cbd5e1;border-radius:20px;padding:6px 13px;
+  font-size:.82rem;font-weight:600;color:#334155;}
+.legend-item b{color:#1e40af;}
+
+.exam-tools{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.exam-tools .muted{font-size:.86rem;}
+.lesson-grid{display:grid;gap:12px;}
+.lesson-card-x{
+  display:flex;align-items:center;gap:14px;text-decoration:none;
+  background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px 18px;
+  color:var(--txt);transition:.2s;
+}
+.lesson-card-x:hover{border-color:#93c5fd;box-shadow:0 8px 20px rgba(59,130,246,.13);transform:translateY(-1px);}
+.lesson-card-x.disabled{opacity:.62;cursor:default;background:#f8fafc;}
+.lesson-card-x.disabled:hover{border-color:var(--line);box-shadow:none;transform:none;}
+.lesson-card-x .lc-num{
+  width:44px;height:44px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-weight:900;font-size:1.05rem;
+}
+.lesson-card-x.done .lc-num{background:linear-gradient(135deg,#22c55e,#16a34a);}
+.lesson-card-x.disabled .lc-num{background:#cbd5e1;color:#475569;}
+.lesson-card-x .lc-body{flex:1;min-width:0;}
+.lesson-card-x .lc-title{font-weight:700;font-size:.97rem;line-height:1.35;}
+.lesson-card-x .lc-meta{font-size:.8rem;color:var(--muted);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;}
+.lesson-card-x .lc-state{font-size:.78rem;font-weight:700;white-space:nowrap;}
+.lesson-card-x .lc-state.done{color:#15803d;}
+.lesson-card-x .lc-state.todo{color:#94a3b8;}
+/* ---------- Главная страница тренажёра ---------- */
+.exam-grid{display:grid;gap:14px;}
+.exam-card{
+  display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--txt);
+  background:#fff;border:2px solid var(--line);border-radius:18px;padding:18px 20px;
+  transition:.2s;
+}
+.exam-card:hover{border-color:#93c5fd;box-shadow:0 10px 24px rgba(59,130,246,.14);transform:translateY(-2px);}
+.exam-card.locked{background:#f8fafc;opacity:.7;cursor:default;}
+.exam-card.locked:hover{transform:none;box-shadow:none;border-color:var(--line);}
+.ec-icon{
+  width:56px;height:56px;border-radius:16px;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:1.7rem;
+  background:linear-gradient(135deg,#eff6ff,#fdf4ff);
+}
+.exam-card.vpr7 .ec-icon{background:linear-gradient(135deg,#e0f2fe,#dcfce7);}
+.exam-card.vpr8 .ec-icon{background:linear-gradient(135deg,#cffafe,#e0e7ff);}
+.exam-card.oge .ec-icon{background:linear-gradient(135deg,#f3e8ff,#fce7f3);}
+.exam-card.ege .ec-icon{background:linear-gradient(135deg,#fef3c7,#fee2e2);}
+.ec-body{flex:1;min-width:0;}
+.ec-title{font-weight:800;font-size:1.08rem;}
+.ec-sub{font-size:.87rem;color:var(--muted);margin-top:3px;line-height:1.4;}
+.ec-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px;font-size:.79rem;color:#64748b;font-weight:600;}
+.ec-state{white-space:nowrap;font-size:.84rem;font-weight:800;flex:none;}
+.ec-open{color:#1d4ed8;}
+.ec-lock{color:#94a3b8;font-weight:700;}
+
+/* ---------- Широкие таблицы ---------- */
+.table-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:10px 0;}
+.table-scroll table{max-width:none;}
+
+.loading-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;color:var(--muted);text-align:center;}
+.error-card{background:#fef2f2;border:2px solid #fca5a5;border-radius:16px;padding:22px;color:#991b1b;line-height:1.6;}
+
+/* ---------- Адаптив ---------- */
+@media(max-width:640px){
+  .trainer-wrap{padding:64px 12px 44px;}
+  body{padding:12px;}
+  .lesson-head{padding:12px 6px 0;}
+  .lesson-head h1{font-size:1.32rem;}
+  .trainer-tabs .tab{padding:9px 15px;font-size:.86rem;}
+  .block-panel{padding:16px 13px;}
+  .task-card{padding:14px 12px;}
+  .task-q{font-size:.93rem;}
+  .answer-row{gap:8px;}
+  .answer-input{min-width:100%;}
+  .btn-check{width:100%;}
+  .lesson-card-x{padding:12px;gap:10px;}
+  .lesson-card-x .lc-num{width:38px;height:38px;border-radius:11px;font-size:.95rem;}
+  .block-chip{font-size:.8rem;padding:8px 11px;}
+  .theory-block{padding:16px 14px;}
+  .exam-hero{padding:20px 14px;}
+  .exam-hero h1{font-size:1.45rem;}
+  .exam-card{flex-wrap:wrap;gap:12px;padding:14px 15px;}
+  .ec-icon{width:44px;height:44px;border-radius:12px;font-size:1.35rem;}
+  .ec-state{width:100%;white-space:normal;text-align:right;}
+  .ec-meta{gap:8px;font-size:.75rem;}
+}
+
+@media print{
+  body{background:#fff;padding:0;}
+  .floating-nav,.trainer-tabs,.block-chips,.lesson-nav,.btn-check,.btn-soft{display:none;}
+  .task-card,.block-panel,.theory-block{break-inside:avoid;box-shadow:none;}
+}

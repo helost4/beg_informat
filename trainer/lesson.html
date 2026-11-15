@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Урок · Подготовка к экзаменам</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="trainer.css">
+</head>
+<body data-page="lesson">
+
+<div class="trainer-wrap">
+  <div class="loading-card" id="lessonLoading">Загрузка урока…</div>
+
+  <div id="lessonContent" class="hidden">
+    <div class="lesson-head">
+      <div class="exam-badge" id="examBadge"></div>
+      <h1 id="lessonTitle"></h1>
+      <p class="sub" id="lessonSub"></p>
+      <div class="student-line">👤 <span id="studentNameDisplay"></span></div>
+      <div class="lesson-meta" id="lessonMeta"></div>
+    </div>
+
+    <div class="trainer-tabs">
+      <button class="tab active" type="button" data-tab="theory">📖 Теория</button>
+      <button class="tab" type="button" data-tab="tasks">
+        🧩 Задачи <span class="tab-count" id="tasksTabCount">0</span>
+      </button>
+    </div>
+
+    <div id="theoryTab"></div>
+
+    <div id="tasksTab" class="hidden">
+      <div class="block-chips" id="blockChips"></div>
+      <div id="blockHost"></div>
+    </div>
+
+    <div class="lesson-nav">
+      <a class="btn ghost" data-back-exam href="exam.html">← К списку заданий</a>
+      <a class="btn ghost" href="index.html">🎯 Все разделы</a>
+      <a class="btn ghost" href="../lessons.html">🏠 Все уроки</a>
+    </div>
+  </div>
+</div>
+
+<script src="../shared/account.js"></script>
+<script src="../shared/nav-auth.js"></script>
+<script src="data/catalog.js"></script>
+<script src="data/videos.js"></script>
+<script src="engine.js"></script>
+</body>
+</html>

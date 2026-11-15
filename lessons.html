@@ -25,6 +25,11 @@
   .practice-card{border-left-color:#22c55e;background:linear-gradient(180deg,#fff,#f7fdf9);}
   .practice-card:hover{border-left-color:#16a34a;box-shadow:0 8px 20px rgba(34,197,94,.22);}
   .practice-card .tag{color:#15803d;}
+  .exam-class-title{font-size:1rem;margin:0 0 10px;color:#1e40af;display:flex;align-items:center;gap:8px;}
+  .exam-class-title:before{content:"🎯";font-size:1.05rem;}
+  .exam-card-link{border-left-color:#8b5cf6;background:linear-gradient(180deg,#fff,#faf5ff);}
+  .exam-card-link:hover{border-left-color:#7c3aed;box-shadow:0 8px 20px rgba(139,92,246,.22);}
+  .exam-card-link .tag{color:#6d28d9;}
 </style>
 </head>
 <body>
@@ -50,6 +55,7 @@
 </div>
 
 <script src="shared/account.js"></script>
+<script src="trainer/data/catalog.js"></script>
 <script>
 (function () {
   'use strict';
@@ -86,7 +92,7 @@
     "8 класс": [],
     "9 класс": [],
     "10 класс": [
-      { file: "10-class/lesson-10-networks.html", title: "Сеть. IP-адреса. Маски", tag: "ЕГЭ №10" }
+      { file: "10-class/lesson-10-networks.html", title: "Сеть. IP-адреса. Маски", tag: "Сети · ЕГЭ №13" }
     ],
     "11 класс": []
   };
@@ -107,22 +113,8 @@
     ]
   };
 
-  const CATALOG_EGE = {
-    "9 класс": [
-      { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
-    ],
-    "10 класс": [
-      { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
-    ],
-    "11 класс": [
-      { file: "ege-class/lesson-10-networks.html", title: "Тренажер: Сети. IP-адреса. Маски", tag: "ЕГЭ №10" }
-    ]
-  };
-
-  /* ---------- Рендер уроков: обычные и тренажёры ЕГЭ ---------- */
+  /* ---------- Рендер уроков ---------- */
   const container = document.getElementById('lessonsList');
-  const SENIOR_CLASSES = ['9 класс', '10 класс', '11 класс'];
-  const isSenior = SENIOR_CLASSES.indexOf(student.class) !== -1;
 
   function renderSection(title, items, emptyText) {
     const section = document.createElement('section');
@@ -188,27 +180,61 @@
     container.appendChild(section);
   }
 
-  renderSection('🐍 Python для начинающих', PYTHON_CATALOG, '');
+  function renderExamSection() {
+    const catalog = window.EXAM_CATALOG;
+    if (!catalog || !catalog.exams) return;
 
-  if (isSenior) {
-    renderSection(
-      '📘 Обычные уроки',
-      LESSONS_CATALOG[student.class],
-      `Обычных уроков для ${student.class} пока нет. Доступен тренажёр ЕГЭ.`
-    );
-    renderSection(
-      '🎯 Тренажёры ЕГЭ',
-      CATALOG_EGE[student.class],
-      `Тренажёров для ${student.class} пока нет.`
-    );
-  } else {
-    renderSection(
-      '📘 Уроки',
-      LESSONS_CATALOG[student.class],
-      `Для ${student.class} пока нет уроков. Обратитесь к учителю.`
-    );
+    const available = catalog.order
+      .map(function (id) { return catalog.exams[id]; })
+      .filter(function (exam) {
+        return exam && exam.classes.indexOf(student.class) !== -1;
+      });
+
+    if (!available.length) return;
+
+    const section = document.createElement('section');
+    section.className = 'lessons-section exams-section';
+
+    const heading = document.createElement('h2');
+    heading.className = 'section-title';
+    heading.textContent = '🎯 Подготовка к экзаменам и ВПР';
+    section.appendChild(heading);
+
+    const subheading = document.createElement('h3');
+    subheading.className = 'exam-class-title';
+    subheading.textContent = student.class;
+    section.appendChild(subheading);
+
+    const listEl = document.createElement('div');
+    listEl.className = 'lesson-list';
+
+    available.forEach(function (exam) {
+      const ready = exam.lessons.filter(function (l) { return l.ready; }).length;
+      const totalBlocks = exam.lessons.reduce(function (sum, lesson) {
+        return sum + (lesson.blocks ? lesson.blocks.length : 0);
+      }, 0);
+      const a = document.createElement('a');
+      a.className = 'lesson-card exam-card-link';
+      a.href = 'trainer/exam.html?exam=' + encodeURIComponent(exam.id);
+      a.innerHTML =
+        `${exam.icon} ${exam.title}` +
+        `<span class="tag">${exam.subtitle} · ${exam.lessons.length} заданий · ` +
+        `${ready} готово · ${totalBlocks} блоков по 10 задач</span>`;
+      listEl.appendChild(a);
+    });
+
+    section.appendChild(listEl);
+    container.appendChild(section);
   }
 
+  renderSection('🐍 Python для начинающих', PYTHON_CATALOG, '');
+  renderSection(
+    '📘 Уроки',
+    LESSONS_CATALOG[student.class],
+    `Для ${student.class} пока нет обычных уроков.`
+  );
+
+  renderExamSection();
   renderPracticeSection();
 
   /* ---------- Мои результаты ---------- */
