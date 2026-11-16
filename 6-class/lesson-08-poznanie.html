@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Способы познания окружающего мира — 6 класс</title>
+<link rel="stylesheet" href="../shared/style.css">
+<style>
+  /* Длинная теория должна раскрываться полностью */
+  .theory-item.open .theory-body{max-height:9000px;}
+
+  .fig{margin:18px 0;padding:14px;border-radius:14px;
+    background:linear-gradient(135deg,#f8fafc,#eff6ff);border:1px solid #dbeafe;}
+  .fig svg{display:block;width:100%;height:auto;max-width:100%;}
+  .fig-cap{text-align:center;font-size:.82rem;color:#64748b;margin-top:10px;line-height:1.4;}
+
+  .fig-grid{display:grid;gap:10px;margin:16px 0;}
+  .fig-grid.two{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+  .fig-grid.three{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));}
+  .fig-card{background:#fff;border:2px solid #e2e8f0;border-radius:12px;
+    padding:12px;text-align:center;}
+  .fig-card h4{margin:6px 0 4px;font-size:.9rem;color:#1e293b;}
+  .fig-card p{margin:0;font-size:.82rem;color:#64748b;line-height:1.45;}
+  .fig-card .big{font-size:1.9rem;line-height:1;}
+  .fig-card.green{border-color:#86efac;background:#f0fdf4;}
+  .fig-card.blue{border-color:#93c5fd;background:#eff6ff;}
+  .fig-card.pink{border-color:#f9a8d4;background:#fdf2f8;}
+  .fig-card.amber{border-color:#fcd34d;background:#fffbeb;}
+
+  .chain{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px;}
+  .chain .fig-card{flex:1 1 180px;max-width:250px;display:flex;flex-direction:column;justify-content:center;}
+  .chain .arrow{font-size:1.5rem;color:#3b82f6;font-weight:700;display:flex;align-items:center;}
+
+  .note{margin:14px 0;padding:12px 14px;border-radius:12px;background:#fffbeb;
+    border-left:4px solid #f59e0b;font-size:.9rem;color:#78350f;line-height:1.5;}
+  .note.blue{background:#eff6ff;border-left-color:#3b82f6;color:#1e3a8a;}
+  .note.pink{background:#fdf2f8;border-left-color:#ec4899;color:#831843;}
+  .note.green{background:#f0fdf4;border-left-color:#22c55e;color:#166534;}
+
+  table.fig-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;}
+  table.fig-table th,table.fig-table td{border:1px solid #e2e8f0;padding:8px 10px;
+    text-align:left;vertical-align:top;}
+  table.fig-table th{background:#eff6ff;color:#1e293b;}
+  table.fig-table tr:nth-child(even) td{background:#f8fafc;}
+
+  details.answer{margin:10px 0;background:#f0fdf4;border:1px solid #bbf7d0;
+    border-radius:10px;padding:8px 12px;font-size:.9rem;}
+  details.answer summary{cursor:pointer;font-weight:600;color:#166534;}
+  details.answer p{margin:8px 0 0;color:#334155;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<!-- Фоновые эмодзи -->
+<div class="bubble-field" aria-hidden="true">
+  <span class="bubble" style="top:8%;  left:5%;  animation-delay:0s;">👀</span>
+  <span class="bubble" style="top:20%; left:88%; animation-delay:1s;">🧠</span>
+  <span class="bubble" style="top:55%; left:3%;  animation-delay:2s;">🔬</span>
+  <span class="bubble" style="top:72%; left:92%; animation-delay:1.5s;">📚</span>
+  <span class="bubble" style="top:35%; left:50%; animation-delay:.5s;">💡</span>
+  <span class="bubble" style="top:85%; left:40%; animation-delay:2.5s;">🌍</span>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="hero-emoji">👀</div>
+    <h1 id="title"></h1>
+    <div class="sub" id="subtitle"></div>
+    <div class="variant-badge" id="variantBadge"></div>
+  </header>
+
+  <!-- ГЕЙМИФИКАЦИЯ -->
+  <div class="xp-panel" id="xpPanel">
+    <div class="xp-header">
+      <span class="xp-level-name" id="xpLevelName">🥉 Наблюдатель</span>
+      <span class="xp-points" id="xpPoints">0 / 100 XP</span>
+    </div>
+    <div class="xp-bar-bg">
+      <div class="xp-bar-fill" id="xpBarFill"></div>
+    </div>
+    <div class="xp-badges">
+      <div class="badge-slot" id="badgeBronze">
+        <span class="badge-icon">🥉</span> Наблюдатель
+      </div>
+      <div class="badge-slot" id="badgeSilver">
+        <span class="badge-icon">🥈</span> Исследователь
+      </div>
+      <div class="badge-slot" id="badgeGold">
+        <span class="badge-icon">🥇</span> Мыслитель
+      </div>
+    </div>
+  </div>
+
+  <div class="section-tabs">
+    <button class="tab active" data-tab="theory">📚 Теория</button>
+    <button class="tab" data-tab="mindmap">🧠 Карта</button>
+    <button class="tab" data-tab="solutions">📐 Разбор задач</button>
+    <button class="tab" data-tab="test">✏️ Тест</button>
+    <button class="tab" data-tab="homework">🏠 Домашнее задание</button>
+  </div>
+
+  <!-- ТЕОРИЯ -->
+  <div class="card" id="theorySection">
+    <div id="lessonGoals">
+      <h2><span class="icon">🎯</span> Цель и задачи урока</h2>
+      <div style="margin-bottom:14px;">
+        <span class="goal-tag goal">ЦЕЛЬ</span>
+        <div id="goalText" style="font-size:1rem;line-height:1.5;color:#1e293b;"></div>
+      </div>
+      <div>
+        <span class="goal-tag tasks">ЗАДАЧИ</span>
+        <ul id="tasksList" style="margin:8px 0 0;padding-left:22px;line-height:1.7;color:#334155;"></ul>
+      </div>
+    </div>
+
+    <h2><span class="icon">💡</span> Ключевые понятия темы</h2>
+    <div id="theoryList"></div>
+  </div>
+
+  <!-- ИНТЕЛЛЕКТ-КАРТА -->
+  <div class="card hidden" id="mindmapSection">
+    <h2><span class="icon">🧠</span> Интеллект-карта темы</h2>
+    <p class="muted" style="margin:-8px 0 14px">Кликните по узлу, чтобы раскрыть/свернуть ветвь</p>
+    <div id="mindmapBox"></div>
+  </div>
+
+  <!-- РАЗБОР ЗАДАЧ -->
+  <div class="card hidden" id="solutionsSection">
+    <h2><span class="icon">📐</span> Разбор задач по шаблону</h2>
+    <p class="muted" style="margin:-8px 0 16px">
+      Разберите каждую задачу по шагам. Попробуйте решить сами, затем нажмите «Показать решение».
+    </p>
+    <div id="solutionsList"></div>
+  </div>
+
+  <!-- ТЕСТ -->
+  <div class="card hidden" id="testSection">
+    <h2><span class="icon">🎯</span> Проверочный тест</h2>
+
+    <div id="studentInfo" style="background:#eff6ff;border-radius:12px;padding:16px;margin-bottom:18px;border:2px solid #3b82f6;">
+      <div style="font-weight:700;color:#1e293b;">
+        👤 Ученик: <span id="studentNameDisplay">—</span>
+      </div>
+      <div class="muted" style="margin-top:6px;font-size:.85rem;">
+        ФИО подставлено из вашего входа и будет отправлено в журнал учителя.
+      </div>
+    </div>
+
+    <div class="muted">Прогресс выполнения</div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="muted" id="progTxt">0 из 0 заданий</div>
+    <div id="tasks" style="margin-top:18px"></div>
+  </div>
+
+  <!-- ДОМАШНЕЕ ЗАДАНИЕ -->
+  <div class="card hidden" id="homeworkSection">
+    <h2><span class="icon">🏠</span> Домашнее задание</h2>
+    <p class="muted" style="margin:-8px 0 16px">
+      Выполните задания дома. Проверка автоматическая — оценка не влияет на оценку за урок.
+    </p>
+
+    <div id="homeworkTasks"></div>
+
+    <div class="progress" style="margin-top:18px"><div id="hwBar"></div></div>
+    <div class="muted" id="hwProgTxt">0 из 0 заданий</div>
+
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn" id="hwFinish">Проверить домашнее задание</button>
+    </div>
+
+    <div class="score-box hidden" id="hwScoreBox" style="margin-top:20px">
+      <div class="muted">Результат домашнего задания</div>
+      <div id="hwFinalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div class="grade" id="hwGrade"></div>
+      <div class="muted" id="hwComment" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="finishCard" style="text-align:center">
+    <button class="btn" id="finish">Завершить урок и получить оценку</button>
+    <div class="score-box hidden" id="scoreBox">
+      <div class="muted">Ваш результат</div>
+      <div id="finalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div style="font-size:3rem;margin:8px 0;" id="finalEmoji"></div>
+      <div class="grade-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#ec4899"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="60" cy="60" r="45"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="45"/>
+        </svg>
+        <div class="ring-text">
+          <span id="ringPercent">0%</span>
+          <small>выполнено</small>
+        </div>
+      </div>
+      <div class="grade" id="finalGrade"></div>
+      <div class="muted" id="finalComment" style="margin-top:10px"></div>
+      <button class="btn ghost" style="margin-top:20px" onclick="location.reload()">🔄 Пройти другой вариант</button>
+    </div>
+  </div>
+
+  <footer>УМК Л.Л. Босовой · § 7 · Интерактивный урок с самопроверкой</footer>
+</div>
+
+<script>
+/* ============================================================
+   ДАННЫЕ УРОКА
+   ============================================================ */
+const LESSON_DATA = {
+  title: "Способы познания окружающего мира",
+  subtitle: "6 класс · УМК Босовой · § 7",
+  className: "6 класс",
+
+  goal: "Сформировать представление о познании как процессе получения знаний: о чувственном познании и его формах, о мышлении и его формах, о методах познания и видах знаний, а также о единстве чувственного и логического путей познания.",
+
+  tasks: [
+    "Понять, что такое познание и знание.",
+    "Различать ощущение, восприятие и представление.",
+    "Различать понятие, суждение и умозаключение.",
+    "Познакомиться с наблюдением, опытом и измерением как способами познания.",
+    "Различать декларативные и процедурные знания.",
+    "Увидеть, как чувственное познание и мышление дополняют друг друга."
+  ],
+
+  gameLevels: [
+    { name: '🥉 Наблюдатель',  threshold: 0,  badge: 'badgeBronze' },
+    { name: '🥈 Исследователь', threshold: 15, badge: 'badgeSilver' },
+    { name: '🥇 Мыслитель',    threshold: 30, badge: 'badgeGold'   }
+  ],
+
+  theory: [
+    {
+      title: "🌍 Познание и знание",
+      image: "🌍 💡 📚",
+      body: `<p><b>Познание</b> — это процесс получения новых знаний об окружающем мире.</p>
+             <p><b>Знание</b> — это результат познания: сведения об объектах и явлениях, которые человек получил, понял и запомнил.</p>
+             <p>Человек познаёт мир двумя путями:</p>
+
+             <div class="fig-grid two">
+               <div class="fig-card blue">
+                 <div class="big">👀</div>
+                 <h4>Чувственное познание</h4>
+                 <p>С помощью органов чувств: зрения, слуха, обоняния, вкуса, осязания. Даёт непосредственные впечатления о мире.</p>
+               </div>
+               <div class="fig-card green">
+                 <div class="big">🧠</div>
+                 <h4>Логическое познание</h4>
+                 <p>С помощью мышления: сравнения, анализа, обобщения, выводов. Помогает понять то, что нельзя увидеть или потрогать.</p>
+               </div>
+             </div>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 300" role="img" aria-label="Два пути познания: чувственное и логическое">
+                 <rect x="4" y="4" width="632" height="292" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <rect x="34" y="42" width="214" height="184" rx="16" fill="#eff6ff" stroke="#3b82f6" stroke-width="2.5"/>
+                 <text x="141" y="70" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="15" font-weight="800" fill="#1d4ed8">ЧУВСТВЕННОЕ</text>
+                 <text x="141" y="90" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="15" font-weight="800" fill="#1d4ed8">ПОЗНАНИЕ</text>
+
+                 <circle cx="86" cy="132" r="20" fill="#bfdbfe" stroke="#2563eb" stroke-width="2"/>
+                 <text x="86" y="139" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="18">👁</text>
+                 <circle cx="141" cy="132" r="20" fill="#bfdbfe" stroke="#2563eb" stroke-width="2"/>
+                 <text x="141" y="139" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="18">👂</text>
+                 <circle cx="196" cy="132" r="20" fill="#bfdbfe" stroke="#2563eb" stroke-width="2"/>
+                 <text x="196" y="139" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="18">✋</text>
+
+                 <text x="141" y="178" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#3b82f6">ощущение · восприятие</text>
+                 <text x="141" y="198" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#3b82f6">представление</text>
+
+                 <rect x="392" y="42" width="214" height="184" rx="16" fill="#f0fdf4" stroke="#22c55e" stroke-width="2.5"/>
+                 <text x="499" y="70" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="15" font-weight="800" fill="#15803d">ЛОГИЧЕСКОЕ</text>
+                 <text x="499" y="90" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="15" font-weight="800" fill="#15803d">ПОЗНАНИЕ</text>
+
+                 <text x="499" y="142" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="38">🧠</text>
+                 <text x="499" y="178" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#16a34a">понятие · суждение</text>
+                 <text x="499" y="198" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#16a34a">умозаключение</text>
+
+                 <path d="M254 134 C300 134 300 134 330 134" stroke="#3b82f6" stroke-width="3" fill="none"/>
+                 <path d="M322 127 L334 134 L322 141" fill="#3b82f6"/>
+                 <path d="M354 134 C378 134 378 134 386 134" stroke="#3b82f6" stroke-width="3" fill="none"/>
+                 <path d="M378 127 L390 134 L378 141" fill="#3b82f6"/>
+
+                 <rect x="238" y="246" width="164" height="40" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.5"/>
+                 <text x="320" y="272" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="15" font-weight="800" fill="#b45309">💡 ЗНАНИЕ</text>
+                 <path d="M320 226 V240" stroke="#f59e0b" stroke-width="3"/>
+                 <path d="M313 234 L320 244 L327 234" fill="#f59e0b"/>
+               </svg>
+               <div class="fig-cap">Рис. 1. Чувственное познание даёт впечатления, мышление помогает понять и объяснить их, а вместе они приводят к знанию</div>
+             </div>
+
+             <p class="note blue">💡 Познание — это не только запоминание готовых сведений. Это активная работа: мы наблюдаем, сравниваем, задаём вопросы, проверяем предположения и делаем выводы.</p>`
+    },
+    {
+      title: "👀 Чувственное познание: ощущение, восприятие, представление",
+      image: "👀 🍋 🧠",
+      body: `<p><b>Чувственное познание</b> — это познание с помощью органов чувств. В нём выделяют три формы.</p>
+
+             <div class="fig-grid three">
+               <div class="fig-card amber">
+                 <div class="big">👁</div>
+                 <h4>Ощущение</h4>
+                 <p>Отражение <b>отдельных свойств</b> объекта при непосредственном воздействии на органы чувств: цвет, запах, вкус, звук, температура.</p>
+               </div>
+               <div class="fig-card blue">
+                 <div class="big">🍋</div>
+                 <h4>Восприятие</h4>
+                 <p><b>Целостный образ</b> объекта при непосредственном воздействии на органы чувств: мы видим лимон целиком — жёлтый, овальный, гладкий.</p>
+               </div>
+               <div class="fig-card green">
+                 <div class="big">🧠</div>
+                 <h4>Представление</h4>
+                 <p>Образ объекта, <b>сохранённый в памяти</b>. Объекта уже нет перед нами, но мы можем его представить.</p>
+               </div>
+             </div>
+
+             <p>Разберём на примере лимона:</p>
+
+             <table class="fig-table">
+               <thead><tr><th>Форма познания</th><th>Что происходит</th><th>Пример с лимоном</th></tr></thead>
+               <tbody>
+                 <tr><td><b>Ощущение</b></td><td>Органы чувств фиксируют отдельные свойства</td><td>Вижу жёлтый цвет, чувствую кислый вкус и гладкую кожицу</td></tr>
+                 <tr><td><b>Восприятие</b></td><td>Из ощущений складывается целостный образ</td><td>Воспринимаю лимон как целый предмет: жёлтый, овальный, кислый</td></tr>
+                 <tr><td><b>Представление</b></td><td>Образ сохраняется в памяти и возникает без объекта</td><td>Закрываю глаза и вспоминаю, как выглядит и пахнет лимон</td></tr>
+               </tbody>
+             </table>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 260" role="img" aria-label="Ощущение, восприятие и представление на примере лимона">
+                 <rect x="4" y="4" width="632" height="252" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <rect x="28" y="30" width="180" height="196" rx="14" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.5"/>
+                 <text x="118" y="58" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#b45309">ОЩУЩЕНИЕ</text>
+                 <text x="118" y="88" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#92400e">жёлтый · кислый · гладкий</text>
+                 <ellipse cx="118" cy="148" rx="46" ry="30" fill="#fde68a" stroke="#d97706" stroke-width="2.5"/>
+                 <text x="118" y="205" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#92400e">отдельные свойства</text>
+
+                 <rect x="230" y="30" width="180" height="196" rx="14" fill="#eff6ff" stroke="#3b82f6" stroke-width="2.5"/>
+                 <text x="320" y="58" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#1d4ed8">ВОСПРИЯТИЕ</text>
+                 <text x="320" y="88" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#1e40af">целый объект</text>
+                 <ellipse cx="320" cy="145" rx="48" ry="32" fill="#fde68a" stroke="#d97706" stroke-width="2.5"/>
+                 <path d="M320 113 C318 104 322 100 326 98" fill="none" stroke="#65a30d" stroke-width="3"/>
+                 <ellipse cx="330" cy="98" rx="8" ry="4" fill="#65a30d"/>
+                 <text x="320" y="205" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#1e40af">образ в целом</text>
+
+                 <rect x="432" y="30" width="180" height="196" rx="14" fill="#f0fdf4" stroke="#22c55e" stroke-width="2.5"/>
+                 <text x="522" y="58" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#15803d">ПРЕДСТАВЛЕНИЕ</text>
+                 <text x="522" y="88" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#166534">объекта нет, образ остался</text>
+                 <ellipse cx="522" cy="145" rx="48" ry="32" fill="#fde68a" stroke="#d97706" stroke-width="2.5" stroke-dasharray="7 5"/>
+                 <text x="522" y="205" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#166534">образ в памяти</text>
+
+                 <path d="M212 128 H224" stroke="#3b82f6" stroke-width="3"/>
+                 <path d="M218 122 L228 128 L218 134" fill="#3b82f6"/>
+                 <path d="M414 128 H426" stroke="#3b82f6" stroke-width="3"/>
+                 <path d="M420 122 L430 128 L420 134" fill="#3b82f6"/>
+               </svg>
+               <div class="fig-cap">Рис. 2. От отдельных ощущений — к целостному восприятию, а затем к представлению, сохранённому в памяти</div>
+             </div>
+
+             <p class="note">⚠️ Органы чувств не всегда дают точную информацию. Глаз может обмануть оптическая иллюзия, а рука — ощущение температуры. Поэтому в науке ощущения и восприятия проверяют измерениями и логическими выводами.</p>`
+    },
+    {
+      title: "🧠 Мышление: понятие, суждение, умозаключение",
+      image: "🧠 💭 🔗",
+      body: `<p><b>Мышление</b> — это опосредованное и обобщённое познание действительности. Оно помогает узнавать то, что нельзя увидеть, услышать или потрогать: прошлое, будущее, скрытые свойства предметов, связи между явлениями.</p>
+             <p>Основные формы мышления:</p>
+
+             <div class="fig-grid three">
+               <div class="fig-card blue">
+                 <div class="big">📘</div>
+                 <h4>Понятие</h4>
+                 <p>Мысль о существенных признаках объекта или класса объектов. Выражается словом или словосочетанием.</p>
+               </div>
+               <div class="fig-card amber">
+                 <div class="big">💬</div>
+                 <h4>Суждение</h4>
+                 <p>Мысль, в которой что-то утверждается или отрицается. Может быть истинным или ложным.</p>
+               </div>
+               <div class="fig-card green">
+                 <div class="big">🔗</div>
+                 <h4>Умозаключение</h4>
+                 <p>Вывод нового суждения из одного или нескольких известных суждений.</p>
+               </div>
+             </div>
+
+             <div class="fig">
+               <div class="chain">
+                 <div class="fig-card blue"><h4>Понятие</h4><p>«Воробей — птица»</p></div>
+                 <span class="arrow">+</span>
+                 <div class="fig-card amber"><h4>Суждение</h4><p>«Все птицы имеют перья»</p></div>
+                 <span class="arrow">→</span>
+                 <div class="fig-card green"><h4>Умозаключение</h4><p>«Воробей имеет перья»</p></div>
+               </div>
+               <div class="fig-cap">Рис. 3. Из понятий и суждений строится умозаключение — новое знание, которое мы не наблюдали напрямую</div>
+             </div>
+
+             <p><b>Пример.</b> Мы видим на улице мокрые крыши и лужи. Это <b>восприятие</b>. Мы вспоминаем понятие «дождь» и суждение «после дождя остаются лужи». Из этих мыслей делаем <b>умозаключение</b>: недавно прошёл дождь. Мы не видели сам дождь, но узнали о нём с помощью мышления.</p>
+
+             <table class="fig-table">
+               <thead><tr><th>Форма мышления</th><th>Вопрос, на который отвечает</th><th>Пример</th></tr></thead>
+               <tbody>
+                 <tr><td><b>Понятие</b></td><td>Что это?</td><td>«Птица — животное с перьями и крыльями»</td></tr>
+                 <tr><td><b>Суждение</b></td><td>Что об этом можно сказать?</td><td>«Все птицы имеют перья»</td></tr>
+                 <tr><td><b>Умозаключение</b></td><td>Что из этого следует?</td><td>«Значит, воробей имеет перья»</td></tr>
+               </tbody>
+             </table>
+
+             <p class="note green">💡 Мышление тесно связано с речью: понятия и суждения мы выражаем словами и предложениями. Поэтому чтение, разговор и письмо тоже развивают мышление.</p>`
+    },
+    {
+      title: "🔬 Наблюдение, опыт и измерение",
+      image: "🔬 👁 📏",
+      body: `<p>Чтобы получить достоверные знания, одного любопытства мало. В познании используют специальные <b>методы</b>.</p>
+
+             <div class="fig-grid three">
+               <div class="fig-card blue">
+                 <div class="big">👁</div>
+                 <h4>Наблюдение</h4>
+                 <p>Целенаправленное восприятие объектов и явлений. Мы заранее решаем, что и зачем будем наблюдать, и фиксируем результаты.</p>
+               </div>
+               <div class="fig-card amber">
+                 <div class="big">⚗️</div>
+                 <h4>Опыт (эксперимент)</h4>
+                 <p>Активное воздействие на объект в специально созданных условиях, чтобы проверить предположение.</p>
+               </div>
+               <div class="fig-card green">
+                 <div class="big">📏</div>
+                 <h4>Измерение</h4>
+                 <p>Сравнение величины с эталоном или показанием прибора. Даёт точные числовые данные.</p>
+               </div>
+             </div>
+
+             <table class="fig-table">
+               <thead><tr><th>Метод</th><th>Что делает исследователь</th><th>Пример</th></tr></thead>
+               <tbody>
+                 <tr><td><b>Наблюдение</b></td><td>Смотрит, слушает, описывает, не вмешиваясь в процесс</td><td>Наблюдает, как распускаются листья на дереве</td></tr>
+                 <tr><td><b>Опыт</b></td><td>Меняет условия и сравнивает результаты</td><td>Проверяет, при какой температуре вода закипает быстрее</td></tr>
+                 <tr><td><b>Измерение</b></td><td>Измеряет прибором и записывает число с единицей</td><td>Измеряет температуру термометром: 24 °C</td></tr>
+               </tbody>
+             </table>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 250" role="img" aria-label="Наблюдение, опыт и измерение">
+                 <rect x="4" y="4" width="632" height="242" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <rect x="26" y="28" width="184" height="194" rx="14" fill="#eff6ff" stroke="#3b82f6" stroke-width="2.5"/>
+                 <text x="118" y="56" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#1d4ed8">НАБЛЮДЕНИЕ</text>
+                 <circle cx="92" cy="112" r="26" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+                 <circle cx="92" cy="112" r="9" fill="#2563eb"/>
+                 <path d="M92 86 C110 86 128 100 134 112 C128 124 110 138 92 138" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+                 <rect x="128" y="96" width="46" height="58" rx="4" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+                 <line x1="136" y1="110" x2="166" y2="110" stroke="#94a3b8" stroke-width="2"/>
+                 <line x1="136" y1="122" x2="166" y2="122" stroke="#94a3b8" stroke-width="2"/>
+                 <line x1="136" y1="134" x2="158" y2="134" stroke="#94a3b8" stroke-width="2"/>
+                 <text x="118" y="196" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#1e40af">смотрю и записываю</text>
+
+                 <rect x="228" y="28" width="184" height="194" rx="14" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.5"/>
+                 <text x="320" y="56" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#b45309">ОПЫТ</text>
+                 <path d="M294 88 H306 V118 L288 156 H332 L314 118 V88 Z" fill="#fde68a" stroke="#d97706" stroke-width="2.5"/>
+                 <path d="M292 140 H328" stroke="#d97706" stroke-width="2.5"/>
+                 <path d="M338 88 H350 V118 L332 156 H376 L358 118 V88 Z" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/>
+                 <path d="M336 140 H372" stroke="#d97706" stroke-width="2.5"/>
+                 <text x="320" y="196" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#92400e">меняю условия</text>
+
+                 <rect x="430" y="28" width="184" height="194" rx="14" fill="#f0fdf4" stroke="#22c55e" stroke-width="2.5"/>
+                 <text x="522" y="56" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#15803d">ИЗМЕРЕНИЕ</text>
+                 <rect x="462" y="118" width="120" height="18" rx="4" fill="#ffffff" stroke="#16a34a" stroke-width="2.5"/>
+                 <g stroke="#16a34a" stroke-width="2">
+                   <line x1="474" y1="118" x2="474" y2="128"/>
+                   <line x1="492" y1="118" x2="492" y2="124"/>
+                   <line x1="510" y1="118" x2="510" y2="128"/>
+                   <line x1="528" y1="118" x2="528" y2="124"/>
+                   <line x1="546" y1="118" x2="546" y2="128"/>
+                   <line x1="564" y1="118" x2="564" y2="124"/>
+                 </g>
+                 <text x="522" y="160" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="16" font-weight="800" fill="#15803d">24 °C</text>
+                 <text x="522" y="196" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#166534">получаю число</text>
+
+                 <path d="M212 125 H222" stroke="#3b82f6" stroke-width="3"/>
+                 <path d="M414 125 H424" stroke="#3b82f6" stroke-width="3"/>
+               </svg>
+               <div class="fig-cap">Рис. 4. Наблюдение, опыт и измерение — разные способы получить достоверные данные</div>
+             </div>
+
+             <p><b>Чем наблюдение отличается от опыта?</b> При наблюдении исследователь не вмешивается в процесс, а только фиксирует то, что происходит. В опыте он сознательно меняет условия и смотрит, как это повлияет на результат.</p>
+             <p class="note blue">💡 Любое измерение выполняется с помощью прибора и записывается числом с единицей измерения. Запись «длина 25» ничего не значит, а «длина 25 см» — это уже результат измерения.</p>`
+    },
+    {
+      title: "📚 Виды знаний: декларативные и процедурные",
+      image: "📚 🧾 ⚙️",
+      body: `<p>Знания, которые получает человек, делят на две большие группы.</p>
+
+             <div class="fig-grid two">
+               <div class="fig-card blue">
+                 <div class="big">🧾</div>
+                 <h4>Декларативные знания</h4>
+                 <p>Знания <b>«знаю что»</b>: факты, определения, свойства, законы, правила.</p>
+                 <p style="margin-top:6px;color:#1e3a8a"><b>Примеры:</b> «Москва — столица России», «У квадрата четыре равные стороны», «Вода кипит при 100 °C»</p>
+               </div>
+               <div class="fig-card green">
+                 <div class="big">⚙️</div>
+                 <h4>Процедурные знания</h4>
+                 <p>Знания <b>«знаю как»</b>: способы действий, умения, алгоритмы.</p>
+                 <p style="margin-top:6px;color:#166534"><b>Примеры:</b> «как сложить дроби», «как открыть файл», «как заварить чай», «как решить задачу по шагам»</p>
+               </div>
+             </div>
+
+             <table class="fig-table">
+               <thead><tr><th>Утверждение</th><th>Вид знания</th><th>Почему</th></tr></thead>
+               <tbody>
+                 <tr><td>У треугольника три стороны</td><td>декларативное</td><td>Сообщает факт о свойстве фигуры</td></tr>
+                 <tr><td>Как начертить треугольник по трём сторонам</td><td>процедурное</td><td>Описывает способ действия</td></tr>
+                 <tr><td>Байкал — самое глубокое озеро мира</td><td>декларативное</td><td>Сообщает факт</td></tr>
+                 <tr><td>Как найти самое глубокое озеро на карте</td><td>процедурное</td><td>Описывает последовательность действий</td></tr>
+                 <tr><td>Алгоритм сложения чисел в столбик</td><td>процедурное</td><td>Задаёт порядок действий</td></tr>
+               </tbody>
+             </table>
+
+             <p><b>Как отличить?</b> Если знание отвечает на вопрос «что это такое?» или «что известно?» — оно декларативное. Если на вопрос «как это сделать?» — процедурное.</p>
+             <p class="note green">💡 В информатике важны оба вида знаний. Декларативные знания помогают понять задачу, а процедурные — составить алгоритм её решения. Компьютер работает по алгоритму, то есть использует процедурные знания, записанные в программе.</p>`
+    },
+    {
+      title: "🔗 Единство чувственного и логического познания",
+      image: "🔗 👀 🧠",
+      body: `<p>Чувственное познание и мышление не спорят друг с другом — они работают вместе.</p>
+
+             <div class="chain">
+               <div class="fig-card blue"><h4>1. Наблюдаю</h4><p>Вижу мокрые крыши, лужи и капли на листьях</p></div>
+               <span class="arrow">→</span>
+               <div class="fig-card amber"><h4>2. Описываю</h4><p>Фиксирую признаки: вода на поверхности, влажный воздух</p></div>
+               <span class="arrow">→</span>
+               <div class="fig-card green"><h4>3. Объясняю</h4><p>Вспоминаю понятие «дождь» и делаю вывод</p></div>
+             </div>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 280" role="img" aria-label="Единство чувственного и логического познания">
+                 <rect x="4" y="4" width="632" height="272" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <circle cx="120" cy="140" r="66" fill="#eff6ff" stroke="#3b82f6" stroke-width="2.5"/>
+                 <text x="120" y="126" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="30">👀</text>
+                 <text x="120" y="156" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="13" font-weight="800" fill="#1d4ed8">ЧУВСТВЕННОЕ</text>
+                 <text x="120" y="176" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#3b82f6">факты и впечатления</text>
+
+                 <circle cx="320" cy="140" r="66" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.5"/>
+                 <text x="320" y="126" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="30">🧠</text>
+                 <text x="320" y="156" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="13" font-weight="800" fill="#b45309">МЫШЛЕНИЕ</text>
+                 <text x="320" y="176" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#d97706">объяснение и вывод</text>
+
+                 <circle cx="520" cy="140" r="66" fill="#f0fdf4" stroke="#22c55e" stroke-width="2.5"/>
+                 <text x="520" y="126" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="30">💡</text>
+                 <text x="520" y="156" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="13" font-weight="800" fill="#15803d">ЗНАНИЕ</text>
+                 <text x="520" y="176" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#16a34a">понятое и проверенное</text>
+
+                 <path d="M190 140 H246" stroke="#3b82f6" stroke-width="3"/>
+                 <path d="M238 133 L250 140 L238 147" fill="#3b82f6"/>
+                 <path d="M390 140 H446" stroke="#3b82f6" stroke-width="3"/>
+                 <path d="M438 133 L450 140 L438 147" fill="#3b82f6"/>
+
+                 <path d="M470 204 C400 252 240 252 170 204" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-dasharray="7 6"/>
+                 <path d="M180 212 L168 202 L184 198" fill="#8b5cf6"/>
+                 <text x="320" y="262" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#6d28d9">новый вопрос — новое наблюдение</text>
+               </svg>
+               <div class="fig-cap">Рис. 5. Чувственное познание поставляет факты, мышление объясняет их, а знание проверяется новыми наблюдениями</div>
+             </div>
+
+             <p><b>Пример из науки.</b> Учёный замечает, что растение тянется к свету (наблюдение). Он выдвигает предположение, что свет влияет на рост (суждение). Затем ставит опыт: одно растение освещает, другое держит в темноте (эксперимент). Измеряет высоту побегов (измерение) и делает вывод (умозаключение).</p>
+
+             <p class="note pink">💡 Чувственное познание без мышления даёт только разрозненные впечатления. Мышление без чувственного познания рискует оторваться от реальности. Настоящее знание рождается там, где они работают вместе.</p>`
+    },
+    {
+      title: "🏁 Итоги темы",
+      image: "🏁 ✅ 📌",
+      body: `<p><b>Самое главное:</b></p>
+             <ol>
+               <li><b>Познание</b> — процесс получения новых знаний об окружающем мире. <b>Знание</b> — результат познания.</li>
+               <li><b>Чувственное познание</b> идёт через органы чувств. Его формы: <b>ощущение</b>, <b>восприятие</b>, <b>представление</b>.</li>
+               <li><b>Мышление</b> — опосредованное и обобщённое познание. Его формы: <b>понятие</b>, <b>суждение</b>, <b>умозаключение</b>.</li>
+               <li>Методы познания: <b>наблюдение</b>, <b>опыт (эксперимент)</b> и <b>измерение</b>.</li>
+               <li>Знания бывают <b>декларативными</b> («знаю что») и <b>процедурными</b> («знаю как»).</li>
+               <li>Чувственное и логическое познание работают вместе: факты проверяются мышлением, а выводы — новыми наблюдениями.</li>
+             </ol>
+
+             <details class="answer">
+               <summary>Проверь себя: чем ощущение отличается от восприятия?</summary>
+               <p>Ощущение отражает отдельные свойства объекта (цвет, вкус, запах), а восприятие — объект в целом, целостный образ.</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: чем представление отличается от восприятия?</summary>
+               <p>Восприятие возникает, когда объект действует на органы чувств. Представление — это образ, сохранённый в памяти, когда объекта перед нами уже нет.</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: что такое умозаключение?</summary>
+               <p>Это вывод нового суждения из одного или нескольких известных суждений. Например: «Все птицы имеют перья. Воробей — птица. Значит, воробей имеет перья».</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: «Как открыть файл» — это декларативное или процедурное знание?</summary>
+               <p>Процедурное: оно отвечает на вопрос «как сделать?» и описывает последовательность действий.</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: зачем в познании нужны измерения?</summary>
+               <p>Измерения дают точные числовые данные и помогают проверить то, что мы воспринимаем органами чувств.</p>
+             </details>`
+    }
+  ],
+
+  mindmap: {
+    center: "Познание",
+    branches: [
+      { text: "Чувственное познание", color: "#3b82f6",
+        children: ["Ощущение", "Восприятие", "Представление", "Органы чувств"] },
+      { text: "Мышление", color: "#22c55e",
+        children: ["Понятие", "Суждение", "Умозаключение", "Обобщение"] },
+      { text: "Методы", color: "#f59e0b",
+        children: ["Наблюдение", "Опыт (эксперимент)", "Измерение"] },
+      { text: "Виды знаний", color: "#8b5cf6",
+        children: ["Декларативные: «знаю что»", "Процедурные: «знаю как»", "Алгоритмы"] },
+      { text: "Единство", color: "#ec4899",
+        children: ["Факты + объяснение", "Проверка вывода", "Новое знание"] }
+    ]
+  },
+
+  variants: {
+    A: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что такое познание?",
+        options:["Процесс получения новых знаний об окружающем мире","Только чтение книг","Запоминание готовых ответов","Работа компьютера"],
+        answer:0, exp:"Познание — это процесс получения новых знаний об окружающем мире." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Какие формы чувственного познания выделяют?",
+        options:["Ощущение, восприятие, представление","Понятие, суждение, умозаключение","Наблюдение, опыт, измерение","Анализ, синтез, сравнение"],
+        answer:0, exp:"Чувственное познание включает ощущение, восприятие и представление." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Что такое восприятие?",
+        options:["Целостный образ объекта при непосредственном воздействии на органы чувств","Отражение одного свойства объекта","Образ объекта, сохранённый в памяти","Вывод из нескольких суждений"],
+        answer:0, exp:"Восприятие даёт целостный образ объекта, когда он действует на органы чувств." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Что такое наблюдение?",
+        options:["Целенаправленное восприятие объектов и явлений","Любое случайное рассматривание","Вывод из нескольких суждений","Измерение величины прибором"],
+        answer:0, exp:"Наблюдение — целенаправленное восприятие, результаты которого фиксируются." },
+      { level:"hard", weight:3, type:"text",
+        q:"Как называется форма чувственного познания — образ объекта, сохранившийся в памяти? (одно слово)",
+        answer:"представление", exp:"Представление — это образ объекта, который сохранился в памяти и возникает без непосредственного воздействия на органы чувств." }
+    ],
+    B: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что даёт человеку чувственное познание?",
+        options:["Информацию через органы чувств","Только логические выводы","Готовые формулы","Компьютерные программы"],
+        answer:0, exp:"Чувственное познание опирается на ощущения, восприятия и представления." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Какая форма мышления что-то утверждает или отрицает?",
+        options:["Суждение","Понятие","Представление","Ощущение"],
+        answer:0, exp:"Суждение — мысль, в которой что-то утверждается или отрицается." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Что такое ощущение?",
+        options:["Отражение отдельных свойств объекта при воздействии на органы чувств","Целостный образ объекта","Вывод из нескольких суждений","Образ объекта в памяти"],
+        answer:0, exp:"Ощущение отражает отдельные свойства: цвет, запах, вкус, звук, температуру." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какой метод познания предполагает активное воздействие на объект для проверки предположения?",
+        options:["Опыт (эксперимент)","Наблюдение","Представление","Суждение"],
+        answer:0, exp:"В опыте исследователь меняет условия и проверяет, как это повлияет на результат." },
+      { level:"hard", weight:3, type:"text",
+        q:"Как называют знания «знаю как» — правила и способы действий? (одно слово)",
+        answer:"процедурные", exp:"Процедурные знания отвечают на вопрос «как сделать?» и описывают способы действий." }
+    ],
+    C: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что относится к формам мышления?",
+        options:["Понятие, суждение, умозаключение","Ощущение, восприятие, представление","Наблюдение, опыт, измерение","Сравнение, анализ, синтез"],
+        answer:0, exp:"Основные формы мышления — понятие, суждение и умозаключение." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Что такое представление?",
+        options:["Образ объекта, сохранившийся в памяти","Отражение отдельного свойства объекта","Целостный образ при непосредственном контакте","Вывод из нескольких суждений"],
+        answer:0, exp:"Представление — образ объекта, который сохранился в памяти." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какой метод познания даёт числовые данные о величине?",
+        options:["Измерение","Наблюдение","Представление","Умозаключение"],
+        answer:0, exp:"Измерение сравнивает величину с эталоном или показанием прибора и даёт число." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какие знания называют декларативными?",
+        options:["Знания «знаю что» — факты и определения","Знания «знаю как» — правила действий","Только умения","Только ощущения"],
+        answer:0, exp:"Декларативные знания сообщают факты, свойства, определения и законы." },
+      { level:"hard", weight:3, type:"text",
+        q:"Как называется вывод нового суждения из одного или нескольких известных суждений? (одно слово)",
+        answer:"умозаключение", exp:"Умозаключение — форма мышления, в которой из известных суждений получают новое." }
+    ]
+  },
+
+  homework: [
+    {
+      type: "choice",
+      q: "Что такое знание?",
+      options: ["Сведения об окружающем мире, полученные в результате познания", "Только оценка в дневнике", "Любое ощущение", "Компьютерная программа"],
+      answer: 0,
+      exp: "Знание — результат познания, сведения, которые человек получил, понял и запомнил."
+    },
+    {
+      type: "choice",
+      q: "Какая форма чувственного познания даёт целостный образ объекта?",
+      options: ["Восприятие", "Ощущение", "Представление", "Умозаключение"],
+      answer: 0,
+      exp: "Восприятие складывает отдельные ощущения в целостный образ объекта."
+    },
+    {
+      type: "choice",
+      q: "Что относится к формам мышления?",
+      options: ["Понятие, суждение, умозаключение", "Ощущение, восприятие, представление", "Наблюдение, опыт, измерение", "Файл, папка, документ"],
+      answer: 0,
+      exp: "Мышление работает в формах понятия, суждения и умозаключения."
+    },
+    {
+      type: "text",
+      q: "Как называется целенаправленное восприятие объектов и явлений? (одно слово)",
+      answer: "наблюдение",
+      exp: "Наблюдение — это целенаправленное восприятие, при котором исследователь фиксирует результаты."
+    },
+    {
+      type: "text",
+      q: "Как называют знания «знаю что» — факты, определения и законы? (одно слово)",
+      answer: "декларативные",
+      exp: "Декларативные знания сообщают, что известно об объекте или явлении."
+    },
+    {
+      type: "choice",
+      q: "Зачем в познании нужны измерения?",
+      options: ["Они дают точные числовые данные и помогают проверить ощущения", "Они заменяют все остальные методы познания", "Они нужны только на уроках математики", "Они помогают запоминать слова"],
+      answer: 0,
+      exp: "Измерения дают точные числовые результаты и позволяют проверить то, что мы воспринимаем органами чувств."
+    }
+  ],
+
+  solutions: [
+    {
+      title: "Задача 1. Ощущение, восприятие или представление?",
+      task: "Определите форму чувственного познания: «Я закрываю глаза и вспоминаю кислый вкус и жёлтый цвет лимона».",
+      template: [
+        "1. Проверяем: действует ли объект на органы чувств <b>сейчас</b>? Нет, глаза закрыты, лимона перед нами нет.",
+        "2. Значит, это не ощущение и не восприятие: они возникают при непосредственном воздействии объекта.",
+        "3. Перед нами <b>образ, сохранённый в памяти</b>.",
+        "4. Вывод: это <b>представление</b>."
+      ],
+      answer: "Представление",
+      hint: "Если объект сейчас не действует на органы чувств, а образ остался — это представление."
+    },
+    {
+      title: "Задача 2. Определите форму мышления",
+      task: "«Все птицы имеют перья. Воробей — птица. Значит, воробей имеет перья». Какая форма мышления здесь использована?",
+      template: [
+        "1. Выделяем исходные мысли: «Все птицы имеют перья» и «Воробей — птица». Это <b>суждения</b>.",
+        "2. Из двух известных суждений получено <b>новое</b> суждение: «Воробей имеет перья».",
+        "3. Вывод нового суждения из известных — это <b>умозаключение</b>.",
+        "4. Вывод: использовано умозаключение."
+      ],
+      answer: "Умозаключение",
+      hint: "Смотрите, получаем ли мы новое суждение из уже известных."
+    },
+    {
+      title: "Задача 3. Наблюдение, опыт или измерение?",
+      task: "Ученик проверяет, как температура влияет на скорость растворения сахара: в один стакан наливает холодную воду, в другой — горячую и сравнивает результат. Какой метод он использует?",
+      template: [
+        "1. Ученик <b>сам меняет условие</b>: берёт холодную и горячую воду.",
+        "2. Он сравнивает результаты в разных условиях, чтобы проверить предположение.",
+        "3. Это не просто наблюдение, потому что исследователь <b>вмешивается</b> в процесс.",
+        "4. Вывод: это <b>опыт (эксперимент)</b>."
+      ],
+      answer: "Опыт (эксперимент)",
+      hint: "Если исследователь специально меняет условия, это опыт."
+    },
+    {
+      title: "Задача 4. Декларативное или процедурное знание?",
+      task: "Распределите утверждения: «У квадрата четыре равные стороны»; «Как построить квадрат циркулем и линейкой».",
+      template: [
+        "1. Первое утверждение сообщает <b>факт</b> о свойстве квадрата. Это знание «знаю что».",
+        "2. Второе утверждение описывает <b>последовательность действий</b>. Это знание «знаю как».",
+        "3. Знания «знаю что» — <b>декларативные</b>.",
+        "4. Знания «знаю как» — <b>процедурные</b>.",
+        "5. Вывод: первое — декларативное, второе — процедурное."
+      ],
+      answer: "«У квадрата четыре равные стороны» — декларативное; «Как построить квадрат» — процедурное",
+      hint: "Задайте вопрос: это сообщает факт или способ действия?"
+    },
+    {
+      title: "Задача 5. Чувственное и логическое познание",
+      task: "Объясните, как из наблюдения «крыши мокрые, на улице лужи» человек делает вывод «прошёл дождь».",
+      template: [
+        "1. <b>Чувственное познание:</b> мы видим мокрые крыши и лужи — это восприятие.",
+        "2. <b>Мышление:</b> вспоминаем понятие «дождь» и суждение «после дождя остаются лужи».",
+        "3. Связываем факты и делаем <b>умозаключение</b>: недавно прошёл дождь.",
+        "4. Вывод: чувственное познание дало факты, а мышление объяснило их и позволило узнать то, что мы не наблюдали напрямую."
+      ],
+      answer: "Восприятие дало факты, а мышление связало их и привело к умозаключению о дожде",
+      hint: "Сначала назовите факты, которые мы видим, затем мысли, которые помогают их объяснить."
+    }
+  ]
+};
+</script>
+
+<!-- Подключение общих скриптов -->
+<script src="../shared/account.js"></script>
+<script src="../shared/mindmap.js"></script>
+<script src="../shared/app.js"></script>
+
+</body>
+</html>

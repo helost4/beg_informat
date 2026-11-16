@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Персональный компьютер как система — 6 класс</title>
+<link rel="stylesheet" href="../shared/style.css">
+<style>
+  /* Длинная теория должна раскрываться полностью */
+  .theory-item.open .theory-body{max-height:9000px;}
+
+  .fig{margin:18px 0;padding:14px;border-radius:14px;
+    background:linear-gradient(135deg,#f8fafc,#eff6ff);border:1px solid #dbeafe;}
+  .fig svg{display:block;width:100%;height:auto;max-width:100%;}
+  .fig-cap{text-align:center;font-size:.82rem;color:#64748b;margin-top:10px;line-height:1.4;}
+
+  .fig-grid{display:grid;gap:10px;margin:16px 0;}
+  .fig-grid.two{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+  .fig-grid.three{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));}
+  .fig-card{background:#fff;border:2px solid #e2e8f0;border-radius:12px;
+    padding:12px;text-align:center;}
+  .fig-card h4{margin:6px 0 4px;font-size:.9rem;color:#1e293b;}
+  .fig-card p{margin:0;font-size:.82rem;color:#64748b;line-height:1.45;}
+  .fig-card .big{font-size:1.9rem;line-height:1;}
+  .fig-card.green{border-color:#86efac;background:#f0fdf4;}
+  .fig-card.blue{border-color:#93c5fd;background:#eff6ff;}
+  .fig-card.pink{border-color:#f9a8d4;background:#fdf2f8;}
+  .fig-card.amber{border-color:#fcd34d;background:#fffbeb;}
+
+  .chain{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px;}
+  .chain .fig-card{flex:1 1 180px;max-width:250px;display:flex;flex-direction:column;justify-content:center;}
+  .chain .arrow{font-size:1.5rem;color:#3b82f6;font-weight:700;display:flex;align-items:center;}
+
+  .note{margin:14px 0;padding:12px 14px;border-radius:12px;background:#fffbeb;
+    border-left:4px solid #f59e0b;font-size:.9rem;color:#78350f;line-height:1.5;}
+  .note.blue{background:#eff6ff;border-left-color:#3b82f6;color:#1e3a8a;}
+  .note.pink{background:#fdf2f8;border-left-color:#ec4899;color:#831843;}
+  .note.green{background:#f0fdf4;border-left-color:#22c55e;color:#166534;}
+
+  table.fig-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;}
+  table.fig-table th,table.fig-table td{border:1px solid #e2e8f0;padding:8px 10px;
+    text-align:left;vertical-align:top;}
+  table.fig-table th{background:#eff6ff;color:#1e293b;}
+  table.fig-table tr:nth-child(even) td{background:#f8fafc;}
+
+  details.answer{margin:10px 0;background:#f0fdf4;border:1px solid #bbf7d0;
+    border-radius:10px;padding:8px 12px;font-size:.9rem;}
+  details.answer summary{cursor:pointer;font-weight:600;color:#166534;}
+  details.answer p{margin:8px 0 0;color:#334155;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<!-- Фоновые эмодзи -->
+<div class="bubble-field" aria-hidden="true">
+  <span class="bubble" style="top:8%;  left:5%;  animation-delay:0s;">🖥️</span>
+  <span class="bubble" style="top:20%; left:88%; animation-delay:1s;">⚙️</span>
+  <span class="bubble" style="top:55%; left:3%;  animation-delay:2s;">💾</span>
+  <span class="bubble" style="top:72%; left:92%; animation-delay:1.5s;">🔗</span>
+  <span class="bubble" style="top:35%; left:50%; animation-delay:.5s;">🧩</span>
+  <span class="bubble" style="top:85%; left:40%; animation-delay:2.5s;">📦</span>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="hero-emoji">🖥️</div>
+    <h1 id="title"></h1>
+    <div class="sub" id="subtitle"></div>
+    <div class="variant-badge" id="variantBadge"></div>
+  </header>
+
+  <!-- ГЕЙМИФИКАЦИЯ -->
+  <div class="xp-panel" id="xpPanel">
+    <div class="xp-header">
+      <span class="xp-level-name" id="xpLevelName">🥉 Пользователь</span>
+      <span class="xp-points" id="xpPoints">0 / 100 XP</span>
+    </div>
+    <div class="xp-bar-bg">
+      <div class="xp-bar-fill" id="xpBarFill"></div>
+    </div>
+    <div class="xp-badges">
+      <div class="badge-slot" id="badgeBronze">
+        <span class="badge-icon">🥉</span> Пользователь
+      </div>
+      <div class="badge-slot" id="badgeSilver">
+        <span class="badge-icon">🥈</span> Инженер
+      </div>
+      <div class="badge-slot" id="badgeGold">
+        <span class="badge-icon">🥇</span> Системный архитектор
+      </div>
+    </div>
+  </div>
+
+  <div class="section-tabs">
+    <button class="tab active" data-tab="theory">📚 Теория</button>
+    <button class="tab" data-tab="mindmap">🧠 Карта</button>
+    <button class="tab" data-tab="solutions">📐 Разбор задач</button>
+    <button class="tab" data-tab="test">✏️ Тест</button>
+    <button class="tab" data-tab="homework">🏠 Домашнее задание</button>
+  </div>
+
+  <!-- ТЕОРИЯ -->
+  <div class="card" id="theorySection">
+    <div id="lessonGoals">
+      <h2><span class="icon">🎯</span> Цель и задачи урока</h2>
+      <div style="margin-bottom:14px;">
+        <span class="goal-tag goal">ЦЕЛЬ</span>
+        <div id="goalText" style="font-size:1rem;line-height:1.5;color:#1e293b;"></div>
+      </div>
+      <div>
+        <span class="goal-tag tasks">ЗАДАЧИ</span>
+        <ul id="tasksList" style="margin:8px 0 0;padding-left:22px;line-height:1.7;color:#334155;"></ul>
+      </div>
+    </div>
+
+    <h2><span class="icon">💡</span> Ключевые понятия темы</h2>
+    <div id="theoryList"></div>
+  </div>
+
+  <!-- ИНТЕЛЛЕКТ-КАРТА -->
+  <div class="card hidden" id="mindmapSection">
+    <h2><span class="icon">🧠</span> Интеллект-карта темы</h2>
+    <p class="muted" style="margin:-8px 0 14px">Кликните по узлу, чтобы раскрыть/свернуть ветвь</p>
+    <div id="mindmapBox"></div>
+  </div>
+
+  <!-- РАЗБОР ЗАДАЧ -->
+  <div class="card hidden" id="solutionsSection">
+    <h2><span class="icon">📐</span> Разбор задач по шаблону</h2>
+    <p class="muted" style="margin:-8px 0 16px">
+      Разберите каждую задачу по шагам. Попробуйте решить сами, затем нажмите «Показать решение».
+    </p>
+    <div id="solutionsList"></div>
+  </div>
+
+  <!-- ТЕСТ -->
+  <div class="card hidden" id="testSection">
+    <h2><span class="icon">🎯</span> Проверочный тест</h2>
+
+    <div id="studentInfo" style="background:#eff6ff;border-radius:12px;padding:16px;margin-bottom:18px;border:2px solid #3b82f6;">
+      <div style="font-weight:700;color:#1e293b;">
+        👤 Ученик: <span id="studentNameDisplay">—</span>
+      </div>
+      <div class="muted" style="margin-top:6px;font-size:.85rem;">
+        ФИО подставлено из вашего входа и будет отправлено в журнал учителя.
+      </div>
+    </div>
+
+    <div class="muted">Прогресс выполнения</div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="muted" id="progTxt">0 из 0 заданий</div>
+    <div id="tasks" style="margin-top:18px"></div>
+  </div>
+
+  <!-- ДОМАШНЕЕ ЗАДАНИЕ -->
+  <div class="card hidden" id="homeworkSection">
+    <h2><span class="icon">🏠</span> Домашнее задание</h2>
+    <p class="muted" style="margin:-8px 0 16px">
+      Выполните задания дома. Проверка автоматическая — оценка не влияет на оценку за урок.
+    </p>
+
+    <div id="homeworkTasks"></div>
+
+    <div class="progress" style="margin-top:18px"><div id="hwBar"></div></div>
+    <div class="muted" id="hwProgTxt">0 из 0 заданий</div>
+
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn" id="hwFinish">Проверить домашнее задание</button>
+    </div>
+
+    <div class="score-box hidden" id="hwScoreBox" style="margin-top:20px">
+      <div class="muted">Результат домашнего задания</div>
+      <div id="hwFinalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div class="grade" id="hwGrade"></div>
+      <div class="muted" id="hwComment" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="finishCard" style="text-align:center">
+    <button class="btn" id="finish">Завершить урок и получить оценку</button>
+    <div class="score-box hidden" id="scoreBox">
+      <div class="muted">Ваш результат</div>
+      <div id="finalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div style="font-size:3rem;margin:8px 0;" id="finalEmoji"></div>
+      <div class="grade-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#ec4899"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="60" cy="60" r="45"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="45"/>
+        </svg>
+        <div class="ring-text">
+          <span id="ringPercent">0%</span>
+          <small>выполнено</small>
+        </div>
+      </div>
+      <div class="grade" id="finalGrade"></div>
+      <div class="muted" id="finalComment" style="margin-top:10px"></div>
+      <button class="btn ghost" style="margin-top:20px" onclick="location.reload()">🔄 Пройти другой вариант</button>
+    </div>
+  </div>
+
+  <footer>УМК Л.Л. Босовой · § 6 · Интерактивный урок с самопроверкой</footer>
+</div>
+
+<script>
+/* ============================================================
+   ДАННЫЕ УРОКА
+   ============================================================ */
+const LESSON_DATA = {
+  title: "Персональный компьютер как система",
+  subtitle: "6 класс · УМК Босовой · § 6",
+  className: "6 класс",
+
+  goal: "Сформировать представление о персональном компьютере как о системе: увидеть его подсистемы — аппаратное и программное обеспечение, информационные ресурсы, — понять связи между ними, а также роль компьютера как надсистемы и подсистемы.",
+
+  tasks: [
+    "Понять, почему персональный компьютер называют универсальной системой.",
+    "Различать аппаратное и программное обеспечение компьютера.",
+    "Классифицировать устройства по назначению: обработка, хранение, ввод, вывод, передача.",
+    "Различать системные, прикладные и инструментальные программы.",
+    "Понять, что компьютер одновременно является надсистемой для своих устройств и подсистемой для сети.",
+    "Увидеть проявление системного эффекта в работе компьютера."
+  ],
+
+  gameLevels: [
+    { name: '🥉 Пользователь',        threshold: 0,  badge: 'badgeBronze' },
+    { name: '🥈 Инженер',             threshold: 15, badge: 'badgeSilver' },
+    { name: '🥇 Системный архитектор', threshold: 30, badge: 'badgeGold'   }
+  ],
+
+  theory: [
+    {
+      title: "🖥️ Персональный компьютер — универсальная система",
+      image: "🖥️ 🧩 🎯",
+      body: `<p><b>Персональный компьютер (ПК)</b> — это универсальная машина для работы с информацией, предназначенная для одного пользователя.</p>
+             <p>Слово «универсальная» означает, что компьютер может работать с разными видами информации: текстом, числами, графикой, звуком и видео — и решать самые разные задачи: учиться, писать, рисовать, общаться, программировать.</p>
+             <p>Как и любая система, компьютер состоит из <b>взаимосвязанных частей — подсистем</b>. Их три:</p>
+
+             <div class="fig-grid three">
+               <div class="fig-card blue"><div class="big">🧱</div><h4>Аппаратное обеспечение</h4><p>Все устройства компьютера: процессор, память, монитор, клавиатура и другие</p></div>
+               <div class="fig-card green"><div class="big">💾</div><h4>Программное обеспечение</h4><p>Все программы, которые управляют устройствами и решают задачи пользователя</p></div>
+               <div class="fig-card amber"><div class="big">📁</div><h4>Информационные ресурсы</h4><p>Файлы, папки, документы, изображения, звукозаписи и другие данные</p></div>
+             </div>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 310" role="img" aria-label="Персональный компьютер как система из трёх подсистем">
+                 <rect x="4" y="4" width="632" height="302" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <rect x="232" y="118" width="176" height="66" rx="14" fill="#1e3a8a"/>
+                 <text x="320" y="146" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="16" font-weight="800" fill="#ffffff">ПЕРСОНАЛЬНЫЙ</text>
+                 <text x="320" y="168" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="16" font-weight="800" fill="#ffffff">КОМПЬЮТЕР</text>
+
+                 <g stroke="#3b82f6" stroke-width="3" stroke-dasharray="7 6" fill="none">
+                   <path d="M232 136 C180 110 160 96 138 90"/>
+                   <path d="M408 136 C460 110 480 96 502 90"/>
+                   <path d="M320 184 V232"/>
+                 </g>
+
+                 <rect x="26" y="42" width="222" height="58" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="2.5"/>
+                 <text x="137" y="66" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#1d4ed8">🧱 АППАРАТНОЕ</text>
+                 <text x="137" y="86" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#1d4ed8">ОБЕСПЕЧЕНИЕ</text>
+
+                 <rect x="392" y="42" width="222" height="58" rx="12" fill="#f0fdf4" stroke="#22c55e" stroke-width="2.5"/>
+                 <text x="503" y="66" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#15803d">💾 ПРОГРАММНОЕ</text>
+                 <text x="503" y="86" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#15803d">ОБЕСПЕЧЕНИЕ</text>
+
+                 <rect x="218" y="232" width="204" height="54" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.5"/>
+                 <text x="320" y="255" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#b45309">📁 ИНФОРМАЦИОННЫЕ</text>
+                 <text x="320" y="275" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#b45309">РЕСУРСЫ</text>
+
+                 <text x="320" y="30" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#64748b">три подсистемы работают вместе</text>
+               </svg>
+               <div class="fig-cap">Рис. 1. Персональный компьютер как система: аппаратное обеспечение, программное обеспечение и информационные ресурсы</div>
+             </div>
+
+             <p class="note blue">💡 Устройства без программ — это только набор деталей. Программы без устройств работать не могут. А без информации компьютеру нечего обрабатывать. Только вместе три подсистемы образуют работающий компьютер.</p>`
+    },
+    {
+      title: "🧱 Аппаратное обеспечение компьютера",
+      image: "🧱 ⚙️ 🔌",
+      body: `<p><b>Аппаратное обеспечение</b> — это совокупность всех устройств компьютера. Их часто называют «железом».</p>
+             <p>Устройства объединяют в группы по назначению:</p>
+
+             <table class="fig-table">
+               <thead><tr><th>Группа устройств</th><th>Назначение</th><th>Примеры</th></tr></thead>
+               <tbody>
+                 <tr><td><b>Обработки</b></td><td>Выполняют вычисления и команды программ</td><td>Процессор</td></tr>
+                 <tr><td><b>Хранения</b></td><td>Хранят данные и программы</td><td>Оперативная память, жёсткий диск, SSD, флеш-память</td></tr>
+                 <tr><td><b>Ввода</b></td><td>Передают информацию в компьютер</td><td>Клавиатура, мышь, сканер, микрофон, веб-камера</td></tr>
+                 <tr><td><b>Вывода</b></td><td>Выдают информацию пользователю</td><td>Монитор, принтер, колонки, проектор</td></tr>
+                 <tr><td><b>Передачи</b></td><td>Связывают компьютер с другими устройствами и сетями</td><td>Сетевая карта, Wi-Fi-адаптер, Bluetooth-модуль</td></tr>
+               </tbody>
+             </table>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 300" role="img" aria-label="Устройства персонального компьютера">
+                 <rect x="4" y="4" width="632" height="292" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <!-- Монитор -->
+                 <rect x="60" y="46" width="170" height="112" rx="10" fill="#e2e8f0" stroke="#475569" stroke-width="3"/>
+                 <rect x="72" y="58" width="146" height="88" rx="5" fill="#bfdbfe"/>
+                 <rect x="132" y="158" width="26" height="24" fill="#94a3b8"/>
+                 <rect x="102" y="182" width="86" height="9" rx="4.5" fill="#64748b"/>
+                 <text x="145" y="214" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#334155">Монитор</text>
+                 <text x="145" y="230" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#64748b">устройство вывода</text>
+
+                 <!-- Системный блок -->
+                 <rect x="282" y="52" width="112" height="158" rx="10" fill="#e2e8f0" stroke="#475569" stroke-width="3"/>
+                 <rect x="294" y="68" width="88" height="26" rx="4" fill="#cbd5e1"/>
+                 <circle cx="309" cy="81" r="4" fill="#22c55e"/>
+                 <rect x="294" y="106" width="88" height="10" rx="5" fill="#94a3b8"/>
+                 <rect x="294" y="126" width="88" height="10" rx="5" fill="#94a3b8"/>
+                 <rect x="302" y="152" width="72" height="34" rx="5" fill="#bfdbfe" stroke="#2563eb" stroke-width="2"/>
+                 <text x="338" y="174" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="10" font-weight="700" fill="#1e3a8a">CPU · RAM · HDD</text>
+                 <text x="338" y="230" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#334155">Системный блок</text>
+                 <text x="338" y="246" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#64748b">обработка и хранение</text>
+
+                 <!-- Клавиатура -->
+                 <rect x="60" y="250" width="152" height="26" rx="6" fill="#cbd5e1" stroke="#475569" stroke-width="2.5"/>
+                 <g fill="#64748b">
+                   <rect x="70" y="256" width="8" height="6" rx="1.5"/><rect x="82" y="256" width="8" height="6" rx="1.5"/>
+                   <rect x="94" y="256" width="8" height="6" rx="1.5"/><rect x="106" y="256" width="8" height="6" rx="1.5"/>
+                   <rect x="118" y="256" width="8" height="6" rx="1.5"/><rect x="130" y="256" width="8" height="6" rx="1.5"/>
+                   <rect x="142" y="256" width="8" height="6" rx="1.5"/><rect x="154" y="256" width="8" height="6" rx="1.5"/>
+                   <rect x="166" y="256" width="8" height="6" rx="1.5"/><rect x="178" y="256" width="8" height="6" rx="1.5"/>
+                   <rect x="70" y="266" width="24" height="5" rx="1.5"/><rect x="98" y="266" width="40" height="5" rx="1.5"/>
+                   <rect x="142" y="266" width="24" height="5" rx="1.5"/><rect x="170" y="266" width="18" height="5" rx="1.5"/>
+                 </g>
+
+                 <!-- Мышь -->
+                 <ellipse cx="256" cy="260" rx="20" ry="14" fill="#cbd5e1" stroke="#475569" stroke-width="2.5"/>
+                 <line x1="256" y1="246" x2="256" y2="256" stroke="#475569" stroke-width="2"/>
+
+                 <!-- Принтер -->
+                 <rect x="448" y="86" width="144" height="70" rx="8" fill="#e2e8f0" stroke="#475569" stroke-width="3"/>
+                 <rect x="462" y="100" width="116" height="26" rx="4" fill="#bfdbfe"/>
+                 <rect x="462" y="132" width="116" height="54" rx="4" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+                 <text x="520" y="162" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#64748b">документ</text>
+                 <text x="520" y="184" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#334155">Принтер</text>
+                 <text x="520" y="200" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#64748b">устройство вывода</text>
+
+                 <!-- Сеть -->
+                 <rect x="448" y="218" width="144" height="48" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2.5"/>
+                 <text x="520" y="240" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#15803d">📡 Сетевая карта</text>
+                 <text x="520" y="256" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#15803d">устройство передачи</text>
+
+                 <!-- Связи -->
+                 <g stroke="#93c5fd" stroke-width="2.5" stroke-dasharray="5 4">
+                   <line x1="230" y1="110" x2="282" y2="110"/>
+                   <line x1="394" y1="110" x2="448" y2="110"/>
+                   <line x1="230" y1="262" x2="282" y2="220"/>
+                   <line x1="394" y1="220" x2="448" y2="240"/>
+                 </g>
+               </svg>
+               <div class="fig-cap">Рис. 2. Аппаратное обеспечение: устройства обработки, хранения, ввода, вывода и передачи информации</div>
+             </div>
+
+             <p><b>В системном блоке</b> находятся процессор, оперативная память и устройства долговременного хранения. Это «мозг» и «память» компьютера.</p>
+             <p><b>Периферийные устройства</b> — это устройства, которые подключаются к системному блоку снаружи: монитор, клавиатура, мышь, принтер, сканер, колонки.</p>
+
+             <p class="note">⚠️ Некоторые устройства совмещают несколько функций. Например, сенсорный экран одновременно служит устройством ввода и вывода, а многофункциональное устройство (МФУ) может печатать, сканировать и копировать.</p>`
+    },
+    {
+      title: "💾 Программное обеспечение компьютера",
+      image: "💾 📝 🛠️",
+      body: `<p><b>Программное обеспечение (ПО)</b> — это совокупность всех программ, хранящихся в памяти компьютера.</p>
+             <p>Программы делят на три группы:</p>
+
+             <div class="fig-grid three">
+               <div class="fig-card blue">
+                 <div class="big">⚙️</div>
+                 <h4>Системное ПО</h4>
+                 <p>Обеспечивает работу устройств и всех остальных программ</p>
+                 <p style="margin-top:6px;color:#1e3a8a"><b>Примеры:</b> операционная система, драйверы, утилиты, антивирус</p>
+               </div>
+               <div class="fig-card green">
+                 <div class="big">📝</div>
+                 <h4>Прикладное ПО</h4>
+                 <p>Помогает пользователю решать его задачи</p>
+                 <p style="margin-top:6px;color:#166534"><b>Примеры:</b> текстовый и графический редакторы, браузер, игры, учебные программы</p>
+               </div>
+               <div class="fig-card amber">
+                 <div class="big">🛠️</div>
+                 <h4>Инструментальное ПО</h4>
+                 <p>Служит для создания новых программ</p>
+                 <p style="margin-top:6px;color:#92400e"><b>Примеры:</b> среды программирования, компиляторы, отладчики</p>
+               </div>
+             </div>
+
+             <p><b>Операционная система</b> — главная системная программа. Она управляет устройствами, файлами и запуском программ, обеспечивает удобный интерфейс для пользователя. Примеры: Windows, Linux, macOS, Android.</p>
+             <p><b>Прикладные программы</b> ещё называют <b>приложениями</b>. Именно в них мы чаще всего работаем: набираем текст, рисуем, ищем информацию в Интернете, смотрим видео.</p>
+             <p><b>Инструментальные программы</b> нужны программистам. С их помощью создают прикладные и системные программы.</p>
+
+             <table class="fig-table">
+               <thead><tr><th>Программа</th><th>Группа ПО</th><th>Для чего нужна</th></tr></thead>
+               <tbody>
+                 <tr><td>Windows, Linux</td><td>системное</td><td>Управляет компьютером и запускает программы</td></tr>
+                 <tr><td>Текстовый редактор</td><td>прикладное</td><td>Создаёт и редактирует тексты</td></tr>
+                 <tr><td>Браузер</td><td>прикладное</td><td>Просматривает сайты в Интернете</td></tr>
+                 <tr><td>Среда программирования Python</td><td>инструментальное</td><td>Помогает создавать новые программы</td></tr>
+                 <tr><td>Антивирус</td><td>системное</td><td>Защищает компьютер от вредных программ</td></tr>
+               </tbody>
+             </table>
+
+             <p class="note green">💡 Программное обеспечение — это «душа» компьютера. Одно и то же устройство может выполнять разные задачи в зависимости от того, какая программа им управляет.</p>`
+    },
+    {
+      title: "🔗 Компьютер как надсистема и подсистема",
+      image: "🔗 🌐 🖥️",
+      body: `<p>Компьютер — это система, но и сам он может входить в состав других систем. Поэтому говорят, что компьютер одновременно является <b>надсистемой</b> и <b>подсистемой</b>.</p>
+
+             <div class="fig-grid two">
+               <div class="fig-card blue"><div class="big">🔽</div><h4>Компьютер — надсистема</h4><p>Для своих устройств: процессора, памяти, монитора, клавиатуры. Они являются его подсистемами.</p></div>
+               <div class="fig-card green"><div class="big">🔼</div><h4>Компьютер — подсистема</h4><p>Для локальной сети, Интернета, системы «человек — компьютер». Они являются его надсистемами.</p></div>
+             </div>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 330" role="img" aria-label="Вложенность систем: Интернет, локальная сеть, компьютер, устройства">
+                 <rect x="10" y="12" width="620" height="306" rx="18" fill="#faf5ff" stroke="#8b5cf6" stroke-width="2.5"/>
+                 <text x="30" y="40" font-family="Segoe UI, sans-serif" font-size="15" font-weight="800" fill="#6d28d9">🌐 ИНТЕРНЕТ</text>
+                 <text x="610" y="40" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="11" fill="#7c3aed">надсистема</text>
+
+                 <rect x="46" y="56" width="548" height="238" rx="16" fill="#eff6ff" stroke="#3b82f6" stroke-width="2.5"/>
+                 <text x="66" y="82" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#1d4ed8">🏫 ЛОКАЛЬНАЯ СЕТЬ ШКОЛЫ</text>
+
+                 <rect x="102" y="98" width="436" height="176" rx="14" fill="#f0fdf4" stroke="#22c55e" stroke-width="2.5"/>
+                 <text x="122" y="124" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#15803d">🖥️ ПЕРСОНАЛЬНЫЙ КОМПЬЮТЕР</text>
+
+                 <rect x="150" y="142" width="84" height="108" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+                 <text x="192" y="166" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#334155">Процессор</text>
+                 <text x="192" y="184" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#334155">Память</text>
+                 <text x="192" y="202" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#334155">Монитор</text>
+                 <text x="192" y="220" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#334155">Клавиатура</text>
+                 <text x="192" y="238" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#334155">Диск</text>
+
+                 <rect x="266" y="142" width="240" height="108" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+                 <text x="386" y="170" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#334155">Устройства — подсистемы</text>
+                 <text x="386" y="192" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#64748b">входят в состав компьютера</text>
+                 <text x="386" y="216" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#334155">Компьютер — подсистема</text>
+                 <text x="386" y="238" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#64748b">входит в состав сети</text>
+
+                 <text x="320" y="308" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#475569">чем больше система, тем дальше она от пользователя</text>
+               </svg>
+               <div class="fig-cap">Рис. 3. Один и тот же компьютер одновременно является надсистемой для устройств и подсистемой для сети</div>
+             </div>
+
+             <p><b>Пример.</b> Компьютер в кабинете информатики:</p>
+             <ul>
+               <li><b>подсистемы компьютера:</b> процессор, оперативная память, жёсткий диск, монитор, клавиатура, операционная система;</li>
+               <li><b>надсистемы компьютера:</b> локальная сеть школы, Интернет, система «ученик — компьютер — учитель».</li>
+             </ul>
+
+             <p class="note blue">💡 Границы системы зависят от цели изучения. Если нам важно, как устроен компьютер, мы рассматриваем его как систему, а его устройства — как подсистемы. Если важно, как компьютеры обмениваются данными, мы рассматриваем компьютер как часть сети.</p>`
+    },
+    {
+      title: "✨ Системный эффект и целостность компьютера",
+      image: "✨ 🧩 🚀",
+      body: `<p><b>Целостность</b> — это свойство системы, которое означает: система обладает качествами, которых нет у её отдельных частей.</p>
+             <p><b>Системный эффект</b> — результат совместной работы элементов, который больше простой суммы их возможностей.</p>
+             <p>Рассмотрим компьютер. По отдельности:</p>
+             <ul>
+               <li>процессор умеет выполнять команды, но не умеет показывать изображение;</li>
+               <li>монитор умеет показывать изображение, но не умеет его создавать;</li>
+               <li>клавиатура умеет вводить символы, но не умеет их обрабатывать;</li>
+               <li>жёсткий диск умеет хранить данные, но не умеет их обрабатывать.</li>
+             </ul>
+             <p>А вместе, под управлением программ, они образуют компьютер, на котором можно набрать текст, нарисовать рисунок, посмотреть видео и отправить сообщение. Это и есть <b>системный эффект</b>.</p>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 270" role="img" aria-label="Системный эффект: разрозненные устройства и собранный компьютер">
+                 <rect x="4" y="4" width="306" height="262" rx="18" fill="#fff7ed" stroke="#fdba74" stroke-width="2.5"/>
+                 <rect x="330" y="4" width="306" height="262" rx="18" fill="#f0fdf4" stroke="#86efac" stroke-width="2.5"/>
+
+                 <text x="157" y="36" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="16" font-weight="800" fill="#c2410c">ПО ОТДЕЛЬНОСТИ</text>
+                 <text x="157" y="56" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#ea580c">набор деталей</text>
+
+                 <rect x="44" y="84" width="52" height="40" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+                 <text x="70" y="109" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#7c2d12">CPU</text>
+
+                 <rect x="118" y="84" width="60" height="40" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+                 <text x="148" y="109" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#7c2d12">RAM</text>
+
+                 <rect x="200" y="84" width="62" height="40" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+                 <text x="231" y="109" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#7c2d12">Диск</text>
+
+                 <rect x="44" y="148" width="74" height="34" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+                 <text x="81" y="170" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#7c2d12">Монитор</text>
+
+                 <rect x="138" y="148" width="80" height="34" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+                 <text x="178" y="170" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#7c2d12">Клавиатура</text>
+
+                 <rect x="238" y="148" width="38" height="34" rx="6" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+                 <text x="257" y="170" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#7c2d12">Мышь</text>
+
+                 <text x="157" y="222" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="34" fill="#ea580c">?</text>
+
+                 <text x="483" y="36" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="16" font-weight="800" fill="#15803d">ВМЕСТЕ</text>
+                 <text x="483" y="56" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#16a34a">работающая система</text>
+
+                 <rect x="390" y="82" width="70" height="52" rx="7" fill="#bbf7d0" stroke="#16a34a" stroke-width="2"/>
+                 <rect x="400" y="92" width="50" height="32" rx="3" fill="#dcfce7"/>
+                 <rect x="418" y="134" width="14" height="12" fill="#86efac"/>
+                 <rect x="404" y="146" width="42" height="5" rx="2.5" fill="#16a34a"/>
+
+                 <rect x="486" y="92" width="86" height="70" rx="7" fill="#bbf7d0" stroke="#16a34a" stroke-width="2"/>
+                 <rect x="496" y="104" width="66" height="8" rx="4" fill="#dcfce7"/>
+                 <rect x="496" y="118" width="66" height="8" rx="4" fill="#dcfce7"/>
+                 <rect x="496" y="132" width="40" height="8" rx="4" fill="#dcfce7"/>
+
+                 <rect x="390" y="188" width="66" height="20" rx="5" fill="#bbf7d0" stroke="#16a34a" stroke-width="2"/>
+                 <rect x="472" y="188" width="24" height="20" rx="8" fill="#bbf7d0" stroke="#16a34a" stroke-width="2"/>
+
+                 <text x="483" y="238" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="32" fill="#16a34a">✓</text>
+
+                 <path d="M314 135 H326" stroke="#3b82f6" stroke-width="3"/>
+                 <path d="M320 128 L330 135 L320 142" fill="#3b82f6"/>
+               </svg>
+               <div class="fig-cap">Рис. 4. Системный эффект: разрозненные устройства не работают, а собранный компьютер решает информационные задачи</div>
+             </div>
+
+             <p><b>Если убрать элемент системы</b>, она может перестать работать. Без процессора компьютер не обработает данные, без операционной системы не запустятся программы, без монитора мы не увидим результат.</p>
+             <p class="note pink">💡 Системный эффект — главный признак любой системы. Именно ради него части и объединяют в целое.</p>`
+    },
+    {
+      title: "🔁 Компьютер и пользователь: вход — обработка — выход",
+      image: "🔁 👤 💡",
+      body: `<p>Для пользователя компьютер удобно рассматривать как систему, которая получает <b>входные данные</b>, обрабатывает их и выдаёт <b>результат</b>.</p>
+
+             <div class="chain">
+               <div class="fig-card blue"><h4>Вход</h4><p>Данные и команды: текст с клавиатуры, щелчок мыши, изображение со сканера, голос в микрофон</p></div>
+               <span class="arrow">→</span>
+               <div class="fig-card amber"><h4>Обработка</h4><p>Процессор выполняет команды программы, данные сохраняются в памяти</p></div>
+               <span class="arrow">→</span>
+               <div class="fig-card green"><h4>Выход</h4><p>Результат: текст на экране, рисунок, звук, напечатанный документ</p></div>
+             </div>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 210" role="img" aria-label="Схема: пользователь, вход, обработка, выход">
+                 <rect x="4" y="4" width="632" height="202" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <circle cx="72" cy="88" r="22" fill="#dbeafe" stroke="#3b82f6" stroke-width="2.5"/>
+                 <circle cx="72" cy="82" r="8" fill="#1e3a8a"/>
+                 <path d="M54 108 C58 94 86 94 90 108" fill="#1e3a8a"/>
+                 <text x="72" y="136" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">Пользователь</text>
+                 <text x="72" y="152" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="10" fill="#64748b">ставит задачу</text>
+
+                 <rect x="138" y="62" width="112" height="60" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="2.5"/>
+                 <text x="194" y="88" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#1d4ed8">ВХОД</text>
+                 <text x="194" y="108" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="10" fill="#3b82f6">данные и команды</text>
+
+                 <rect x="296" y="48" width="132" height="88" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.5"/>
+                 <text x="362" y="76" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#b45309">ОБРАБОТКА</text>
+                 <text x="362" y="96" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="10" fill="#d97706">процессор и программы</text>
+                 <text x="362" y="112" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="10" fill="#d97706">память</text>
+
+                 <rect x="474" y="62" width="126" height="60" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2.5"/>
+                 <text x="537" y="88" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#15803d">ВЫХОД</text>
+                 <text x="537" y="108" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="10" fill="#16a34a">результат</text>
+
+                 <g stroke="#3b82f6" stroke-width="3" fill="#3b82f6">
+                   <line x1="106" y1="92" x2="132" y2="92"/>
+                   <path d="M126 85 L136 92 L126 99"/>
+                   <line x1="250" y1="92" x2="290" y2="92"/>
+                   <path d="M284 85 L294 92 L284 99"/>
+                   <line x1="428" y1="92" x2="468" y2="92"/>
+                   <path d="M462 85 L472 92 L462 99"/>
+                 </g>
+
+                 <text x="320" y="180" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#64748b">Компьютер можно рассматривать как «чёрный ящик»: важны входы и выходы, а не внутреннее устройство</text>
+               </svg>
+               <div class="fig-cap">Рис. 5. Компьютер в системе «пользователь — компьютер»: вход, обработка и выход информации</div>
+             </div>
+
+             <p><b>Информационные ресурсы</b> компьютера — это файлы и папки, в которых хранятся тексты, рисунки, таблицы, музыка, видео и программы. Они тоже часть системы: без них компьютер не сможет выдать нужный результат.</p>
+             <p><b>Пользователь</b> также входит в систему «человек — компьютер». Он ставит цель, выбирает программу и оценивает результат. Без человека компьютер не решает, <i>зачем</i> обрабатывать информацию.</p>
+
+             <p class="note blue">💡 Связь с предыдущей темой: если внутреннее устройство компьютера нам не важно, мы можем рассматривать его как «чёрный ящик» и описывать только через входы и выходы.</p>`
+    },
+    {
+      title: "🏁 Итоги темы",
+      image: "🏁 ✅ 📌",
+      body: `<p><b>Самое главное:</b></p>
+             <ol>
+               <li><b>Персональный компьютер</b> — универсальная машина для работы с информацией, предназначенная для одного пользователя.</li>
+               <li>Компьютер как система включает три подсистемы: <b>аппаратное обеспечение</b>, <b>программное обеспечение</b> и <b>информационные ресурсы</b>.</li>
+               <li><b>Аппаратное обеспечение</b> — все устройства компьютера. Их делят на устройства обработки, хранения, ввода, вывода и передачи.</li>
+               <li><b>Программное обеспечение</b> — все программы компьютера. Они бывают <b>системными</b>, <b>прикладными</b> и <b>инструментальными</b>.</li>
+               <li>Компьютер одновременно является <b>надсистемой</b> для своих устройств и <b>подсистемой</b> для локальной сети и Интернета.</li>
+               <li><b>Системный эффект</b> — совместная работа устройств и программ даёт новые возможности, которых нет у отдельных частей.</li>
+             </ol>
+
+             <details class="answer">
+               <summary>Проверь себя: почему компьютер называют универсальной машиной?</summary>
+               <p>Потому что он может работать с разными видами информации — текстом, числами, графикой, звуком и видео — и решать разные задачи при помощи разных программ.</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: чем аппаратное обеспечение отличается от программного?</summary>
+               <p>Аппаратное обеспечение — это устройства, которые можно потрогать. Программное обеспечение — это программы, то есть инструкции, по которым работают устройства.</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: почему компьютер называют и надсистемой, и подсистемой?</summary>
+               <p>Он является надсистемой для своих устройств (процессора, памяти, монитора) и подсистемой для более крупных систем — локальной сети, Интернета, системы «человек — компьютер».</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: в чём проявляется системный эффект компьютера?</summary>
+               <p>В том, что отдельные устройства сами по себе не могут решать информационные задачи, а вместе, под управлением программ, они образуют работающий компьютер с новыми возможностями.</p>
+             </details>`
+    }
+  ],
+
+  mindmap: {
+    center: "Персональный компьютер",
+    branches: [
+      { text: "Аппаратное обеспечение", color: "#3b82f6",
+        children: ["Обработка: процессор", "Хранение: ОЗУ, диск", "Ввод: клавиатура, мышь", "Вывод: монитор, принтер", "Передача: сетевая карта"] },
+      { text: "Программное обеспечение", color: "#22c55e",
+        children: ["Системное: ОС, драйверы", "Прикладное: редакторы, браузер", "Инструментальное: среды программирования"] },
+      { text: "Информационные ресурсы", color: "#f59e0b",
+        children: ["Файлы", "Папки", "Документы, изображения, звук"] },
+      { text: "Надсистема и подсистема", color: "#8b5cf6",
+        children: ["Устройства — подсистемы", "Сеть, Интернет — надсистемы", "«Человек — компьютер»"] },
+      { text: "Системный эффект", color: "#ec4899",
+        children: ["Целостность", "Новые возможности", "Убери элемент — система сломается"] }
+    ]
+  },
+
+  variants: {
+    A: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что такое персональный компьютер?",
+        options:["Универсальная машина для работы с информацией, предназначенная для одного пользователя","Устройство только для компьютерных игр","Набор программ без устройств","Только монитор и клавиатура"],
+        answer:0, exp:"ПК — универсальная машина для работы с информацией, рассчитанная на одного пользователя." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Из каких двух основных подсистем состоит компьютер?",
+        options:["Аппаратное и программное обеспечение","Процессор и монитор","Windows и Linux","Файлы и папки"],
+        answer:0, exp:"Основные подсистемы компьютера — аппаратное и программное обеспечение." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какое устройство относится к устройствам ввода?",
+        options:["Клавиатура","Монитор","Принтер","Колонки"],
+        answer:0, exp:"Клавиатура передаёт информацию в компьютер, значит это устройство ввода." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Что относится к системному программному обеспечению?",
+        options:["Операционная система","Текстовый редактор","Браузер","Компьютерная игра"],
+        answer:0, exp:"Операционная система управляет устройствами и программами, поэтому относится к системному ПО." },
+      { level:"hard", weight:3, type:"text",
+        q:"Как называется совокупность всех устройств компьютера? (два слова)",
+        answer:"аппаратное обеспечение", exp:"Аппаратное обеспечение — это все устройства компьютера." }
+    ],
+    B: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что означает слово «персональный» в названии ПК?",
+        options:["Предназначенный для одного пользователя","Самый мощный","Подключённый к Интернету","Состоящий из одного устройства"],
+        answer:0, exp:"Персональный компьютер рассчитан на работу одного пользователя." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Что относится к аппаратному обеспечению?",
+        options:["Монитор, клавиатура, процессор","Операционная система","Текстовый редактор","Файлы и папки"],
+        answer:0, exp:"Аппаратное обеспечение — это устройства компьютера." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какое устройство относится к устройствам вывода?",
+        options:["Монитор","Сканер","Микрофон","Клавиатура"],
+        answer:0, exp:"Монитор выдаёт информацию пользователю, поэтому это устройство вывода." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Что относится к прикладному программному обеспечению?",
+        options:["Текстовый редактор","Операционная система","Драйвер","BIOS"],
+        answer:0, exp:"Текстовый редактор помогает пользователю решать его задачу, значит это прикладная программа." },
+      { level:"hard", weight:3, type:"text",
+        q:"Как называется более общая система, в которую компьютер входит как составная часть? (одно слово)",
+        answer:"надсистема", exp:"По отношению к компьютеру сеть и Интернет являются надсистемами." }
+    ],
+    C: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что такое программное обеспечение?",
+        options:["Совокупность всех программ компьютера","Совокупность всех устройств компьютера","Только операционная система","Информация в файлах"],
+        answer:0, exp:"Программное обеспечение — это все программы, хранящиеся в памяти компьютера." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Какое устройство обрабатывает информацию в компьютере?",
+        options:["Процессор","Монитор","Клавиатура","Принтер"],
+        answer:0, exp:"Процессор выполняет команды программ и обрабатывает данные." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Что из перечисленного является подсистемой компьютера?",
+        options:["Процессор","Интернет","Локальная сеть","Пользователь"],
+        answer:0, exp:"Процессор входит в состав компьютера, а сеть и Интернет — более общие системы." },
+      { level:"medium", weight:2, type:"choice",
+        q:"В чём проявляется системный эффект компьютера?",
+        options:["В совместной работе устройств и программ появляются новые возможности","Каждое устройство работает независимо от других","Компьютер состоит только из одного устройства","Программы не связаны с устройствами"],
+        answer:0, exp:"Системный эффект — новые возможности, которые появляются при совместной работе частей." },
+      { level:"hard", weight:3, type:"text",
+        q:"Как называется совокупность всех программ компьютера? (два слова)",
+        answer:"программное обеспечение", exp:"Программное обеспечение — это все программы компьютера." }
+    ]
+  },
+
+  homework: [
+    {
+      type: "choice",
+      q: "Какую информацию может обрабатывать персональный компьютер?",
+      options: ["Текст, числа, графику, звук и видео", "Только текст", "Только числа", "Только компьютерные игры"],
+      answer: 0,
+      exp: "Компьютер универсален: он работает с разными видами информации."
+    },
+    {
+      type: "choice",
+      q: "Что из перечисленного относится к аппаратному обеспечению?",
+      options: ["Жёсткий диск", "Операционная система", "Браузер", "Текстовый документ"],
+      answer: 0,
+      exp: "Жёсткий диск — устройство хранения, то есть аппаратное обеспечение."
+    },
+    {
+      type: "choice",
+      q: "Какое устройство служит для ввода информации?",
+      options: ["Сканер", "Принтер", "Монитор", "Проектор"],
+      answer: 0,
+      exp: "Сканер переводит изображение или текст в компьютерный вид — это устройство ввода."
+    },
+    {
+      type: "choice",
+      q: "Что относится к прикладному программному обеспечению?",
+      options: ["Графический редактор", "Операционная система", "Драйвер видеокарты", "Антивирус"],
+      answer: 0,
+      exp: "Графический редактор помогает пользователю решать задачу, поэтому это прикладная программа."
+    },
+    {
+      type: "text",
+      q: "Как называется более общая система, частью которой является компьютер в локальной сети? (одно слово)",
+      answer: "надсистема",
+      exp: "Локальная сеть — надсистема по отношению к входящему в неё компьютеру."
+    },
+    {
+      type: "text",
+      q: "Как называется свойство системы, при котором целое обладает качествами, которых нет у отдельных частей? (одно слово)",
+      answer: "целостность",
+      exp: "Целостность — это наличие у системы новых качеств, которых нет у её частей по отдельности."
+    }
+  ],
+
+  solutions: [
+    {
+      title: "Задача 1. Подсистемы компьютера",
+      task: "Назовите три основные подсистемы персонального компьютера и приведите примеры для каждой.",
+      template: [
+        "1. Вспомним: компьютер — система, значит, его части — это <b>подсистемы</b>.",
+        "2. Первая подсистема — <b>аппаратное обеспечение</b>: процессор, память, монитор, клавиатура.",
+        "3. Вторая подсистема — <b>программное обеспечение</b>: операционная система, редакторы, браузер.",
+        "4. Третья подсистема — <b>информационные ресурсы</b>: файлы, папки, документы, изображения.",
+        "5. Вывод: только вместе эти подсистемы образуют работающий компьютер."
+      ],
+      answer: "Аппаратное обеспечение, программное обеспечение и информационные ресурсы",
+      hint: "Назовите устройства, программы и данные — это три части системы."
+    },
+    {
+      title: "Задача 2. Классификация устройств",
+      task: "Распределите устройства по назначению: процессор, монитор, клавиатура, жёсткий диск, сетевая карта.",
+      template: [
+        "1. Задаём вопрос: <b>что делает устройство?</b>",
+        "2. <b>Процессор</b> обрабатывает данные — устройство обработки.",
+        "3. <b>Жёсткий диск</b> хранит данные — устройство хранения.",
+        "4. <b>Клавиатура</b> вводит информацию — устройство ввода.",
+        "5. <b>Монитор</b> выводит изображение — устройство вывода.",
+        "6. <b>Сетевая карта</b> передаёт данные — устройство передачи.",
+        "7. Вывод: обработка — процессор; хранение — жёсткий диск; ввод — клавиатура; вывод — монитор; передача — сетевая карта."
+      ],
+      answer: "Обработка — процессор, хранение — жёсткий диск, ввод — клавиатура, вывод — монитор, передача — сетевая карта",
+      hint: "Определите, что устройство делает с информацией: получает, хранит, обрабатывает, выдаёт или передаёт."
+    },
+    {
+      title: "Задача 3. Классификация программ",
+      task: "Распределите программы по группам ПО: Windows, текстовый редактор, среда программирования Python, антивирус, браузер.",
+      template: [
+        "1. <b>Системное ПО</b> управляет компьютером и обеспечивает его работу: Windows, антивирус.",
+        "2. <b>Прикладное ПО</b> решает задачи пользователя: текстовый редактор, браузер.",
+        "3. <b>Инструментальное ПО</b> служит для создания программ: среда программирования Python.",
+        "4. Проверяем: каждая программа попала ровно в одну группу.",
+        "5. Вывод: системное — Windows и антивирус; прикладное — текстовый редактор и браузер; инструментальное — Python."
+      ],
+      answer: "Системное: Windows, антивирус. Прикладное: текстовый редактор, браузер. Инструментальное: Python",
+      hint: "Спросите: программа управляет компьютером, решает задачу пользователя или помогает создавать другие программы?"
+    },
+    {
+      title: "Задача 4. Надсистема и подсистема",
+      task: "Для компьютера в кабинете информатики назовите две его подсистемы и две надсистемы.",
+      template: [
+        "1. <b>Подсистемы</b> входят в состав компьютера: процессор, оперативная память, монитор, операционная система.",
+        "2. <b>Надсистемы</b> включают компьютер в свой состав: локальная сеть школы, Интернет.",
+        "3. Проверяем направление: подсистема меньше компьютера, надсистема — больше.",
+        "4. Вывод: подсистемы — процессор и операционная система; надсистемы — локальная сеть и Интернет."
+      ],
+      answer: "Подсистемы: процессор, операционная система. Надсистемы: локальная сеть, Интернет",
+      hint: "Подсистема — часть компьютера, надсистема — система, в которую компьютер входит."
+    },
+    {
+      title: "Задача 5. Системный эффект",
+      task: "Объясните, почему набор устройств компьютера без программ нельзя назвать работающим компьютером.",
+      template: [
+        "1. <b>Система</b> — это не просто набор частей, а взаимосвязанное целое.",
+        "2. Устройства сами по себе умеют выполнять только отдельные операции: процессор — вычислять, монитор — показывать, диск — хранить.",
+        "3. <b>Программы</b> связывают устройства в единое целое и определяют порядок их работы.",
+        "4. Без программ устройства не знают, что делать, и <b>системный эффект</b> не возникает.",
+        "5. Вывод: работающий компьютер — это единство аппаратного и программного обеспечения."
+      ],
+      answer: "Без программ устройства не связаны в единое целое и не могут решать информационные задачи",
+      hint: "Вспомните, что системный эффект появляется только при совместной работе всех частей."
+    }
+  ]
+};
+</script>
+
+<!-- Подключение общих скриптов -->
+<script src="../shared/account.js"></script>
+<script src="../shared/mindmap.js"></script>
+<script src="../shared/app.js"></script>
+
+</body>
+</html>
