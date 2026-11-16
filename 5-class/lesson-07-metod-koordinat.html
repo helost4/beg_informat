@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Метод координат — 5 класс</title>
+<link rel="stylesheet" href="../shared/style.css">
+<style>
+  /* Длинная теория должна раскрываться полностью */
+  .theory-item.open .theory-body{max-height:9000px;}
+
+  .fig{margin:18px 0;padding:14px;border-radius:14px;
+    background:linear-gradient(135deg,#f8fafc,#eff6ff);border:1px solid #dbeafe;}
+  .fig svg{display:block;width:100%;height:auto;max-width:100%;}
+  .fig-cap{text-align:center;font-size:.82rem;color:#64748b;margin-top:10px;line-height:1.4;}
+
+  .fig-grid{display:grid;gap:10px;margin:16px 0;}
+  .fig-grid.two{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+  .fig-grid.three{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));}
+  .fig-card{background:#fff;border:2px solid #e2e8f0;border-radius:12px;
+    padding:12px;text-align:center;}
+  .fig-card h4{margin:6px 0 4px;font-size:.9rem;color:#1e293b;}
+  .fig-card p{margin:0;font-size:.82rem;color:#64748b;line-height:1.45;}
+  .fig-card .big{font-size:1.9rem;line-height:1;}
+  .fig-card.green{border-color:#86efac;background:#f0fdf4;}
+  .fig-card.blue{border-color:#93c5fd;background:#eff6ff;}
+  .fig-card.pink{border-color:#f9a8d4;background:#fdf2f8;}
+  .fig-card.amber{border-color:#fcd34d;background:#fffbeb;}
+  .fig-card.purple{border-color:#c4b5fd;background:#f5f3ff;}
+
+  .chain{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px;}
+  .chain .fig-card{flex:1 1 170px;max-width:230px;display:flex;flex-direction:column;justify-content:center;}
+  .chain .arrow{font-size:1.5rem;color:#3b82f6;font-weight:700;display:flex;align-items:center;}
+
+  .note{margin:14px 0;padding:12px 14px;border-radius:12px;background:#fffbeb;
+    border-left:4px solid #f59e0b;font-size:.9rem;color:#78350f;line-height:1.5;}
+  .note.blue{background:#eff6ff;border-left-color:#3b82f6;color:#1e3a8a;}
+  .note.pink{background:#fdf2f8;border-left-color:#ec4899;color:#831843;}
+  .note.green{background:#f0fdf4;border-left-color:#22c55e;color:#166534;}
+
+  table.fig-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;}
+  table.fig-table th,table.fig-table td{border:1px solid #e2e8f0;padding:8px 10px;
+    text-align:left;vertical-align:top;}
+  table.fig-table th{background:#eff6ff;color:#1e293b;}
+  table.fig-table tr:nth-child(even) td{background:#f8fafc;}
+
+  details.answer{margin:10px 0;background:#f0fdf4;border:1px solid #bbf7d0;
+    border-radius:10px;padding:8px 12px;font-size:.9rem;}
+  details.answer summary{cursor:pointer;font-weight:600;color:#166534;}
+  details.answer p{margin:8px 0 0;color:#334155;line-height:1.5;}
+
+  @media(max-width:600px){
+    table.fig-table{font-size:.8rem;}
+    table.fig-table th,table.fig-table td{padding:6px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Фоновые эмодзи -->
+<div class="bubble-field" aria-hidden="true">
+  <span class="bubble" style="top:8%;  left:5%;  animation-delay:0s;">📍</span>
+  <span class="bubble" style="top:20%; left:88%; animation-delay:1s;">📐</span>
+  <span class="bubble" style="top:55%; left:3%;  animation-delay:2s;">🗺️</span>
+  <span class="bubble" style="top:72%; left:92%; animation-delay:1.5s;">🎯</span>
+  <span class="bubble" style="top:35%; left:50%; animation-delay:.5s;">🧭</span>
+  <span class="bubble" style="top:85%; left:40%; animation-delay:2.5s;">✏️</span>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="hero-emoji">🗺️</div>
+    <h1 id="title"></h1>
+    <div class="sub" id="subtitle"></div>
+    <div class="variant-badge" id="variantBadge"></div>
+  </header>
+
+  <!-- ГЕЙМИФИКАЦИЯ -->
+  <div class="xp-panel" id="xpPanel">
+    <div class="xp-header">
+      <span class="xp-level-name" id="xpLevelName">🥉 Навигатор</span>
+      <span class="xp-points" id="xpPoints">0 / 100 XP</span>
+    </div>
+    <div class="xp-bar-bg">
+      <div class="xp-bar-fill" id="xpBarFill"></div>
+    </div>
+    <div class="xp-badges">
+      <div class="badge-slot" id="badgeBronze">
+        <span class="badge-icon">🥉</span> Навигатор
+      </div>
+      <div class="badge-slot" id="badgeSilver">
+        <span class="badge-icon">🥈</span> Картограф
+      </div>
+      <div class="badge-slot" id="badgeGold">
+        <span class="badge-icon">🥇</span> Магистр координат
+      </div>
+    </div>
+  </div>
+
+  <div class="section-tabs">
+    <button class="tab active" data-tab="theory">📚 Теория</button>
+    <button class="tab" data-tab="mindmap">🧠 Карта</button>
+    <button class="tab" data-tab="solutions">📐 Разбор задач</button>
+    <button class="tab" data-tab="test">✏️ Тест</button>
+    <button class="tab" data-tab="homework">🏠 Домашнее задание</button>
+  </div>
+
+  <!-- ТЕОРИЯ -->
+  <div class="card" id="theorySection">
+    <div id="lessonGoals">
+      <h2><span class="icon">🎯</span> Цель и задачи урока</h2>
+      <div style="margin-bottom:14px;">
+        <span class="goal-tag goal">ЦЕЛЬ</span>
+        <div id="goalText" style="font-size:1rem;line-height:1.5;color:#1e293b;"></div>
+      </div>
+      <div>
+        <span class="goal-tag tasks">ЗАДАЧИ</span>
+        <ul id="tasksList" style="margin:8px 0 0;padding-left:22px;line-height:1.7;color:#334155;"></ul>
+      </div>
+    </div>
+
+    <h2><span class="icon">💡</span> Ключевые понятия темы</h2>
+    <div id="theoryList"></div>
+  </div>
+
+  <!-- ИНТЕЛЛЕКТ-КАРТА -->
+  <div class="card hidden" id="mindmapSection">
+    <h2><span class="icon">🧠</span> Интеллект-карта темы</h2>
+    <p class="muted" style="margin:-8px 0 14px">Кликните по узлу, чтобы раскрыть/свернуть ветвь</p>
+    <div id="mindmapBox"></div>
+  </div>
+
+  <!-- РАЗБОР ЗАДАЧ -->
+  <div class="card hidden" id="solutionsSection">
+    <h2><span class="icon">📐</span> Разбор задач по шаблону</h2>
+    <p class="muted" style="margin:-8px 0 16px">
+      Разберите каждую задачу по шагам. Попробуйте решить сами, затем нажмите «Показать решение».
+    </p>
+    <div id="solutionsList"></div>
+  </div>
+
+  <!-- ТЕСТ -->
+  <div class="card hidden" id="testSection">
+    <h2><span class="icon">🎯</span> Проверочный тест</h2>
+
+    <div id="studentInfo" style="background:#eff6ff;border-radius:12px;padding:16px;margin-bottom:18px;border:2px solid #3b82f6;">
+      <div style="font-weight:700;color:#1e293b;">
+        👤 Ученик: <span id="studentNameDisplay">—</span>
+      </div>
+      <div class="muted" style="margin-top:6px;font-size:.85rem;">
+        ФИО подставлено из вашего входа и будет отправлено в журнал учителя.
+      </div>
+    </div>
+
+    <div class="muted">Прогресс выполнения</div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="muted" id="progTxt">0 из 0 заданий</div>
+    <div id="tasks" style="margin-top:18px"></div>
+  </div>
+
+  <!-- ДОМАШНЕЕ ЗАДАНИЕ -->
+  <div class="card hidden" id="homeworkSection">
+    <h2><span class="icon">🏠</span> Домашнее задание</h2>
+    <p class="muted" style="margin:-8px 0 16px">
+      Выполните задания дома. Проверка автоматическая — оценка не влияет на оценку за урок.
+    </p>
+
+    <div id="homeworkTasks"></div>
+
+    <div class="progress" style="margin-top:18px"><div id="hwBar"></div></div>
+    <div class="muted" id="hwProgTxt">0 из 0 заданий</div>
+
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn" id="hwFinish">Проверить домашнее задание</button>
+    </div>
+
+    <div class="score-box hidden" id="hwScoreBox" style="margin-top:20px">
+      <div class="muted">Результат домашнего задания</div>
+      <div id="hwFinalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div class="grade" id="hwGrade"></div>
+      <div class="muted" id="hwComment" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="finishCard" style="text-align:center">
+    <button class="btn" id="finish">Завершить урок и получить оценку</button>
+    <div class="score-box hidden" id="scoreBox">
+      <div class="muted">Ваш результат</div>
+      <div id="finalScore" style="font-size:1.4rem;margin:10px 0;font-weight:600"></div>
+      <div style="font-size:3rem;margin:8px 0;" id="finalEmoji"></div>
+      <div class="grade-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#ec4899"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="60" cy="60" r="45"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="45"/>
+        </svg>
+        <div class="ring-text">
+          <span id="ringPercent">0%</span>
+          <small>выполнено</small>
+        </div>
+      </div>
+      <div class="grade" id="finalGrade"></div>
+      <div class="muted" id="finalComment" style="margin-top:10px"></div>
+      <button class="btn ghost" style="margin-top:20px" onclick="location.reload()">🔄 Пройти другой вариант</button>
+    </div>
+  </div>
+
+  <footer>УМК Л.Л. Босовой · § 7 · Интерактивный урок с самопроверкой</footer>
+</div>
+
+<script>
+/* ============================================================
+   ДАННЫЕ УРОКА
+   ============================================================ */
+const LESSON_DATA = {
+  title: "Метод координат",
+  subtitle: "5 класс · УМК Босовой · § 7",
+  className: "5 класс",
+
+  goal: "Сформировать представление о методе координат как способе описания положения объекта числами; научиться находить координаты точек на координатном луче и координатной плоскости, строить точки по заданным координатам.",
+
+  tasks: [
+    "Понять, зачем в жизни нужны координаты.",
+    "Научиться определять координату точки на координатном луче.",
+    "Познакомиться с прямоугольной системой координат и её осями.",
+    "Научиться читать и записывать координаты точки в виде (x; y).",
+    "Строить точки по заданным координатам и определять четверть.",
+    "Увидеть, где метод координат применяется в жизни и информатике."
+  ],
+
+  gameLevels: [
+    { name: '🥉 Навигатор', threshold: 0, badge: 'badgeBronze' },
+    { name: '🥈 Картограф', threshold: 35, badge: 'badgeSilver' },
+    { name: '🥇 Магистр координат', threshold: 65, badge: 'badgeGold' }
+  ],
+
+  theory: [
+    {
+      title: "🧭 Зачем нужны координаты?",
+      image: "🧭 📍 🗺️",
+      body: `<p>Представьте, что вам нужно найти место в кинотеатре. В билете написано: <b>«ряд 7, место 12»</b>. Этого достаточно, чтобы точно найти своё кресло. Два числа заменяют долгое объяснение «сядьте правее, потом ещё немного вперёд».</p>
+
+             <div class="fig-grid two">
+               <div class="fig-card blue">
+                 <div class="big">🎬</div>
+                 <h4>В кинотеатре</h4>
+                 <p>Положение кресла задают два числа: номер ряда и номер места.</p>
+               </div>
+               <div class="fig-card green">
+                 <div class="big">🗺️</div>
+                 <h4>На карте</h4>
+                 <p>Положение города задают широта и долгота. Это тоже координаты.</p>
+               </div>
+             </div>
+
+             <p><b>Координата</b> — это число (или несколько чисел), которое указывает положение объекта.</p>
+             <p><b>Метод координат</b> — это способ описания положения объекта с помощью чисел.</p>
+
+             <table class="fig-table">
+               <thead><tr><th>Где мы встречаем координаты</th><th>Что является координатами</th></tr></thead>
+               <tbody>
+                 <tr><td>Кинотеатр, театр, стадион</td><td>Ряд и место</td></tr>
+                 <tr><td>Шахматная доска</td><td>Буква столбца и номер строки, например e2</td></tr>
+                 <tr><td>Игра «Морской бой»</td><td>Буква и число, например Б4</td></tr>
+                 <tr><td>Географическая карта</td><td>Широта и долгота</td></tr>
+                 <tr><td>Экран компьютера</td><td>Номер строки и номер столбца пикселя</td></tr>
+               </tbody>
+             </table>
+
+             <p class="note blue">💡 Координаты делают описание положения <b>коротким и точным</b>. Вместо рисунка или длинного объяснения достаточно записать несколько чисел.</p>`
+    },
+    {
+      title: "📏 Координатный луч",
+      image: "📏 ➡️ 🔢",
+      body: `<p>Самая простая система координат — это <b>координатный луч</b>.</p>
+
+             <p>Чтобы получить координатный луч, нужно:</p>
+             <div class="chain">
+               <div class="fig-card blue"><h4>1</h4><p>Отметить точку O — <b>начало луча</b></p></div>
+               <span class="arrow">→</span>
+               <div class="fig-card amber"><h4>2</h4><p>Выбрать <b>единичный отрезок</b> — мерку</p></div>
+               <span class="arrow">→</span>
+               <div class="fig-card green"><h4>3</h4><p>Указать <b>направление</b> стрелкой вправо</p></div>
+             </div>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 200" role="img" aria-label="Координатный луч с точками A, B и C">
+                 <rect x="4" y="4" width="632" height="192" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <line x1="40" y1="105" x2="598" y2="105" stroke="#1e293b" stroke-width="3"/>
+                 <path d="M598 105 L584 98 L584 112 Z" fill="#1e293b"/>
+
+                 <g stroke="#64748b" stroke-width="2">
+                   <line x1="60"  y1="99" x2="60"  y2="111"/>
+                   <line x1="120" y1="99" x2="120" y2="111"/>
+                   <line x1="180" y1="99" x2="180" y2="111"/>
+                   <line x1="240" y1="99" x2="240" y2="111"/>
+                   <line x1="300" y1="99" x2="300" y2="111"/>
+                   <line x1="360" y1="99" x2="360" y2="111"/>
+                   <line x1="420" y1="99" x2="420" y2="111"/>
+                   <line x1="480" y1="99" x2="480" y2="111"/>
+                   <line x1="540" y1="99" x2="540" y2="111"/>
+                 </g>
+
+                 <g font-family="Segoe UI, sans-serif" font-size="13" fill="#334155" text-anchor="middle">
+                   <text x="60"  y="132">0</text>
+                   <text x="120" y="132">1</text>
+                   <text x="180" y="132">2</text>
+                   <text x="240" y="132">3</text>
+                   <text x="300" y="132">4</text>
+                   <text x="360" y="132">5</text>
+                   <text x="420" y="132">6</text>
+                   <text x="480" y="132">7</text>
+                   <text x="540" y="132">8</text>
+                 </g>
+
+                 <text x="60" y="158" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" fill="#64748b">O</text>
+                 <text x="90" y="178" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#3b82f6">1 единичный отрезок</text>
+                 <line x1="60" y1="168" x2="60" y2="172" stroke="#3b82f6" stroke-width="2"/>
+                 <line x1="120" y1="168" x2="120" y2="172" stroke="#3b82f6" stroke-width="2"/>
+                 <line x1="60" y1="170" x2="120" y2="170" stroke="#3b82f6" stroke-width="2"/>
+
+                 <circle cx="180" cy="105" r="6" fill="#3b82f6"/>
+                 <text x="180" y="88" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#1d4ed8">A(2)</text>
+
+                 <circle cx="360" cy="105" r="6" fill="#22c55e"/>
+                 <text x="360" y="88" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#15803d">B(5)</text>
+
+                 <circle cx="540" cy="105" r="6" fill="#ec4899"/>
+                 <text x="540" y="88" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#be185d">C(8)</text>
+               </svg>
+               <div class="fig-cap">Рис. 1. На координатном луче точка A находится на расстоянии 2 единичных отрезков от O, поэтому её координата — 2</div>
+             </div>
+
+             <p><b>Координата точки на луче</b> показывает, сколько единичных отрезков нужно отложить от начала луча O, чтобы попасть в эту точку.</p>
+             <p>Записывают так: <b>A(2)</b>, <b>B(5)</b>, <b>C(8)</b>. Читают: «точка A с координатой 2».</p>
+
+             <p class="note">⚠️ Единичный отрезок может быть любым: 1 клетка, 1 см, 2 клетки. Главное — на всём луче он должен быть одинаковым.</p>`
+    },
+    {
+      title: "📐 Прямоугольная система координат",
+      image: "📐 ➕ 🧭",
+      body: `<p>На плоскости одной координаты мало: точка может находиться выше или ниже, левее или правее. Поэтому используют <b>две координатные прямые</b>.</p>
+
+             <p><b>Прямоугольная система координат</b> — это две перпендикулярные координатные прямые с общим началом.</p>
+
+             <div class="fig-grid two">
+               <div class="fig-card blue">
+                 <div class="big">↔️</div>
+                 <h4>Ось абсцисс</h4>
+                 <p>Горизонтальная ось <b>Ox</b>. По ней откладывают первую координату — <b>x</b>.</p>
+               </div>
+               <div class="fig-card green">
+                 <div class="big">↕️</div>
+                 <h4>Ось ординат</h4>
+                 <p>Вертикальная ось <b>Oy</b>. По ней откладывают вторую координату — <b>y</b>.</p>
+               </div>
+             </div>
+
+             <p>Точка пересечения осей называется <b>началом координат</b> и обозначается <b>O(0; 0)</b>.</p>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 480" role="img" aria-label="Прямоугольная система координат с четырьмя четвертями и точками">
+                 <rect x="4" y="4" width="632" height="472" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <text x="455" y="105" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="30" font-weight="800" fill="#bfdbfe">I</text>
+                 <text x="185" y="105" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="30" font-weight="800" fill="#bbf7d0">II</text>
+                 <text x="185" y="390" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="30" font-weight="800" fill="#fde68a">III</text>
+                 <text x="455" y="390" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="30" font-weight="800" fill="#fbcfe8">IV</text>
+
+                 <line x1="40" y1="240" x2="602" y2="240" stroke="#1e293b" stroke-width="3"/>
+                 <path d="M602 240 L588 233 L588 247 Z" fill="#1e293b"/>
+                 <line x1="320" y1="452" x2="320" y2="34" stroke="#1e293b" stroke-width="3"/>
+                 <path d="M320 34 L313 48 L327 48 Z" fill="#1e293b"/>
+
+                 <g stroke="#94a3b8" stroke-width="1.5">
+                   <line x1="380" y1="236" x2="380" y2="244"/>
+                   <line x1="440" y1="236" x2="440" y2="244"/>
+                   <line x1="500" y1="236" x2="500" y2="244"/>
+                   <line x1="560" y1="236" x2="560" y2="244"/>
+                   <line x1="260" y1="236" x2="260" y2="244"/>
+                   <line x1="200" y1="236" x2="200" y2="244"/>
+                   <line x1="140" y1="236" x2="140" y2="244"/>
+                   <line x1="80"  y1="236" x2="80"  y2="244"/>
+                   <line x1="316" y1="180" x2="324" y2="180"/>
+                   <line x1="316" y1="120" x2="324" y2="120"/>
+                   <line x1="316" y1="300" x2="324" y2="300"/>
+                   <line x1="316" y1="360" x2="324" y2="360"/>
+                 </g>
+
+                 <text x="380" y="262" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#64748b">1</text>
+                 <text x="302" y="184" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#64748b">1</text>
+                 <text x="606" y="225" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#1d4ed8">Ox</text>
+                 <text x="334" y="46" font-family="Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#15803d">Oy</text>
+                 <text x="300" y="260" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#1e293b">O</text>
+
+                 <line x1="410" y1="180" x2="410" y2="240" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 4"/>
+                 <line x1="320" y1="180" x2="410" y2="180" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 4"/>
+                 <circle cx="410" cy="180" r="6" fill="#3b82f6"/>
+                 <text x="424" y="174" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#1d4ed8">A(3; 2)</text>
+
+                 <line x1="260" y1="150" x2="260" y2="240" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="5 4"/>
+                 <line x1="320" y1="150" x2="260" y2="150" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="5 4"/>
+                 <circle cx="260" cy="150" r="6" fill="#22c55e"/>
+                 <text x="248" y="138" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#15803d">B(−2; 3)</text>
+
+                 <circle cx="230" cy="300" r="6" fill="#f59e0b"/>
+                 <text x="218" y="322" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#b45309">C(−3; −2)</text>
+
+                 <circle cx="440" cy="270" r="6" fill="#ec4899"/>
+                 <text x="454" y="286" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#be185d">D(4; −1)</text>
+               </svg>
+               <div class="fig-cap">Рис. 2. Оси делят плоскость на четыре четверти. Точка A лежит в I четверти, B — во II, C — в III, D — в IV</div>
+             </div>
+
+             <table class="fig-table">
+               <thead><tr><th>Четверть</th><th>Знак x</th><th>Знак y</th><th>Пример</th></tr></thead>
+               <tbody>
+                 <tr><td><b>I</b></td><td>+</td><td>+</td><td>A(3; 2)</td></tr>
+                 <tr><td><b>II</b></td><td>−</td><td>+</td><td>B(−2; 3)</td></tr>
+                 <tr><td><b>III</b></td><td>−</td><td>−</td><td>C(−3; −2)</td></tr>
+                 <tr><td><b>IV</b></td><td>+</td><td>−</td><td>D(4; −1)</td></tr>
+               </tbody>
+             </table>
+
+             <p class="note blue">💡 Прямоугольную систему координат придумал французский учёный <b>Рене Декарт</b> в XVII веке. Поэтому её называют декартовой.</p>`
+    },
+    {
+      title: "🔢 Координаты точки на плоскости",
+      image: "🔢 🎯 📌",
+      body: `<p>Положение точки на плоскости задают <b>парой чисел</b>. Их записывают в скобках через точку с запятой:</p>
+             <p style="text-align:center;font-size:1.3rem;font-weight:800;color:#1d4ed8">A(x; y)</p>
+
+             <div class="fig-grid two">
+               <div class="fig-card blue">
+                 <div class="big">↔️</div>
+                 <h4>Первое число — абсцисса</h4>
+                 <p>Показывает, на сколько единиц точка удалена от оси Oy вдоль оси Ox. <b>Идём вправо или влево.</b></p>
+               </div>
+               <div class="fig-card green">
+                 <div class="big">↕️</div>
+                 <h4>Второе число — ордината</h4>
+                 <p>Показывает, на сколько единиц точка удалена от оси Ox вдоль оси Oy. <b>Идём вверх или вниз.</b></p>
+               </div>
+             </div>
+
+             <table class="fig-table">
+               <thead><tr><th>Точка</th><th>Абсцисса x</th><th>Ордината y</th><th>Четверть</th></tr></thead>
+               <tbody>
+                 <tr><td>A(3; 2)</td><td>3</td><td>2</td><td>I</td></tr>
+                 <tr><td>B(−2; 3)</td><td>−2</td><td>3</td><td>II</td></tr>
+                 <tr><td>C(−3; −2)</td><td>−3</td><td>−2</td><td>III</td></tr>
+                 <tr><td>D(4; −1)</td><td>4</td><td>−1</td><td>IV</td></tr>
+               </tbody>
+             </table>
+
+             <p><b>Порядок чисел важен!</b> Точки A(3; 5) и B(5; 3) — разные.</p>
+
+             <div class="fig-grid two">
+               <div class="fig-card amber">
+                 <h4>Точка на оси Oy</h4>
+                 <p>Если x = 0, точка лежит на оси ординат: <b>(0; 4)</b>.</p>
+               </div>
+               <div class="fig-card pink">
+                 <h4>Точка на оси Ox</h4>
+                 <p>Если y = 0, точка лежит на оси абсцисс: <b>(−3; 0)</b>.</p>
+               </div>
+             </div>
+
+             <p class="note">⚠️ В записи координат сначала всегда указывают <b>x</b>, потом <b>y</b>. Если переставить числа местами, получится совсем другая точка.</p>`
+    },
+    {
+      title: "🛠️ Как построить точку по координатам",
+      image: "🛠️ 📌 ✅",
+      body: `<p>Построим точку <b>A(3; 2)</b>.</p>
+
+             <div class="chain">
+               <div class="fig-card blue"><h4>1</h4><p>Находим на оси Ox число <b>3</b></p></div>
+               <span class="arrow">→</span>
+               <div class="fig-card amber"><h4>2</h4><p>Проводим из этой точки <b>вертикальную</b> линию</p></div>
+               <span class="arrow">→</span>
+               <div class="fig-card green"><h4>3</h4><p>На оси Oy находим число <b>2</b> и проводим <b>горизонтальную</b> линию</p></div>
+               <span class="arrow">→</span>
+               <div class="fig-card pink"><h4>4</h4><p>В точке пересечения линий ставим точку <b>A</b></p></div>
+             </div>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 400" role="img" aria-label="Построение точки A с координатами 3 и 2">
+                 <rect x="4" y="4" width="632" height="392" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <line x1="50" y1="290" x2="602" y2="290" stroke="#1e293b" stroke-width="2.5"/>
+                 <path d="M602 290 L588 283 L588 297 Z" fill="#1e293b"/>
+                 <line x1="320" y1="372" x2="320" y2="30" stroke="#1e293b" stroke-width="2.5"/>
+                 <path d="M320 30 L313 44 L327 44 Z" fill="#1e293b"/>
+                 <text x="606" y="276" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#1d4ed8">Ox</text>
+                 <text x="334" y="42" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#15803d">Oy</text>
+                 <text x="302" y="310" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#1e293b">O</text>
+
+                 <line x1="410" y1="290" x2="410" y2="180" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6 4"/>
+                 <line x1="320" y1="180" x2="410" y2="180" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6 4"/>
+                 <circle cx="410" cy="180" r="7" fill="#3b82f6"/>
+                 <text x="424" y="174" font-family="Segoe UI, sans-serif" font-size="15" font-weight="800" fill="#1d4ed8">A(3; 2)</text>
+
+                 <circle cx="410" cy="290" r="4" fill="#1d4ed8"/>
+                 <text x="410" y="314" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#1d4ed8">3</text>
+                 <circle cx="320" cy="180" r="4" fill="#15803d"/>
+                 <text x="300" y="185" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#15803d">2</text>
+
+                 <circle cx="394" cy="280" r="13" fill="#fbbf24" stroke="#d97706" stroke-width="2"/>
+                 <text x="394" y="285" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" font-weight="800" fill="#78350f">1</text>
+                 <circle cx="398" cy="192" r="13" fill="#fbbf24" stroke="#d97706" stroke-width="2"/>
+                 <text x="398" y="197" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" font-weight="800" fill="#78350f">2</text>
+                 <circle cx="428" cy="188" r="13" fill="#fbbf24" stroke="#d97706" stroke-width="2"/>
+                 <text x="428" y="193" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" font-weight="800" fill="#78350f">3</text>
+               </svg>
+               <div class="fig-cap">Рис. 3. Чтобы построить A(3; 2), сначала откладывают 3 по оси Ox, затем 2 по оси Oy</div>
+             </div>
+
+             <p><b>Алгоритм:</b></p>
+             <ol>
+               <li>Найдите на оси <b>Ox</b> число <b>x</b>.</li>
+               <li>Проведите через эту точку вертикальную линию.</li>
+               <li>Найдите на оси <b>Oy</b> число <b>y</b>.</li>
+               <li>Проведите через эту точку горизонтальную линию.</li>
+               <li>Отметьте точку пересечения — это искомая точка.</li>
+             </ol>
+
+             <p><b>Пример с отрицательными числами.</b> Точка B(−2; 3): от −2 на оси Ox идём вверх до 3 на оси Oy. Точка находится во II четверти.</p>
+
+             <p class="note green">✅ Полезная привычка: подпишите точку рядом с её координатами. Так легче проверять построение и не путать точки.</p>`
+    },
+    {
+      title: "🎨 Рисуем по координатам",
+      image: "🎨 ✏️ 🏠",
+      body: `<p>Метод координат можно использовать и для рисования. Если последовательно соединять точки с заданными координатами, получится контур рисунка.</p>
+
+             <p>Попробуем нарисовать домик. Соединим точки по порядку:</p>
+             <p style="text-align:center;font-weight:700;color:#1d4ed8">
+               (2; 1) → (2; 4) → (1; 4) → (4; 7) → (7; 4) → (6; 4) → (6; 1) → (2; 1)
+             </p>
+
+             <div class="fig">
+               <svg viewBox="0 0 640 460" role="img" aria-label="Домик, построенный по координатам">
+                 <rect x="4" y="4" width="632" height="452" rx="18" fill="#f8fafc" stroke="#dbeafe" stroke-width="2"/>
+
+                 <g stroke="#e2e8f0" stroke-width="1">
+                   <line x1="120" y1="60" x2="120" y2="420"/>
+                   <line x1="160" y1="60" x2="160" y2="420"/>
+                   <line x1="200" y1="60" x2="200" y2="420"/>
+                   <line x1="240" y1="60" x2="240" y2="420"/>
+                   <line x1="280" y1="60" x2="280" y2="420"/>
+                   <line x1="320" y1="60" x2="320" y2="420"/>
+                   <line x1="360" y1="60" x2="360" y2="420"/>
+                   <line x1="400" y1="60" x2="400" y2="420"/>
+                   <line x1="440" y1="60" x2="440" y2="420"/>
+                   <line x1="480" y1="60" x2="480" y2="420"/>
+                   <line x1="520" y1="60" x2="520" y2="420"/>
+                   <line x1="560" y1="60" x2="560" y2="420"/>
+                   <line x1="80" y1="100" x2="560" y2="100"/>
+                   <line x1="80" y1="140" x2="560" y2="140"/>
+                   <line x1="80" y1="180" x2="560" y2="180"/>
+                   <line x1="80" y1="220" x2="560" y2="220"/>
+                   <line x1="80" y1="260" x2="560" y2="260"/>
+                   <line x1="80" y1="300" x2="560" y2="300"/>
+                   <line x1="80" y1="340" x2="560" y2="340"/>
+                   <line x1="80" y1="380" x2="560" y2="380"/>
+                 </g>
+
+                 <line x1="80" y1="420" x2="590" y2="420" stroke="#1e293b" stroke-width="2.5"/>
+                 <path d="M590 420 L576 413 L576 427 Z" fill="#1e293b"/>
+                 <line x1="80" y1="420" x2="80" y2="50" stroke="#1e293b" stroke-width="2.5"/>
+                 <path d="M80 50 L73 64 L87 64 Z" fill="#1e293b"/>
+                 <text x="590" y="442" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#1d4ed8">x</text>
+                 <text x="94" y="60" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#15803d">y</text>
+                 <text x="64" y="440" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#1e293b">0</text>
+
+                 <g font-family="Segoe UI, sans-serif" font-size="10" fill="#64748b">
+                   <text x="160" y="440" text-anchor="middle">2</text>
+                   <text x="240" y="440" text-anchor="middle">4</text>
+                   <text x="320" y="440" text-anchor="middle">6</text>
+                   <text x="400" y="440" text-anchor="middle">8</text>
+                   <text x="480" y="440" text-anchor="middle">10</text>
+                   <text x="64" y="384" text-anchor="end">1</text>
+                   <text x="64" y="304" text-anchor="end">3</text>
+                   <text x="64" y="224" text-anchor="end">5</text>
+                   <text x="64" y="144" text-anchor="end">7</text>
+                 </g>
+
+                 <polyline points="160,380 160,260 120,260 240,140 360,260 320,260 320,380 160,380"
+                   fill="#dbeafe" fill-opacity="0.6" stroke="#2563eb" stroke-width="4" stroke-linejoin="round"/>
+
+                 <rect x="200" y="320" width="40" height="60" fill="#fbbf24" stroke="#b45309" stroke-width="2"/>
+                 <circle cx="230" cy="350" r="3" fill="#78350f"/>
+
+                 <rect x="280" y="280" width="40" height="40" fill="#bfdbfe" stroke="#1d4ed8" stroke-width="2"/>
+                 <line x1="300" y1="280" x2="300" y2="320" stroke="#1d4ed8" stroke-width="2"/>
+                 <line x1="280" y1="300" x2="320" y2="300" stroke="#1d4ed8" stroke-width="2"/>
+
+                 <g font-family="Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#1e40af">
+                   <text x="166" y="374">(2; 1)</text>
+                   <text x="166" y="254">(2; 4)</text>
+                   <text x="72" y="254">(1; 4)</text>
+                   <text x="238" y="130">(4; 7)</text>
+                   <text x="364" y="254">(7; 4)</text>
+                   <text x="326" y="254">(6; 4)</text>
+                   <text x="326" y="374">(6; 1)</text>
+                 </g>
+               </svg>
+               <div class="fig-cap">Рис. 4. Домик, нарисованный по координатам: последовательно соединяем точки и получаем контур</div>
+             </div>
+
+             <p><b>Почему это важно для информатики?</b> Изображение на экране состоит из маленьких точек — <b>пикселей</b>. Каждый пиксель имеет свои координаты: номер столбца и номер строки. Компьютер «рисует», выбирая нужный цвет для пикселя с координатами (x; y).</p>
+
+             <p class="note pink">💡 Так работают компьютерная графика, карты, игры и программы для черчения. Метод координат — один из главных инструментов информатики.</p>`
+    },
+    {
+      title: "🌍 Где применяют метод координат",
+      image: "🌍 🚀 📱",
+      body: `<p>Метод координат — универсальный способ описать положение объекта. Он используется в самых разных областях.</p>
+
+             <div class="fig-grid three">
+               <div class="fig-card blue">
+                 <div class="big">🗺️</div>
+                 <h4>География и навигация</h4>
+                 <p>Широта и долгота определяют положение точки на Земле. По координатам работают карты и GPS.</p>
+               </div>
+               <div class="fig-card green">
+                 <div class="big">🎮</div>
+                 <h4>Игры и графика</h4>
+                 <p>Положение персонажа, курсора мыши и пикселя задаётся координатами.</p>
+               </div>
+               <div class="fig-card amber">
+                 <div class="big">♟️</div>
+                 <h4>Шахматы и «Морской бой»</h4>
+                 <p>Клетка обозначается буквой и числом: e2, Б4. Это тоже координаты.</p>
+               </div>
+               <div class="fig-card pink">
+                 <div class="big">📈</div>
+                 <h4>Графики и диаграммы</h4>
+                 <p>Точки на графике показывают связь двух величин: времени и температуры, скорости и расстояния.</p>
+               </div>
+               <div class="fig-card purple">
+                 <div class="big">🏗️</div>
+                 <h4>Черчение и строительство</h4>
+                 <p>По координатам задают положение деталей на чертеже и на местности.</p>
+               </div>
+               <div class="fig-card blue">
+                 <div class="big">🚀</div>
+                 <h4>Наука и техника</h4>
+                 <p>Координатами описывают движение планет, самолётов и роботов.</p>
+               </div>
+             </div>
+
+             <table class="fig-table">
+               <thead><tr><th>Задача</th><th>Что используют как координаты</th></tr></thead>
+               <tbody>
+                 <tr><td>Найти место в зале</td><td>Ряд и место</td></tr>
+                 <tr><td>Указать клетку на шахматной доске</td><td>Буква столбца и номер строки</td></tr>
+                 <tr><td>Указать положение на карте</td><td>Широту и долготу</td></tr>
+                 <tr><td>Задать точку на экране</td><td>Номер столбца и номер строки пикселя</td></tr>
+               </tbody>
+             </table>
+
+             <p class="note blue">💡 В любой системе координат главное — <b>договориться</b>, что означают числа и в каком порядке они записаны. Тогда положение будет понятно всем.</p>`
+    },
+    {
+      title: "🏁 Итоги урока",
+      image: "🏁 ✅ 📌",
+      body: `<p><b>Самое главное:</b></p>
+             <ol>
+               <li><b>Координата</b> — число (или набор чисел), указывающее положение объекта.</li>
+               <li><b>Метод координат</b> — способ описания положения объекта с помощью чисел.</li>
+               <li>На <b>координатном луче</b> есть начало O, единичный отрезок и направление. Координата точки показывает, сколько единичных отрезков отложено от O.</li>
+               <li><b>Прямоугольная система координат</b> состоит из двух перпендикулярных осей: горизонтальной <b>Ox</b> и вертикальной <b>Oy</b>. Они пересекаются в начале координат <b>O(0; 0)</b>.</li>
+               <li>Координаты точки записывают парой <b>(x; y)</b>: сначала абсцисса, потом ордината. Порядок важен.</li>
+               <li>Оси делят плоскость на <b>четыре четверти</b>. Знаки координат помогают определить, в какой четверти находится точка.</li>
+               <li>По координатам можно <b>строить точки и целые рисунки</b>. Метод координат широко применяется в картах, играх, графике и технике.</li>
+             </ol>
+
+             <details class="answer">
+               <summary>Проверь себя: что показывает координата точки на луче?</summary>
+               <p>Сколько единичных отрезков нужно отложить от начала луча O до этой точки.</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: чем абсцисса отличается от ординаты?</summary>
+               <p>Абсцисса — первая координата x, её откладывают по горизонтальной оси Ox. Ордината — вторая координата y, её откладывают по вертикальной оси Oy.</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: в какой четверти находится точка (−4; 3)?</summary>
+               <p>Абсцисса отрицательная, ордината положительная — это II четверть.</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: где лежит точка (0; −5)?</summary>
+               <p>На оси ординат Oy, ниже начала координат.</p>
+             </details>
+             <details class="answer">
+               <summary>Проверь себя: почему A(3; 5) и B(5; 3) — разные точки?</summary>
+               <p>Потому что у них разные абсциссы и ординаты. У A x = 3, y = 5, а у B x = 5, y = 3. Порядок чисел в записи координат важен.</p>
+             </details>`
+    }
+  ],
+
+  mindmap: {
+    center: "Метод координат",
+    branches: [
+      { text: "Координатный луч", color: "#3b82f6",
+        children: ["Начало O", "Единичный отрезок", "Направление", "Координата точки"] },
+      { text: "Плоскость", color: "#22c55e",
+        children: ["Ось Ox", "Ось Oy", "Начало координат", "Четверти"] },
+      { text: "Координаты точки", color: "#f59e0b",
+        children: ["Абсцисса x", "Ордината y", "Запись (x; y)", "Порядок важен"] },
+      { text: "Построение", color: "#ec4899",
+        children: ["Найти x", "Найти y", "Провести линии", "Отметить точку"] },
+      { text: "Применение", color: "#8b5cf6",
+        children: ["Карты", "Морской бой", "Шахматы", "Рисунки", "Пиксели"] }
+    ]
+  },
+
+  variants: {
+    A: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что называют координатой точки на координатном луче?",
+        options:["Число, показывающее, сколько единичных отрезков от начала луча до точки","Длину всего луча","Номер точки на рисунке","Расстояние между двумя любыми точками"],
+        answer:0, exp:"Координата точки на луче показывает, сколько единичных отрезков отложено от начала O до этой точки." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Как называется горизонтальная ось координат?",
+        options:["Ось абсцисс (Ox)","Ось ординат (Oy)","Ось симметрии","Координатный луч"],
+        answer:0, exp:"Горизонтальная ось — это ось абсцисс Ox." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Точка A имеет абсциссу 3 и ординату 5. Как записывают её координаты?",
+        options:["A(3; 5)","A(5; 3)","A(3; −5)","A(−3; 5)"],
+        answer:0, exp:"Сначала записывают абсциссу x = 3, затем ординату y = 5: A(3; 5)." },
+      { level:"medium", weight:2, type:"choice",
+        q:"В какой четверти находится точка B(−4; 2)?",
+        options:["I","II","III","IV"],
+        answer:1, exp:"Абсцисса отрицательная, ордината положительная — это II четверть." },
+      { level:"hard", weight:3, type:"text",
+        q:"Найдите ординату точки C(7; 9).",
+        answer:"9", exp:"Ордината — второе число в записи координат, то есть 9." },
+      { level:"hard", weight:3, type:"text",
+        q:"Точка D лежит на координатном луче на расстоянии 8 единичных отрезков от начала. Запишите её координату.",
+        answer:"8", exp:"Координата точки на луче равна числу единичных отрезков от начала: 8." },
+      { level:"hard", weight:3, type:"text",
+        q:"Чему равна ордината точки, лежащей на оси Ox?",
+        answer:"0", exp:"На оси Ox ордината любой точки равна 0: например, (4; 0)." }
+    ],
+    B: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Под каким углом пересекаются оси координат?",
+        options:["90°","45°","60°","180°"],
+        answer:0, exp:"Оси прямоугольной системы координат перпендикулярны, угол между ними 90°." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Как называется вертикальная ось координат?",
+        options:["Ось ординат (Oy)","Ось абсцисс (Ox)","Координатный луч","Начало координат"],
+        answer:0, exp:"Вертикальная ось — это ось ординат Oy." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Где расположена точка A(0; 5)?",
+        options:["На оси ординат","На оси абсцисс","В I четверти","В начале координат"],
+        answer:0, exp:"Если абсцисса равна 0, точка лежит на оси ординат Oy." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какая запись соответствует точке с абсциссой −2 и ординатой 6?",
+        options:["(−2; 6)","(6; −2)","(2; 6)","(−2; −6)"],
+        answer:0, exp:"Сначала абсцисса −2, затем ордината 6: (−2; 6)." },
+      { level:"hard", weight:3, type:"text",
+        q:"Найдите абсциссу точки M(12; −3).",
+        answer:"12", exp:"Абсцисса — первое число в записи координат, то есть 12." },
+      { level:"hard", weight:3, type:"choice",
+        q:"В какой четверти находится точка E(−3; −7)?",
+        options:["I","II","III","IV"],
+        answer:2, exp:"Обе координаты отрицательные, значит точка лежит в III четверти." },
+      { level:"hard", weight:3, type:"text",
+        q:"Сколько единичных отрезков от начала координат до точки D(0; −5)?",
+        answer:"5", exp:"Расстояние равно модулю ординаты: от O до −5 — 5 единичных отрезков." }
+    ],
+    C: [
+      { level:"easy", weight:1, type:"choice",
+        q:"Что показывает первое число в записи координат точки (x; y)?",
+        options:["Абсциссу — положение точки по оси Ox","Ординату — положение точки по оси Oy","Номер четверти","Расстояние до начала координат"],
+        answer:0, exp:"Первое число x — абсцисса, её откладывают по горизонтальной оси Ox." },
+      { level:"easy", weight:1, type:"choice",
+        q:"Как называется точка O(0; 0)?",
+        options:["Начало координат","Единичный отрезок","Ось абсцисс","Координата точки"],
+        answer:0, exp:"Точка пересечения осей называется началом координат." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Где находится точка (0; −4)?",
+        options:["На оси ординат ниже начала координат","На оси абсцисс левее начала координат","В I четверти","В начале координат"],
+        answer:0, exp:"x = 0, значит точка на оси Oy; y = −4, значит ниже начала координат." },
+      { level:"medium", weight:2, type:"choice",
+        q:"Какая точка расположена в I четверти?",
+        options:["A(2; 3)","B(−2; 3)","C(−2; −3)","D(2; −3)"],
+        answer:0, exp:"В I четверти обе координаты положительные, поэтому подходит A(2; 3)." },
+      { level:"hard", weight:3, type:"text",
+        q:"Найдите ординату точки P(4; 11).",
+        answer:"11", exp:"Ордината — второе число в записи координат, то есть 11." },
+      { level:"hard", weight:3, type:"text",
+        q:"Чему равна абсцисса точки, лежащей на оси Oy?",
+        answer:"0", exp:"На оси Oy абсцисса любой точки равна 0: например, (0; 3)." },
+      { level:"hard", weight:3, type:"choice",
+        q:"В какой четверти находится точка K(5; −1)?",
+        options:["I","II","III","IV"],
+        answer:3, exp:"Абсцисса положительная, ордината отрицательная — это IV четверть." }
+    ]
+  },
+
+  homework: [
+    {
+      type: "choice",
+      q: "Что из перечисленного является примером использования координат?",
+      options: ["Номер ряда и места в кинотеатре", "Название книги", "Цвет карандаша", "Время года"],
+      answer: 0,
+      exp: "Ряд и место — это два числа, которые точно задают положение кресла в зале."
+    },
+    {
+      type: "text",
+      q: "Сколько чисел нужно, чтобы задать положение точки на плоскости?",
+      answer: "2",
+      exp: "Положение точки на плоскости задают двумя числами: абсциссой и ординатой."
+    },
+    {
+      type: "text",
+      q: "Точка A удалена от начала координатного луча на 6 единичных отрезков. Запишите её координату.",
+      answer: "6",
+      exp: "Координата точки на луче равна числу единичных отрезков от начала: 6."
+    },
+    {
+      type: "choice",
+      q: "Как называют пару чисел, задающих положение точки на плоскости?",
+      options: ["Координаты точки", "Единичный отрезок", "Начало координат", "Ось"],
+      answer: 0,
+      exp: "Пару чисел (x; y) называют координатами точки."
+    },
+    {
+      type: "text",
+      q: "Найдите ординату точки B(4; 8).",
+      answer: "8",
+      exp: "Ордината — второе число в записи координат, значит 8."
+    },
+    {
+      type: "choice",
+      q: "На какой оси лежит точка (0; 3)?",
+      options: ["На оси ординат", "На оси абсцисс", "В I четверти", "Ни на одной оси"],
+      answer: 0,
+      exp: "Если x = 0, точка лежит на оси ординат Oy."
+    },
+    {
+      type: "choice",
+      q: "В какой четверти находится точка (−5; 4)?",
+      options: ["I", "II", "III", "IV"],
+      answer: 1,
+      exp: "Абсцисса отрицательная, ордината положительная — это II четверть."
+    },
+    {
+      type: "text",
+      q: "Сколько единичных отрезков от начала координат до точки (0; −7)?",
+      answer: "7",
+      exp: "Расстояние от начала координат до точки (0; −7) равно 7 единичным отрезкам."
+    }
+  ],
+
+  solutions: [
+    {
+      title: "Задача 1. Координаты точек на луче",
+      task: "На координатном луче с единичным отрезком 1 клетка отмечены точки: A — на расстоянии 2 клетки от начала O, B — на расстоянии 5 клеток, C — на расстоянии 8 клеток. Запишите координаты этих точек.",
+      template: [
+        "1. Находим начало луча <b>O</b> и убеждаемся, что единичный отрезок равен 1 клетке.",
+        "2. Считаем, сколько единичных отрезков от O до точки A: <b>2</b>. Значит, A(2).",
+        "3. Считаем от O до B: <b>5</b>. Значит, B(5).",
+        "4. Считаем от O до C: <b>8</b>. Значит, C(8).",
+        "5. Записываем ответ: <b>A(2), B(5), C(8)</b>."
+      ],
+      answer: "A(2), B(5), C(8)",
+      hint: "Координата точки на луче — это число единичных отрезков от начала O до этой точки."
+    },
+    {
+      title: "Задача 2. Построение точек по координатам",
+      task: "Постройте на координатной плоскости точки A(2; 3), B(−3; 1), C(4; −2) и D(−1; −4). Определите, в каких четвертях они находятся.",
+      template: [
+        "1. Для точки A(2; 3): на оси Ox находим 2, на оси Oy — 3. Точка пересечения — A. Обе координаты положительные, значит это <b>I четверть</b>.",
+        "2. Для B(−3; 1): x = −3 (влево), y = 1 (вверх). Абсцисса отрицательная, ордината положительная — <b>II четверть</b>.",
+        "3. Для C(4; −2): x = 4 (вправо), y = −2 (вниз). Абсцисса положительная, ордината отрицательная — <b>IV четверть</b>.",
+        "4. Для D(−1; −4): x = −1 (влево), y = −4 (вниз). Обе координаты отрицательные — <b>III четверть</b>.",
+        "5. Проверяем: точки отмечены в нужных местах, подписаны координатами."
+      ],
+      answer: "A — I, B — II, C — IV, D — III",
+      hint: "Сначала откладывайте x по горизонтальной оси, затем y по вертикальной."
+    },
+    {
+      title: "Задача 3. Определение четверти",
+      task: "Не строя точки, определите четверти, в которых находятся точки: M(5; 2), N(−4; 7), P(−2; −6), Q(8; −3).",
+      template: [
+        "1. Смотрим на знаки координат точки M(5; 2): x > 0, y > 0 — <b>I четверть</b>.",
+        "2. N(−4; 7): x < 0, y > 0 — <b>II четверть</b>.",
+        "3. P(−2; −6): x < 0, y < 0 — <b>III четверть</b>.",
+        "4. Q(8; −3): x > 0, y < 0 — <b>IV четверть</b>.",
+        "5. Записываем ответ: M — I, N — II, P — III, Q — IV."
+      ],
+      answer: "M — I, N — II, P — III, Q — IV",
+      hint: "Достаточно посмотреть на знаки абсциссы и ординаты."
+    },
+    {
+      title: "Задача 4. Координаты в игре «Морской бой»",
+      task: "В игре «Морской бой» клетка обозначается буквой и числом, например Б4. Как вы думаете, почему такое обозначение можно назвать координатами? Что означает каждая часть записи?",
+      template: [
+        "1. Поле «Морского боя» — это сетка, похожая на координатную плоскость.",
+        "2. <b>Буква</b> задаёт столбец — положение по горизонтали. Это аналог абсциссы.",
+        "3. <b>Число</b> задаёт строку — положение по вертикали. Это аналог ординаты.",
+        "4. Вместе буква и число однозначно указывают клетку, как пара координат указывает точку.",
+        "5. Вывод: запись Б4 — это координаты клетки на игровом поле."
+      ],
+      answer: "Буква задаёт столбец, число — строку; вместе они указывают клетку",
+      hint: "Сравните поле игры с координатной плоскостью: где здесь горизонталь, а где вертикаль?"
+    },
+    {
+      title: "Задача 5. Рисунок по координатам",
+      task: "Последовательно соедините точки: (2; 1) → (2; 4) → (1; 4) → (4; 7) → (7; 4) → (6; 4) → (6; 1) → (2; 1). Какая фигура получится?",
+      template: [
+        "1. Строим точку (2; 1): 2 вправо по Ox, 1 вверх по Oy.",
+        "2. Строим (2; 4) и соединяем с первой точкой — получаем вертикальную стену.",
+        "3. Строим (1; 4) и (4; 7): это левый скат крыши.",
+        "4. Строим (7; 4), (6; 4), (6; 1) — правый скат, основание крыши и правая стена.",
+        "5. Возвращаемся в (2; 1) — контур замыкается.",
+        "6. Получился <b>домик</b>: стены, крыша и основание."
+      ],
+      answer: "Домик (дом)",
+      hint: "Соединяйте точки строго по порядку, не пропуская ни одну."
+    },
+    {
+      title: "Задача 6. Расстояние до осей",
+      task: "Точка A имеет координаты (5; −3). Чему равно расстояние от A до оси Ox и до оси Oy?",
+      template: [
+        "1. Расстояние от точки до оси <b>Ox</b> равно модулю ординаты: |−3| = <b>3</b>.",
+        "2. Расстояние от точки до оси <b>Oy</b> равно модулю абсциссы: |5| = <b>5</b>.",
+        "3. Проверяем по рисунку: точка A находится на 3 единицы ниже оси Ox и на 5 единиц правее оси Oy.",
+        "4. Ответ: до Ox — 3 единицы, до Oy — 5 единиц."
+      ],
+      answer: "До Ox — 3, до Oy — 5",
+      hint: "Расстояние до горизонтальной оси показывает ордината, до вертикальной — абсцисса."
+    }
+  ]
+};
+</script>
+
+<!-- Подключение общих скриптов -->
+<script src="../shared/account.js"></script>
+<script src="../shared/mindmap.js"></script>
+<script src="../shared/app.js"></script>
+
+</body>
+</html>
