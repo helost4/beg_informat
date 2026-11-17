@@ -53,14 +53,15 @@
         <option value="10 класс">10 класс</option>
         <option value="11 класс">11 класс</option>
         <optgroup label="Служебные аккаунты">
-          <option value="Учителя">Учитель</option>
-          <option value="Родители">Родитель</option>
-          <option value="Администрация">Администратор</option>
+          <option value="Учитель">Учитель</option>
+          <option value="Родитель">Родитель</option>
+          <option value="Администратор">Администратор</option>
         </optgroup>
       </select>
       <p class="login-hint">
-        Учителя, родители и администраторы входят с аккаунтом, который создал
-        администратор. Самостоятельно выбрать эти роли при регистрации нельзя.
+        Учитель, родитель и администратор выбирают свою роль в списке «Класс»
+        и входят с именем и паролем аккаунта, который создал администратор.
+        Выбирать эти роли при регистрации нельзя.
       </p>
 
       <label for="loginPassword">Пароль</label>
@@ -142,7 +143,15 @@
     if (legacy.class) document.getElementById('regClass').value = legacy.class;
 
     document.getElementById('loginName').value = legacy.name;
-    if (legacy.class) document.getElementById('loginClass').value = legacy.class;
+    if (legacy.class) {
+      var legacyRoles = {
+        'Администрация': 'Администратор',
+        'Учителя': 'Учитель',
+        'Родители': 'Родитель'
+      };
+      document.getElementById('loginClass').value =
+        legacyRoles[legacy.class] || legacy.class;
+    }
 
     switchTab('register');
   }
@@ -193,7 +202,7 @@
       case 'ACCOUNT_EXISTS':
         return 'Аккаунт с таким именем и классом уже существует. Перейдите на вкладку «Вход».';
       case 'NO_ACCOUNT':
-        return 'Аккаунт не найден. Проверьте имя и класс или зарегистрируйтесь.';
+        return err.message || 'Аккаунт не найден. Проверьте имя и класс (роль) или зарегистрируйтесь.';
       case 'WRONG_PASSWORD':
         return 'Неверный пароль. Попробуйте ещё раз.';
       case 'BAD_REQUEST':

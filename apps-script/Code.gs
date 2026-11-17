@@ -292,9 +292,36 @@ function login_(body) {
   var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
   ensureHeaders_(accounts, ACCOUNT_HEADERS);
 
-  var account = getAccountByLoginKey_(accounts, loginKey_(name, className));
-  if (!account) {
-    throwAppError_('NO_ACCOUNT', 'Аккаунт не найден. Зарегистрируйтесь.');
+  var account;
+  var roleFromClass = roleFromClassLabel_(className);
+
+  if (roleFromClass) {
+    // В форме входа «Администратор», «Учитель», «Родитель» выбраны вместо
+    // класса. В таблице у таких аккаунтов может быть обычный класс
+    // (например, «11 класс»), поэтому ищем по имени и роли.
+    var candidates = findAccountsByNameAndRole_(accounts, name, roleFromClass);
+    if (!candidates.length) {
+      var roleTitles = {
+        admin: 'Администратор', teacher: 'Учитель', parent: 'Родитель'
+      };
+      throwAppError_(
+        'NO_ACCOUNT',
+        'Аккаунт «' + (roleTitles[roleFromClass] || roleFromClass) +
+        '» с таким именем не найден. Обратитесь к администратору.'
+      );
+    }
+    if (candidates.length > 1) {
+      throwAppError_(
+        'BAD_REQUEST',
+        'Найдено несколько аккаунтов с таким именем и ролью. Уточните имя или обратитесь к администратору.'
+      );
+    }
+    account = candidates[0];
+  } else {
+    account = getAccountByLoginKey_(accounts, loginKey_(name, className));
+    if (!account) {
+      throwAppError_('NO_ACCOUNT', 'Аккаунт не найден. Зарегистрируйтесь.');
+    }
   }
 
   if (hashPassword_(account.salt, password) !== account.passwordHash) {
@@ -910,6 +937,44 @@ function getAccountByLoginKey_(sheet, key) {
     }
   }
   return null;
+}
+
+/**
+ * Пункт списка классов в форме входа может обозначать не класс, а роль:
+ * «Администратор», «Учитель», «Родитель». Принимаем и старые варианты
+ * («Администрация», «Учителя», «Родители»), и латинские названия ролей.
+ * Для обычного класса возвращаем пустую строку.
+ */
+function roleFromClassLabel_(className) {
+  var label = String(className || '').trim().toLowerCase().replace(/\s+/g, ' ');
+
+  if (label === 'администратор' || label === 'администрация' ||
+      label === 'админ' || label === 'admin') {
+    return 'admin';
+  }
+  if (label === 'учитель' || label === 'учителя' ||
+      label === 'педагог' || label === 'teacher') {
+    return 'teacher';
+  }
+  if (label === 'родитель' || label === 'родители' || label === 'parent') {
+    return 'parent';
+  }
+  return '';
+}
+
+/** Ищет аккаунты с указанным именем и ролью (вход по роли, а не по классу). */
+function findAccountsByNameAndRole_(sheet, name, role) {
+  var map = headerMap_(sheet);
+  var values = sheet.getDataRange().getValues();
+  var found = [];
+
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    if (normalizeName_(cell_(row, map, 'name')) !== name) continue;
+    if (normalizeRole_(cell_(row, map, 'role')) !== role) continue;
+    found.push(accountFromRow_(row, map, i + 1));
+  }
+  return found;
 }
 
 function getAccountById_(sheet, id) {
