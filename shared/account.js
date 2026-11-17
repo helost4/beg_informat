@@ -256,6 +256,8 @@
   function queueResult(result) {
     var payload = Object.assign({}, result);
     payload._id = resultId(payload);
+    // Сервер использует clientId как ключ идемпотентности (Supabase attempts.client_id).
+    payload.clientId = payload._id;
 
     var queue = readQueue();
     if (!queue.some(function (item) {
@@ -295,7 +297,9 @@
   function sendQueuedItem(item) {
     var payload = Object.assign({}, item);
     var id = payload._id || payload.clientId;
-    delete payload._id;
+    // Раньше _id удалялся, из-за чего повторная отправка создавала дубль строки.
+    payload._id = id;
+    payload.clientId = id;
 
     return post('saveResult', { token: token(), result: payload })
       .then(function (data) {
@@ -339,6 +343,9 @@
     }
 
     var payload = Object.assign({}, result);
+    var id = resultId(payload);
+    payload._id = id;
+    payload.clientId = id;
 
     return post('saveResult', { token: token(), result: payload })
       .catch(function (err) {
