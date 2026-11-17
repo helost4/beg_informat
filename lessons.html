@@ -10,6 +10,13 @@
   .lessons-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px;}
   .lessons-header h1{margin:0;font-size:1.6rem;background:linear-gradient(90deg,#3b82f6,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;}
   .student-badge{background:#eff6ff;border:2px solid #3b82f6;border-radius:12px;padding:10px 16px;font-weight:600;color:#1e293b;}
+  .class-filter{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:2px solid #e2e8f0;
+    border-radius:12px;padding:10px 14px;margin-bottom:20px;}
+  .class-filter label{font-weight:700;color:#1e293b;font-size:.95rem;}
+  .class-filter select{padding:8px 12px;border-radius:9px;border:2px solid #3b82f6;background:#fff;
+    color:#1e293b;font-size:.95rem;font-weight:600;outline:none;min-width:170px;cursor:pointer;}
+  .class-filter select:focus{box-shadow:0 0 0 4px rgba(59,130,246,.15);}
+  .class-filter[hidden]{display:none;}
   .lesson-card{display:block;background:#fff;border-radius:14px;padding:16px 20px;margin-bottom:12px;
     text-decoration:none;color:#1e293b;border-left:4px solid #3b82f6;box-shadow:0 4px 12px rgba(0,0,0,.06);transition:.2s;}
   .lesson-card:hover{transform:translateX(4px);box-shadow:0 8px 20px rgba(59,130,246,.2);border-left-color:#ec4899;}
@@ -43,6 +50,13 @@
     </div>
   </div>
 
+  <div class="class-filter" id="classFilterWrap" hidden>
+    <label for="classFilter">Класс</label>
+    <select id="classFilter">
+      <option value="all">Все классы</option>
+    </select>
+  </div>
+
   <div id="lessonsList"></div>
 
   <section class="results-block" id="resultsBlock">
@@ -72,6 +86,50 @@
 
   /* Учитель, родитель и администратор видят уроки всех классов. */
   const showAll = Account.isPrivileged();
+
+  /* Фильтр по классу: доступен только привилегированным ролям. */
+  const ALL_CLASSES = 'all';
+  const FILTER_KEY = 'lessonsClassFilter';
+  const CLASS_NAMES = [
+    '5 класс', '6 класс', '7 класс', '8 класс',
+    '9 класс', '10 класс', '11 класс'
+  ];
+
+  function readFilter_() {
+    try { return localStorage.getItem(FILTER_KEY) || ALL_CLASSES; }
+    catch (e) { return ALL_CLASSES; }
+  }
+
+  function writeFilter_(value) {
+    try { localStorage.setItem(FILTER_KEY, value); } catch (e) { /* ignore */ }
+  }
+
+  let selectedClass = showAll ? readFilter_() : student.class;
+  if (showAll && selectedClass !== ALL_CLASSES &&
+      CLASS_NAMES.indexOf(selectedClass) === -1) {
+    selectedClass = ALL_CLASSES;
+  }
+
+  if (showAll) {
+    const filterWrap = document.getElementById('classFilterWrap');
+    const filterSelect = document.getElementById('classFilter');
+
+    CLASS_NAMES.forEach(function (cls) {
+      const option = document.createElement('option');
+      option.value = cls;
+      option.textContent = cls;
+      filterSelect.appendChild(option);
+    });
+
+    filterWrap.hidden = false;
+    filterSelect.value = selectedClass;
+
+    filterSelect.addEventListener('change', function () {
+      selectedClass = this.value;
+      writeFilter_(selectedClass);
+      renderCatalog();
+    });
+  }
 
   document.getElementById('studentBadge').textContent =
     `👤 ${student.name} · ${student.class} · ${Account.roleLabel(student.role)}`;
@@ -130,6 +188,33 @@
   /* ---------- Рендер уроков ---------- */
   const container = document.getElementById('lessonsList');
 
+  /** Добавляет метку класса, только если её ещё нет в теге. */
+  function tagWithClass(cls, tag) {
+    const text = String(tag || '');
+    return text.indexOf(cls + ' ·') === 0 ? text : cls + ' · ' + text;
+  }
+
+  /** Возвращает материалы нужного класса или все классы сразу. */
+  function itemsForClass(catalog, cls) {
+    if (cls !== ALL_CLASSES) return catalog[cls] || [];
+
+    const all = [];
+    Object.keys(catalog).forEach(function (key) {
+      (catalog[key] || []).forEach(function (item) {
+        all.push({
+          file: item.file,
+          title: item.title,
+          tag: tagWithClass(key, item.tag)
+        });
+      });
+    });
+    return all;
+  }
+
+  function examMatchesClass(exam, cls) {
+    return !!exam && (cls === ALL_CLASSES || exam.classes.indexOf(cls) !== -1);
+  }
+
   function renderSection(title, items, emptyText) {
     const section = document.createElement('section');
     section.className = 'lessons-section';
@@ -162,19 +247,10 @@
     container.appendChild(section);
   }
 
-  function renderPracticeSection() {
-    let items = PRACTS_CATALOG[student.class];
+  function renderPracticeSection(cls) {
+    const items = itemsForClass(PRACTS_CATALOG, cls);
 
-    if (showAll) {
-      items = [];
-      Object.keys(PRACTS_CATALOG).forEach(function (cls) {
-        (PRACTS_CATALOG[cls] || []).forEach(function (practice) {
-          items.push({ file: practice.file, title: practice.title, tag: cls + ' · ' + practice.tag });
-        });
-      });
-    }
-
-    if (!items || !items.length) return;
+    if (!items.length) return;
 
     const section = document.createElement('section');
     section.className = 'lessons-section practices-section';
@@ -186,7 +262,7 @@
 
     const subheading = document.createElement('h3');
     subheading.className = 'practice-class-title';
-    subheading.textContent = showAll ? 'Все классы' : student.class;
+    subheading.textContent = cls === ALL_CLASSES ? 'Все классы' : cls;
     section.appendChild(subheading);
 
     const listEl = document.createElement('div');
@@ -204,15 +280,13 @@
     container.appendChild(section);
   }
 
-  function renderExamSection() {
+  function renderExamSection(cls) {
     const catalog = window.EXAM_CATALOG;
     if (!catalog || !catalog.exams) return;
 
     const available = catalog.order
       .map(function (id) { return catalog.exams[id]; })
-      .filter(function (exam) {
-        return exam && (showAll || exam.classes.indexOf(student.class) !== -1);
-      });
+      .filter(function (exam) { return examMatchesClass(exam, cls); });
 
     if (!available.length) return;
 
@@ -226,7 +300,7 @@
 
     const subheading = document.createElement('h3');
     subheading.className = 'exam-class-title';
-    subheading.textContent = showAll ? 'Все классы' : student.class;
+    subheading.textContent = cls === ALL_CLASSES ? 'Все классы' : cls;
     section.appendChild(subheading);
 
     const listEl = document.createElement('div');
@@ -251,30 +325,25 @@
     container.appendChild(section);
   }
 
-  renderSection('🐍 Python для начинающих', PYTHON_CATALOG, '');
+  function renderCatalog() {
+    container.textContent = '';
 
-  let lessonItems = LESSONS_CATALOG[student.class];
-  if (showAll) {
-    lessonItems = [];
-    Object.keys(LESSONS_CATALOG).forEach(function (cls) {
-      (LESSONS_CATALOG[cls] || []).forEach(function (lesson) {
-        lessonItems.push({
-          file: lesson.file,
-          title: lesson.title,
-          tag: cls + ' · ' + lesson.tag
-        });
-      });
-    });
+    renderSection('🐍 Python для начинающих', PYTHON_CATALOG, '');
+
+    const allClasses = selectedClass === ALL_CLASSES;
+    renderSection(
+      '📘 Уроки' + (allClasses ? ' — все классы' : ' · ' + selectedClass),
+      itemsForClass(LESSONS_CATALOG, selectedClass),
+      allClasses
+        ? 'Уроки пока не добавлены.'
+        : `Для ${selectedClass} пока нет обычных уроков.`
+    );
+
+    renderExamSection(selectedClass);
+    renderPracticeSection(selectedClass);
   }
 
-  renderSection(
-    '📘 Уроки' + (showAll ? ' — все классы' : ''),
-    lessonItems,
-    showAll ? 'Уроки пока не добавлены.' : `Для ${student.class} пока нет обычных уроков.`
-  );
-
-  renderExamSection();
-  renderPracticeSection();
+  renderCatalog();
 
   /* ---------- Мои результаты ---------- */
   const refreshBtn = document.getElementById('refreshResultsBtn');
