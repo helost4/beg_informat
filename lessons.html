@@ -70,6 +70,9 @@
     return;
   }
 
+  /* Учитель, родитель и администратор видят уроки всех классов. */
+  const showAll = Account.isPrivileged();
+
   document.getElementById('studentBadge').textContent =
     `👤 ${student.name} · ${student.class} · ${Account.roleLabel(student.role)}`;
 
@@ -160,7 +163,17 @@
   }
 
   function renderPracticeSection() {
-    const items = PRACTS_CATALOG[student.class];
+    let items = PRACTS_CATALOG[student.class];
+
+    if (showAll) {
+      items = [];
+      Object.keys(PRACTS_CATALOG).forEach(function (cls) {
+        (PRACTS_CATALOG[cls] || []).forEach(function (practice) {
+          items.push({ file: practice.file, title: practice.title, tag: cls + ' · ' + practice.tag });
+        });
+      });
+    }
+
     if (!items || !items.length) return;
 
     const section = document.createElement('section');
@@ -173,7 +186,7 @@
 
     const subheading = document.createElement('h3');
     subheading.className = 'practice-class-title';
-    subheading.textContent = student.class;
+    subheading.textContent = showAll ? 'Все классы' : student.class;
     section.appendChild(subheading);
 
     const listEl = document.createElement('div');
@@ -198,7 +211,7 @@
     const available = catalog.order
       .map(function (id) { return catalog.exams[id]; })
       .filter(function (exam) {
-        return exam && exam.classes.indexOf(student.class) !== -1;
+        return exam && (showAll || exam.classes.indexOf(student.class) !== -1);
       });
 
     if (!available.length) return;
@@ -213,7 +226,7 @@
 
     const subheading = document.createElement('h3');
     subheading.className = 'exam-class-title';
-    subheading.textContent = student.class;
+    subheading.textContent = showAll ? 'Все классы' : student.class;
     section.appendChild(subheading);
 
     const listEl = document.createElement('div');
@@ -239,10 +252,25 @@
   }
 
   renderSection('🐍 Python для начинающих', PYTHON_CATALOG, '');
+
+  let lessonItems = LESSONS_CATALOG[student.class];
+  if (showAll) {
+    lessonItems = [];
+    Object.keys(LESSONS_CATALOG).forEach(function (cls) {
+      (LESSONS_CATALOG[cls] || []).forEach(function (lesson) {
+        lessonItems.push({
+          file: lesson.file,
+          title: lesson.title,
+          tag: cls + ' · ' + lesson.tag
+        });
+      });
+    });
+  }
+
   renderSection(
-    '📘 Уроки',
-    LESSONS_CATALOG[student.class],
-    `Для ${student.class} пока нет обычных уроков.`
+    '📘 Уроки' + (showAll ? ' — все классы' : ''),
+    lessonItems,
+    showAll ? 'Уроки пока не добавлены.' : `Для ${student.class} пока нет обычных уроков.`
   );
 
   renderExamSection();
