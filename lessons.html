@@ -38,6 +38,7 @@
     <h1>📚 Мои уроки</h1>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
       <div class="student-badge" id="studentBadge"></div>
+      <a class="logout-btn" id="roleHomeLink" href="#" hidden>📊 Кабинет</a>
       <button class="logout-btn" id="logoutBtn">Выйти</button>
     </div>
   </div>
@@ -70,7 +71,15 @@
   }
 
   document.getElementById('studentBadge').textContent =
-    `👤 ${student.name} · ${student.class}`;
+    `👤 ${student.name} · ${student.class} · ${Account.roleLabel(student.role)}`;
+
+  /* Ссылка на кабинет для привилегированных ролей. */
+  const roleHome = { teacher: 'teacher.html', parent: 'parent.html', admin: 'admin.html' }[student.role];
+  if (roleHome) {
+    const roleLink = document.getElementById('roleHomeLink');
+    roleLink.href = roleHome;
+    roleLink.hidden = false;
+  }
 
   /* ---------- Выход ---------- */
   document.getElementById('logoutBtn').addEventListener('click', function () {

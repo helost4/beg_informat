@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Интерактивные уроки информатики</title>
   <script>
-  // Есть действующая сессия (токен + ученик) — к урокам, иначе ко входу.
+  // Есть действующая сессия — на главную страницу роли, иначе ко входу.
   (function () {
     var token = null;
     var student = null;
@@ -15,7 +15,22 @@
       token = null;
       student = null;
     }
-    window.location.href = (token && student) ? 'lessons.html' : 'login.html';
+    if (!token || !student) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    var session = null;
+    try { session = JSON.parse(student); } catch (e) { session = null; }
+    var role = (session && session.role) || 'student';
+    var target;
+    switch (role) {
+      case 'teacher': target = 'teacher.html'; break;
+      case 'parent':  target = 'parent.html';  break;
+      case 'admin':   target = 'admin.html';   break;
+      default:        target = 'lessons.html';
+    }
+    window.location.href = target;
   })();
 </script>
 </head>

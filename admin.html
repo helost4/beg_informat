@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Панель администратора · Интерактивные уроки информатики</title>
+<link rel="stylesheet" href="shared/style.css">
+<link rel="stylesheet" href="shared/dashboard.css">
+</head>
+<body>
+<div class="dash-wrap">
+  <div class="dash-header">
+    <div>
+      <h1>⚙️ Панель администратора</h1>
+      <p class="dash-sub" id="dashSub">Управление аккаунтами и ролями</p>
+    </div>
+    <div class="dash-actions">
+      <a class="dash-btn ghost" href="lessons.html">📚 Уроки</a>
+      <a class="dash-btn ghost" href="teacher.html">📊 Все результаты</a>
+      <button class="dash-btn danger" id="logoutBtn" type="button">🚪 Выйти</button>
+    </div>
+  </div>
+
+  <div class="stat-grid" id="statGrid"></div>
+  <div class="dash-status" id="status" hidden></div>
+
+  <div class="dash-card">
+    <h2>➕ Создать аккаунт</h2>
+    <p class="dash-muted">Так создаются аккаунты учителей, родителей и администраторов. Публичная регистрация всегда создаёт только ученика.</p>
+    <form class="dash-form" id="createForm">
+      <div class="form-row">
+        <div>
+          <label for="newName">Фамилия и имя</label>
+          <input id="newName" required minlength="3" placeholder="Например: Иванова Мария">
+        </div>
+        <div>
+          <label for="newClass">Класс / тип аккаунта</label>
+          <select id="newClass" required>
+            <option value="">— выберите —</option>
+            <option value="5 класс">5 класс</option>
+            <option value="6 класс">6 класс</option>
+            <option value="7 класс">7 класс</option>
+            <option value="8 класс">8 класс</option>
+            <option value="9 класс">9 класс</option>
+            <option value="10 класс">10 класс</option>
+            <option value="11 класс">11 класс</option>
+            <optgroup label="Служебные аккаунты">
+              <option value="Учителя">Учитель</option>
+              <option value="Родители">Родитель</option>
+              <option value="Администрация">Администратор</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label for="newRole">Роль</label>
+          <select id="newRole">
+            <option value="student">Ученик</option>
+            <option value="teacher">Учитель</option>
+            <option value="parent">Родитель</option>
+            <option value="admin">Администратор</option>
+          </select>
+        </div>
+        <div>
+          <label for="newPassword">Пароль (минимум 6 символов)</label>
+          <input id="newPassword" type="password" required minlength="6" autocomplete="new-password">
+        </div>
+      </div>
+      <div>
+        <label for="newScope">Область доступа</label>
+        <input id="newScope" placeholder="Не заполняется для ученика и администратора">
+        <div class="dash-muted" style="margin-top:6px;font-size:.8rem;" id="scopeHint"></div>
+      </div>
+      <div class="btn-row">
+        <button class="dash-btn" type="submit" id="createBtn">Создать аккаунт</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="dash-card">
+    <h2>👥 Аккаунты</h2>
+    <p class="dash-muted">Роль и права проверяются сервером по записи в таблице — не по данным браузера.</p>
+    <div class="table-scroll">
+      <table class="dash-table" id="accountsTable" hidden>
+        <thead>
+          <tr><th>Аккаунт</th><th>Роль</th><th>Область доступа</th><th>Действия</th></tr>
+        </thead>
+        <tbody id="accountsBody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="accountsEmpty" hidden>
+      <span class="empty-emoji">📭</span><div>Аккаунтов пока нет.</div>
+    </div>
+  </div>
+
+  <div class="dash-card">
+    <h2>🔑 Ключи учеников для связи с родителями</h2>
+    <p class="dash-muted">Нажмите на ключ, чтобы скопировать. Вставьте его в поле «Область доступа» родителя; несколько ключей разделяйте точкой с запятой.</p>
+    <div id="childKeys"></div>
+  </div>
+</div>
+
+<script src="shared/account.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (!Account.requireRole(['admin'], 'login.html')) return;
+
+  var student = Account.currentStudent();
+  var statusEl = document.getElementById('status');
+  var accounts = [];
+
+  var SCOPE_HINTS = {
+    student: 'Не используется.',
+    teacher: 'Классы через точку с запятой, например: 5 класс;6 класс',
+    parent: 'Ключи учеников через точку с запятой, например: иванов иван|5 класс',
+    admin: 'Не используется.'
+  };
+  var SCOPE_PLACEHOLDERS = {
+    student: 'Не заполняется',
+    teacher: '5 класс;6 класс',
+    parent: 'иванов иван|5 класс',
+    admin: 'Не заполняется'
+  };
+
+  document.getElementById('dashSub').textContent =
+    '👤 ' + student.name + ' · ' + Account.roleLabel(student.role);
+
+  document.getElementById('logoutBtn').onclick = function () {
+    Account.logout();
+    window.location.href = 'login.html';
+  };
+
+  function esc(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function setStatus(text, kind) {
+    statusEl.textContent = text;
+    statusEl.className = 'dash-status' + (kind ? ' ' + kind : '');
+    statusEl.hidden = !text;
+    if (text && kind !== 'error') {
+      clearTimeout(setStatus._timer);
+      setStatus._timer = setTimeout(function () { setStatus(''); }, 5000);
+    }
+  }
+
+  function updateScopeHint(role) {
+    document.getElementById('scopeHint').textContent = SCOPE_HINTS[role] || '';
+    document.getElementById('newScope').placeholder = SCOPE_PLACEHOLDERS[role] || '';
+  }
+
+  function renderStats() {
+    var counts = { student: 0, teacher: 0, parent: 0, admin: 0 };
+    accounts.forEach(function (a) { if (counts[a.role] !== undefined) counts[a.role]++; });
+
+    var items = [
+      { value: accounts.length, label: 'Всего аккаунтов', cls: 'purple' },
+      { value: counts.student, label: 'Учеников', cls: 'blue' },
+      { value: counts.teacher, label: 'Учителей', cls: 'green' },
+      { value: counts.parent, label: 'Родителей', cls: 'pink' }
+    ];
+
+    document.getElementById('statGrid').innerHTML = items.map(function (i) {
+      return '<div class="stat ' + i.cls + '"><div class="stat-value">' + esc(i.value) +
+        '</div><div class="stat-label">' + esc(i.label) + '</div></div>';
+    }).join('');
+  }
+
+  function roleOptions(current) {
+    return ['student', 'teacher', 'parent', 'admin'].map(function (r) {
+      return '<option value="' + r + '"' + (r === current ? ' selected' : '') + '>' +
+        Account.roleLabel(r) + '</option>';
+    }).join('');
+  }
+
+  function renderAccounts() {
+    var table = document.getElementById('accountsTable');
+    var empty = document.getElementById('accountsEmpty');
+
+    if (!accounts.length) {
+      table.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+
+    empty.hidden = true;
+    table.hidden = false;
+
+    document.getElementById('accountsBody').innerHTML = accounts.map(function (a) {
+      return '<tr data-id="' + esc(a.id) + '">' +
+        '<td><b>' + esc(a.name) + '</b><small>' + esc(a.className) + '</small></td>' +
+        '<td><select class="role-select" data-id="' + esc(a.id) + '">' + roleOptions(a.role) + '</select></td>' +
+        '<td><input class="scope-input" data-id="' + esc(a.id) + '" value="' + esc(a.scope) +
+          '" placeholder="' + esc(SCOPE_PLACEHOLDERS[a.role] || '') + '"></td>' +
+        '<td><div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+          '<button class="dash-btn small save-role" type="button" data-id="' + esc(a.id) + '">💾 Сохранить</button>' +
+          '<button class="dash-btn small danger reset-pwd" type="button" data-id="' + esc(a.id) + '">🔑 Пароль</button>' +
+        '</div></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderChildKeys() {
+    var students = accounts.filter(function (a) { return a.role === 'student'; });
+    var box = document.getElementById('childKeys');
+
+    if (!students.length) {
+      box.innerHTML = '<p class="dash-muted">Учеников пока нет.</p>';
+      return;
+    }
+
+    box.innerHTML = students.map(function (a) {
+      return '<div style="margin-bottom:8px;">' + esc(a.name) + ' · ' + esc(a.className) + ' → ' +
+        '<span class="key-chip" data-key="' + esc(a.childKey) + '" title="Нажмите, чтобы скопировать">' +
+        esc(a.childKey) + '</span></div>';
+    }).join('');
+  }
+
+  function renderAll() {
+    renderStats();
+    renderAccounts();
+    renderChildKeys();
+  }
+
+  function reload() {
+    return Account.adminListAccounts().then(function (list) {
+      accounts = list || [];
+      renderAll();
+    });
+  }
+
+  document.getElementById('newRole').addEventListener('change', function () {
+    updateScopeHint(this.value);
+  });
+
+  document.getElementById('createForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = document.getElementById('createBtn');
+    var data = {
+      name: document.getElementById('newName').value.trim().replace(/\s+/g, ' '),
+      className: document.getElementById('newClass').value,
+      role: document.getElementById('newRole').value,
+      scope: document.getElementById('newScope').value.trim(),
+      password: document.getElementById('newPassword').value
+    };
+
+    if (data.name.length < 3 || !data.className || data.password.length < 6) {
+      setStatus('Заполните имя, класс и пароль (минимум 6 символов).', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    setStatus('Создаём аккаунт…');
+    Account.adminCreateAccount(data).then(function () {
+      e.target.reset();
+      updateScopeHint('student');
+      setStatus('Аккаунт создан: ' + data.name, 'ok');
+      return reload();
+    }).catch(function (err) {
+      setStatus('Ошибка: ' + (err && err.message ? err.message : err), 'error');
+    }).then(function () {
+      btn.disabled = false;
+    });
+  });
+
+  document.getElementById('accountsBody').addEventListener('change', function (e) {
+    if (!e.target.classList.contains('role-select')) return;
+    var role = e.target.value;
+    var input = e.target.closest('tr').querySelector('.scope-input');
+    if (input) input.placeholder = SCOPE_PLACEHOLDERS[role] || '';
+  });
+
+  document.getElementById('accountsBody').addEventListener('click', function (e) {
+    var saveBtn = e.target.closest('.save-role');
+    var resetBtn = e.target.closest('.reset-pwd');
+
+    if (saveBtn) {
+      var row = saveBtn.closest('tr');
+      var id = row.dataset.id;
+      var role = row.querySelector('.role-select').value;
+      var scope = row.querySelector('.scope-input').value.trim();
+
+      saveBtn.disabled = true;
+      setStatus('Сохраняем роль…');
+      Account.adminSetRole({ accountId: id, role: role, scope: scope }).then(function () {
+        setStatus('Роль обновлена.', 'ok');
+        return reload();
+      }).catch(function (err) {
+        setStatus('Ошибка: ' + (err && err.message ? err.message : err), 'error');
+      }).then(function () {
+        saveBtn.disabled = false;
+      });
+      return;
+    }
+
+    if (resetBtn) {
+      var id2 = resetBtn.dataset.id;
+      var pwd = window.prompt('Новый пароль (минимум 6 символов):', '');
+      if (!pwd) return;
+      if (pwd.length < 6) {
+        setStatus('Пароль должен быть не короче 6 символов.', 'error');
+        return;
+      }
+      resetBtn.disabled = true;
+      setStatus('Меняем пароль…');
+      Account.adminResetPassword({ accountId: id2, newPassword: pwd }).then(function () {
+        setStatus('Пароль обновлён.', 'ok');
+      }).catch(function (err) {
+        setStatus('Ошибка: ' + (err && err.message ? err.message : err), 'error');
+      }).then(function () {
+        resetBtn.disabled = false;
+      });
+    }
+  });
+
+  document.getElementById('childKeys').addEventListener('click', function (e) {
+    var chip = e.target.closest('.key-chip');
+    if (!chip) return;
+    var key = chip.dataset.key;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(key).then(function () {
+        setStatus('Ключ скопирован: ' + key, 'ok');
+      }).catch(function () {
+        setStatus('Ключ: ' + key);
+      });
+    } else {
+      setStatus('Ключ: ' + key);
+    }
+  });
+
+  updateScopeHint('student');
+  reload().catch(function (err) {
+    setStatus('Не удалось загрузить аккаунты: ' + (err && err.message ? err.message : err), 'error');
+    if (err && (err.code === 'AUTH_REQUIRED' || err.code === 'TOKEN_EXPIRED')) {
+      Account.logout();
+      setTimeout(function () { window.location.href = 'login.html'; }, 1500);
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кабинет учителя · Интерактивные уроки информатики</title>
+<link rel="stylesheet" href="shared/style.css">
+<link rel="stylesheet" href="shared/dashboard.css">
+</head>
+<body>
+<div class="dash-wrap">
+  <div class="dash-header">
+    <div>
+      <h1>📊 Кабинет учителя</h1>
+      <p class="dash-sub" id="dashSub">Прогресс учеников по урокам и тренажёрам</p>
+    </div>
+    <div class="dash-actions">
+      <a class="dash-btn ghost" href="lessons.html">📚 Уроки</a>
+      <button class="dash-btn ghost" id="exportBtn" type="button">⬇ CSV</button>
+      <button class="dash-btn danger" id="logoutBtn" type="button">🚪 Выйти</button>
+    </div>
+  </div>
+
+  <div class="stat-grid" id="statGrid"></div>
+  <div class="dash-status" id="status">Загрузка данных…</div>
+
+  <div class="dash-card">
+    <h2>👥 Ученики</h2>
+    <div class="dash-form" style="max-width:320px;margin-bottom:14px;">
+      <label for="classFilter">Класс</label>
+      <select id="classFilter"><option value="">Все классы</option></select>
+    </div>
+    <div class="table-scroll">
+      <table class="dash-table" id="studentsTable" hidden>
+        <thead>
+          <tr>
+            <th>Ученик</th>
+            <th>Класс</th>
+            <th>Средний балл</th>
+            <th>Работ</th>
+            <th>Последняя активность</th>
+          </tr>
+        </thead>
+        <tbody id="studentsBody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="emptyState" hidden>
+      <span class="empty-emoji">📭</span>
+      <div>Пока нет результатов учеников. Учитель видит только классы, указанные администратором в настройках аккаунта.</div>
+    </div>
+  </div>
+
+  <div class="dash-card">
+    <h2>📝 Последние работы</h2>
+    <div class="table-scroll">
+      <table class="dash-table" id="resultsTable" hidden>
+        <thead>
+          <tr><th>Дата</th><th>Ученик</th><th>Работа</th><th>Баллы</th><th>Оценка</th></tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+    <div class="dash-muted" id="resultsEmpty" hidden>Работ пока нет.</div>
+  </div>
+</div>
+
+<script src="shared/account.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (!Account.requireRole(['teacher', 'admin'], 'login.html')) return;
+
+  var student = Account.currentStudent();
+  var statusEl = document.getElementById('status');
+  var students = [];
+  var results = [];
+
+  document.getElementById('dashSub').textContent =
+    '👤 ' + student.name + ' · ' + Account.roleLabel(student.role);
+
+  document.getElementById('logoutBtn').onclick = function () {
+    Account.logout();
+    window.location.href = 'login.html';
+  };
+
+  function esc(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function pctClass(pct) {
+    return pct >= 75 ? 'pct-good' : (pct >= 50 ? 'pct-mid' : 'pct-low');
+  }
+
+  function setStatus(text, kind) {
+    statusEl.textContent = text;
+    statusEl.className = 'dash-status' + (kind ? ' ' + kind : '');
+    statusEl.hidden = !text;
+  }
+
+  function renderStats() {
+    var totalPct = 0;
+    var lessonKeys = {};
+    students.forEach(function (s) {
+      totalPct += s.avgPct || 0;
+      (s.lessons || []).forEach(function (l) { lessonKeys[l.lesson] = true; });
+    });
+
+    var items = [
+      { value: students.length, label: 'Учеников', cls: 'blue' },
+      { value: results.length, label: 'Работ проверено', cls: 'purple' },
+      { value: (students.length ? Math.round(totalPct / students.length) : 0) + '%', label: 'Средний балл', cls: 'green' },
+      { value: Object.keys(lessonKeys).length, label: 'Тем', cls: 'pink' }
+    ];
+
+    document.getElementById('statGrid').innerHTML = items.map(function (i) {
+      return '<div class="stat ' + i.cls + '"><div class="stat-value">' + esc(i.value) +
+        '</div><div class="stat-label">' + esc(i.label) + '</div></div>';
+    }).join('');
+  }
+
+  function renderClassFilter() {
+    var classes = {};
+    students.forEach(function (s) { if (s.className) classes[s.className] = true; });
+    var sel = document.getElementById('classFilter');
+    var current = sel.value;
+    sel.innerHTML = '<option value="">Все классы</option>' + Object.keys(classes).sort().map(function (c) {
+      return '<option value="' + esc(c) + '">' + esc(c) + '</option>';
+    }).join('');
+    sel.value = current;
+  }
+
+  function renderStudents() {
+    var filter = document.getElementById('classFilter').value;
+    var list = students.filter(function (s) { return !filter || s.className === filter; });
+    var body = document.getElementById('studentsBody');
+    var table = document.getElementById('studentsTable');
+
+    if (!list.length) {
+      table.hidden = true;
+      document.getElementById('emptyState').hidden = false;
+      return;
+    }
+
+    document.getElementById('emptyState').hidden = true;
+    table.hidden = false;
+
+    body.innerHTML = list.map(function (s) {
+      var pct = s.avgPct || 0;
+      var lessons = (s.lessons || []).map(function (l) {
+        return '<li><span>' + esc(l.lesson) + '</span><span class="' + pctClass(l.pct) + '">' +
+          esc(l.score + ' / ' + l.maxScore + ' · ' + l.pct + '%') + '</span></li>';
+      }).join('');
+
+      return '<tr>' +
+        '<td><b>' + esc(s.name) + '</b>' +
+          (lessons ? '<details><summary style="cursor:pointer;color:#64748b;font-size:.8rem;">по темам (' +
+            s.lessons.length + ')</summary><ul class="lesson-list-mini">' + lessons + '</ul></details>' : '') +
+        '</td>' +
+        '<td>' + esc(s.className) + '</td>' +
+        '<td><span class="' + pctClass(pct) + '">' + pct + '%</span>' +
+          '<div class="pct-bar"><span style="width:' + pct + '%"></span></div></td>' +
+        '<td>' + esc(s.resultsCount) + '</td>' +
+        '<td><small>' + esc(Account.formatDate(s.lastActive)) + '</small></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderResults() {
+    var filter = document.getElementById('classFilter').value;
+    var list = results.filter(function (r) { return !filter || r.className === filter; }).slice(0, 60);
+    var table = document.getElementById('resultsTable');
+    var empty = document.getElementById('resultsEmpty');
+
+    if (!list.length) {
+      table.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+
+    empty.hidden = true;
+    table.hidden = false;
+    document.getElementById('resultsBody').innerHTML = list.map(function (r) {
+      return '<tr>' +
+        '<td><small>' + esc(Account.formatDate(r.timestamp)) + '</small></td>' +
+        '<td>' + esc(r.studentName) + '</td>' +
+        '<td>' + esc(r.lesson) + '<small>' + esc(Account.workTypeLabel(r.workType) +
+          (r.variant ? ' · ' + r.variant : '')) + '</small></td>' +
+        '<td>' + esc(r.score + ' / ' + r.maxScore) + '</td>' +
+        '<td>' + esc(r.grade) + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderAll() {
+    renderClassFilter();
+    renderStudents();
+    renderResults();
+  }
+
+  document.getElementById('classFilter').addEventListener('change', function () {
+    renderStudents();
+    renderResults();
+  });
+
+  document.getElementById('exportBtn').onclick = function () {
+    if (!results.length) {
+      setStatus('Экспортировать пока нечего.', 'error');
+      return;
+    }
+    var rows = [['Дата', 'Ученик', 'Класс', 'Урок', 'Вариант', 'Баллы', 'Максимум', 'Оценка', 'Тип']];
+    results.forEach(function (r) {
+      rows.push([r.timestamp, r.studentName, r.className, r.lesson, r.variant,
+        r.score, r.maxScore, r.grade, r.workType]);
+    });
+    var csv = '\ufeff' + rows.map(function (row) {
+      return row.map(function (cell) {
+        return '"' + String(cell == null ? '' : cell).replace(/"/g, '""') + '"';
+      }).join(';');
+    }).join('\r\n');
+
+    var url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'progress-teacher.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  Account.viewResults().then(function (data) {
+    students = data.students || [];
+    results = data.results || [];
+    renderStats();
+    renderAll();
+    setStatus('Загружено учеников: ' + students.length + ', работ: ' + results.length + '.', 'ok');
+    setTimeout(function () { setStatus(''); }, 4000);
+  }).catch(function (err) {
+    setStatus('Не удалось загрузить данные: ' + (err && err.message ? err.message : err), 'error');
+    if (err && (err.code === 'AUTH_REQUIRED' || err.code === 'TOKEN_EXPIRED')) {
+      Account.logout();
+      setTimeout(function () { window.location.href = 'login.html'; }, 1500);
+    }
+  });
+})();
+</script>
+</body>
+</html>

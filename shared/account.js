@@ -83,6 +83,10 @@
       name: account.name,
       'class': account.className,
       track: account.track,
+      // Роль приходит из ответа сервера. Она нужна только для навигации:
+      // все права проверяются на сервере по записи в таблице.
+      role: account.role || 'student',
+      scope: account.scope || '',
       loginAt: new Date().toISOString()
     };
 
@@ -104,6 +108,66 @@
     var student = readStudent();
     if (!token() || !student || !student.name) return null;
     return student;
+  }
+
+  var ROLE_LABELS = {
+    student: 'Ученик',
+    teacher: 'Учитель',
+    parent: 'Родитель',
+    admin: 'Администратор'
+  };
+
+  function currentRole() {
+    var student = currentStudent();
+    return student ? (student.role || 'student') : null;
+  }
+
+  function roleLabel(role) {
+    return ROLE_LABELS[role] || ROLE_LABELS.student;
+  }
+
+  function hasRole(role) {
+    return currentRole() === role;
+  }
+
+  function hasAnyRole(roles) {
+    var role = currentRole();
+    if (!role) return false;
+    for (var i = 0; i < roles.length; i++) {
+      if (roles[i] === role) return true;
+    }
+    return false;
+  }
+
+  function isPrivileged() {
+    return hasAnyRole(['teacher', 'parent', 'admin']);
+  }
+
+  /** Главная страница для текущей роли. */
+  function homeUrl() {
+    switch (currentRole()) {
+      case 'teacher': return 'teacher.html';
+      case 'parent':  return 'parent.html';
+      case 'admin':   return 'admin.html';
+      default:        return 'lessons.html';
+    }
+  }
+
+  /** Переход на страницу роли с учётом вложенности каталога. */
+  function homeUrlFrom(prefix) {
+    return (prefix || '') + homeUrl();
+  }
+
+  function requireRole(roles, redirectTo) {
+    if (!isLoggedIn()) {
+      global.location.href = redirectTo || loginUrl();
+      return false;
+    }
+    if (!hasAnyRole(roles)) {
+      global.location.href = redirectTo || homeUrl();
+      return false;
+    }
+    return true;
   }
 
   function isLoggedIn() {
@@ -296,6 +360,50 @@
     });
   }
 
+  /* ---------------- РОЛИ: ОТЧЁТЫ И УПРАВЛЕНИЕ ---------------- */
+
+  function requireAuth() {
+    if (!isLoggedIn()) {
+      throw makeError('AUTH_REQUIRED', 'Нужно войти в аккаунт.');
+    }
+  }
+
+  /** Результаты учеников для учителя, родителя или администратора. */
+  function viewResults() {
+    requireAuth();
+    return post('viewResults', { token: token() }).then(function (res) {
+      return {
+        students: Array.isArray(res.students) ? res.students : [],
+        results: Array.isArray(res.results) ? res.results : [],
+        scope: res.scope || { classes: [], childKeys: [] }
+      };
+    });
+  }
+
+  function adminListAccounts() {
+    requireAuth();
+    return post('adminListAccounts', { token: token() }).then(function (res) {
+      return Array.isArray(res.accounts) ? res.accounts : [];
+    });
+  }
+
+  function adminCreateAccount(data) {
+    requireAuth();
+    return post('adminCreateAccount', Object.assign({ token: token() }, data || {}))
+      .then(function (res) { return res.account; });
+  }
+
+  function adminSetRole(data) {
+    requireAuth();
+    return post('adminSetRole', Object.assign({ token: token() }, data || {}))
+      .then(function (res) { return res.account; });
+  }
+
+  function adminResetPassword(data) {
+    requireAuth();
+    return post('adminResetPassword', Object.assign({ token: token() }, data || {}));
+  }
+
   /* ---------------- ПОМОЩНИКИ ДЛЯ ИНТЕРФЕЙСА ---------------- */
 
   function percent(score, maxScore) {
@@ -368,6 +476,14 @@
     apiUrl: apiUrl,
     token: token,
     currentStudent: currentStudent,
+    currentRole: currentRole,
+    roleLabel: roleLabel,
+    hasRole: hasRole,
+    hasAnyRole: hasAnyRole,
+    isPrivileged: isPrivileged,
+    homeUrl: homeUrl,
+    homeUrlFrom: homeUrlFrom,
+    requireRole: requireRole,
     isLoggedIn: isLoggedIn,
     requireLogin: requireLogin,
     loginUrl: loginUrl,
@@ -376,6 +492,11 @@
     logout: logout,
     saveResult: saveResult,
     getMyResults: getMyResults,
+    viewResults: viewResults,
+    adminListAccounts: adminListAccounts,
+    adminCreateAccount: adminCreateAccount,
+    adminSetRole: adminSetRole,
+    adminResetPassword: adminResetPassword,
     queueResult: queueResult,
     flushQueue: flushQueue,
     pendingCount: pendingCount,

@@ -19,6 +19,7 @@
   .login-error.show{display:block;}
   .login-note{background:#eff6ff;border:2px solid #93c5fd;color:#1e3a8a;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:.9rem;display:none;line-height:1.45;}
   .login-note.show{display:block;}
+  .login-hint{font-size:.8rem;color:#64748b;line-height:1.45;margin:8px 0 0;}
   .login-foot{text-align:center;color:#64748b;font-size:.82rem;margin-top:18px;line-height:1.5;}
 </style>
 </head>
@@ -51,7 +52,16 @@
         <option value="9 класс">9 класс</option>
         <option value="10 класс">10 класс</option>
         <option value="11 класс">11 класс</option>
+        <optgroup label="Служебные аккаунты">
+          <option value="Учителя">Учитель</option>
+          <option value="Родители">Родитель</option>
+          <option value="Администрация">Администратор</option>
+        </optgroup>
       </select>
+      <p class="login-hint">
+        Учителя, родители и администраторы входят с аккаунтом, который создал
+        администратор. Самостоятельно выбрать эти роли при регистрации нельзя.
+      </p>
 
       <label for="loginPassword">Пароль</label>
       <div class="password-wrap">
@@ -112,9 +122,9 @@
   var registerForm = document.getElementById('registerForm');
   var tabs = document.querySelectorAll('[data-auth-tab]');
 
-  /* Если уже вошли — сразу к урокам. */
+  /* Если уже вошли — сразу на главную страницу своей роли. */
   if (typeof Account !== 'undefined' && Account.isLoggedIn()) {
-    window.location.href = 'lessons.html';
+    window.location.href = Account.homeUrl();
     return;
   }
 
@@ -195,6 +205,12 @@
         return 'Не удалось связаться с сервером. Проверьте интернет и попробуйте ещё раз.';
       case 'BAD_RESPONSE':
         return 'Сервер не ответил как ожидалось. Возможно, Apps Script ещё не обновлён до новой версии.';
+      case 'FORBIDDEN':
+        return 'У вас нет доступа к этому разделу. Обратитесь к администратору.';
+      case 'LAST_ADMIN':
+        return 'Нельзя снять роль администратора с последнего администратора.';
+      case 'NOT_FOUND':
+        return 'Аккаунт не найден.';
       default:
         return (err && err.message) || 'Что-то пошло не так. Попробуйте ещё раз.';
     }
@@ -203,6 +219,15 @@
   function setBusy(btn, busy, busyText, normalText) {
     btn.disabled = busy;
     btn.textContent = busy ? busyText : normalText;
+  }
+
+  function homeFor(role) {
+    switch (role) {
+      case 'teacher': return 'teacher.html';
+      case 'parent':  return 'parent.html';
+      case 'admin':   return 'admin.html';
+      default:        return 'lessons.html';
+    }
   }
 
   /* ---------------- Вход ---------------- */
@@ -231,8 +256,8 @@
     setBusy(btn, true, 'Входим…', 'Войти →');
 
     Account.login({ name: name, className: className, password: password })
-      .then(function () {
-        window.location.href = 'lessons.html';
+      .then(function (student) {
+        window.location.href = homeFor(student && student.role);
       })
       .catch(function (err) {
         showError(messageFor(err));

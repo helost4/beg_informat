@@ -28,6 +28,30 @@
   homeBtn.href = '../lessons.html';
   homeBtn.innerHTML = '🏠 Главная';
 
+  const role = student.role || 'student';
+  const roleLabels = {
+    student: 'Ученик', teacher: 'Учитель',
+    parent: 'Родитель', admin: 'Администратор'
+  };
+
+  const roleBadge = document.createElement('span');
+  roleBadge.className = 'floating-role';
+  roleBadge.textContent = roleLabels[role] || 'Ученик';
+
+  const dashHref = {
+    teacher: '../teacher.html',
+    parent: '../parent.html',
+    admin: '../admin.html'
+  }[role];
+
+  let dashBtn = null;
+  if (dashHref) {
+    dashBtn = document.createElement('a');
+    dashBtn.className = 'floating-btn dash';
+    dashBtn.href = dashHref;
+    dashBtn.innerHTML = '📊 Кабинет';
+  }
+
   const logoutBtn = document.createElement('button');
   logoutBtn.className = 'floating-btn logout';
   logoutBtn.innerHTML = '🚪 Выйти';
@@ -37,7 +61,9 @@
     window.location.href = '../login.html';
   };
 
+  nav.appendChild(roleBadge);
   nav.appendChild(homeBtn);
+  if (dashBtn) nav.appendChild(dashBtn);
   nav.appendChild(logoutBtn);
   document.body.appendChild(nav);
 })();

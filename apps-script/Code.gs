@@ -3,10 +3,15 @@
    Google Apps Script + Google Таблица
 
    Действия POST (JSON, Content-Type: text/plain):
-     register   { name, className, track, password }
+     register   { name, className, track, password }            // всегда роль student
      login      { name, className, track?, password }
      saveResult { token, result: { lesson, variant, score, maxScore, grade, workType } }
      myResults  { token }
+     viewResults        { token }                                // teacher / parent / admin
+     adminListAccounts  { token }                                // admin
+     adminCreateAccount { token, name, className, password, role, scope }
+     adminSetRole       { token, accountId, role, scope }
+     adminResetPassword { token, accountId, newPassword }
 
    Старый формат без action тоже поддерживается: строка просто
    дописывается в лист результатов (как раньше).
@@ -27,8 +32,11 @@ var RESULT_HEADERS = [
 
 var ACCOUNT_HEADERS = [
   'id', 'name', 'className', 'track', 'loginKey',
-  'salt', 'passwordHash', 'createdAt', 'updatedAt'
+  'salt', 'passwordHash', 'createdAt', 'updatedAt',
+  'role', 'scope'
 ];
+
+var VALID_ROLES = ['student', 'teacher', 'parent', 'admin'];
 
 /* ============================================================
    ТОЧКИ ВХОДА
@@ -52,6 +60,11 @@ function doPost(e) {
       case 'login':      return json_(login_(body));
       case 'saveResult': return json_(saveResult_(body));
       case 'myResults':  return json_(myResults_(body));
+      case 'viewResults':        return json_(viewResults_(body));
+      case 'adminListAccounts':  return json_(adminListAccounts_(body));
+      case 'adminCreateAccount': return json_(adminCreateAccount_(body));
+      case 'adminSetRole':       return json_(adminSetRole_(body));
+      case 'adminResetPassword': return json_(adminResetPassword_(body));
       default:
         throwAppError_('UNKNOWN_ACTION', 'Неизвестное действие: ' + action);
     }
@@ -66,7 +79,9 @@ function doPost(e) {
 
 /**
  * Запустите один раз после вставки этого кода.
- * Создаёт лист «Аккаунты» и добавляет колонку accountId в «Лист1».
+ * Создаёт лист «Аккаунты» (включая колонки role и scope) и добавляет
+ * колонку accountId в «Лист1». Повторный запуск безопасен: недостающие
+ * колонки дописываются справа, существующие данные не меняются.
  */
 function setup() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -148,6 +163,58 @@ function listAccounts() {
 }
 
 /* ============================================================
+   РУЧНАЯ НАСТРОЙКА РОЛЕЙ (из редактора Apps Script)
+
+   Первого администратора назначают вручную: зарегистрируйтесь
+   обычным способом, затем вызовите makeAdmin(...). После этого
+   остальные аккаунты и роли управляются через панель администратора.
+   ============================================================ */
+
+/** Назначить роль произвольному аккаунту. */
+function setAccountRole(name, className, role, scope) {
+  var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
+  ensureHeaders_(accounts, ACCOUNT_HEADERS);
+
+  var normalizedRole = String(role || '').trim().toLowerCase();
+  if (VALID_ROLES.indexOf(normalizedRole) === -1) {
+    throw new Error('Недопустимая роль: ' + String(role || ''));
+  }
+
+  var account = getAccountByLoginKey_(accounts, loginKey_(name, className));
+  if (!account) {
+    throw new Error('Аккаунт не найден: ' + loginKey_(name, className));
+  }
+
+  if (normalizeRole_(account.role) === 'admin' && normalizedRole !== 'admin' && countAdmins_(accounts) <= 1) {
+    throw new Error('Нельзя снять роль администратора с последнего администратора.');
+  }
+
+  var map = headerMap_(accounts);
+  accounts.getRange(account._row, map['role']).setValue(normalizedRole);
+  accounts.getRange(account._row, map['scope']).setValue(sanitizeScope_(scope));
+  accounts.getRange(account._row, map['updatedAt']).setValue(new Date());
+
+  var message = 'Роль обновлена: ' + account.name + ' · ' + account.className + ' → ' + normalizedRole;
+  Logger.log(message);
+  return message;
+}
+
+/** Сделать аккаунт администратором. */
+function makeAdmin(name, className) {
+  return setAccountRole(name, className, 'admin', '');
+}
+
+/** Учитель видит результаты указанных классов. */
+function makeTeacher(name, className, classes) {
+  return setAccountRole(name, className, 'teacher', toScopeString_(classes));
+}
+
+/** Родитель видит результаты привязанных учеников (ключи «имя|класс»). */
+function makeParent(name, className, childKeys) {
+  return setAccountRole(name, className, 'parent', toScopeString_(childKeys));
+}
+
+/* ============================================================
    РЕГИСТРАЦИЯ И ВХОД
    ============================================================ */
 
@@ -187,6 +254,10 @@ function register_(body) {
     row[map['passwordHash'] - 1] = hash;
     row[map['createdAt'] - 1] = now;
     row[map['updatedAt'] - 1] = now;
+    // Публичная регистрация всегда создаёт ученика. Поле role из запроса
+    // намеренно игнорируется: привилегированные роли выдаёт администратор.
+    row[map['role'] - 1] = 'student';
+    row[map['scope'] - 1] = '';
 
     accounts.appendRow(padRow_(row, accounts.getLastColumn()));
 
@@ -194,12 +265,14 @@ function register_(body) {
       id: id,
       name: name,
       className: className,
-      track: track
+      track: track,
+      role: 'student',
+      scope: ''
     };
 
     return success_({
       token: issueToken_(account.id),
-      account: account
+      account: accountPublic_(account)
     });
   } finally {
     lock.releaseLock();
@@ -239,7 +312,10 @@ function login_(body) {
       id: account.id,
       name: account.name,
       className: account.className,
-      track: account.track
+      track: account.track,
+      // Роль берётся из таблицы — это источник истины, а не localStorage.
+      role: normalizeRole_(account.role),
+      scope: account.scope || ''
     }
   });
 }
@@ -335,6 +411,390 @@ function myResults_(body) {
   });
 
   return success_({ results: results });
+}
+
+/* ============================================================
+   РОЛИ: УЧИТЕЛЬ, РОДИТЕЛЬ, АДМИНИСТРАТОР
+
+   Все проверки прав выполняются на сервере на основе записи аккаунта
+   в таблице. Роль из localStorage клиента никогда не используется.
+   ============================================================ */
+
+function normalizeRole_(value) {
+  var role = String(value || '').trim().toLowerCase();
+  return VALID_ROLES.indexOf(role) !== -1 ? role : 'student';
+}
+
+function normalizeRoleStrict_(value) {
+  var role = String(value || '').trim().toLowerCase();
+  if (VALID_ROLES.indexOf(role) === -1) {
+    throwAppError_('BAD_REQUEST', 'Недопустимая роль: ' + String(value || ''));
+  }
+  return role;
+}
+
+function sanitizeScope_(value) {
+  return String(value || '').trim().slice(0, 2000);
+}
+
+function toScopeString_(value) {
+  if (Array.isArray(value)) return value.join(';');
+  return String(value || '');
+}
+
+function splitScope_(scope) {
+  return String(scope || '')
+    .split(/[;,]/)
+    .map(function (part) { return String(part || '').trim().toLowerCase(); })
+    .filter(function (part) { return !!part; });
+}
+
+function requireRole_(account, roles) {
+  var role = normalizeRole_(account.role);
+  if (roles.indexOf(role) === -1) {
+    throwAppError_('FORBIDDEN', 'У вас нет доступа к этому разделу.');
+  }
+  return role;
+}
+
+function countAdmins_(accounts) {
+  var map = headerMap_(accounts);
+  var values = accounts.getDataRange().getValues();
+  var count = 0;
+
+  for (var i = 1; i < values.length; i++) {
+    if (!String(cell_(values[i], map, 'id') || '').trim()) continue;
+    if (normalizeRole_(cell_(values[i], map, 'role')) === 'admin') count++;
+  }
+  return count;
+}
+
+function accountPublic_(account) {
+  return {
+    id: String(account.id || ''),
+    name: String(account.name || ''),
+    className: String(account.className || ''),
+    track: String(account.track || 'standard'),
+    role: normalizeRole_(account.role),
+    scope: String(account.scope || '')
+  };
+}
+
+function adminListAccounts_(body) {
+  var caller = accountFromToken_(body.token);
+  requireRole_(caller, ['admin']);
+
+  var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
+  ensureHeaders_(accounts, ACCOUNT_HEADERS);
+  var map = headerMap_(accounts);
+  var values = accounts.getDataRange().getValues();
+  var out = [];
+
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    if (!String(cell_(row, map, 'id') || '').trim()) continue;
+
+    var acc = accountFromRow_(row, map, i + 1);
+    var item = accountPublic_(acc);
+    item.childKey = loginKey_(acc.name, acc.className);
+    item.createdAt = cell_(row, map, 'createdAt');
+    out.push(item);
+  }
+
+  var order = { admin: 0, teacher: 1, parent: 2, student: 3 };
+  out.sort(function (a, b) {
+    if (a.role !== b.role) return (order[a.role] || 9) - (order[b.role] || 9);
+    return String(a.className).localeCompare(String(b.className), 'ru') ||
+      String(a.name).localeCompare(String(b.name), 'ru');
+  });
+
+  return success_({ accounts: out });
+}
+
+function adminCreateAccount_(body) {
+  var caller = accountFromToken_(body.token);
+  requireRole_(caller, ['admin']);
+
+  var name = normalizeName_(body.name);
+  var className = String(body.className || '').trim();
+  var password = String(body.password || '');
+  var role = normalizeRoleStrict_(body.role);
+  var scope = sanitizeScope_(body.scope);
+
+  validateRegistration_(name, className, password);
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+
+  try {
+    var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
+    ensureHeaders_(accounts, ACCOUNT_HEADERS);
+
+    var key = loginKey_(name, className);
+    if (getAccountByLoginKey_(accounts, key)) {
+      throwAppError_('ACCOUNT_EXISTS', 'Аккаунт с таким именем и классом уже существует.');
+    }
+
+    var map = headerMap_(accounts);
+    var now = new Date();
+    var id = Utilities.getUuid();
+    var salt = randomSalt_();
+    var hash = hashPassword_(salt, password);
+
+    var row = [];
+    row[map['id'] - 1] = id;
+    row[map['name'] - 1] = name;
+    row[map['className'] - 1] = className;
+    row[map['track'] - 1] = 'standard';
+    row[map['loginKey'] - 1] = key;
+    row[map['salt'] - 1] = salt;
+    row[map['passwordHash'] - 1] = hash;
+    row[map['createdAt'] - 1] = now;
+    row[map['updatedAt'] - 1] = now;
+    row[map['role'] - 1] = role;
+    row[map['scope'] - 1] = scope;
+
+    accounts.appendRow(padRow_(row, accounts.getLastColumn()));
+
+    var account = {
+      id: id,
+      name: name,
+      className: className,
+      track: 'standard',
+      role: role,
+      scope: scope
+    };
+
+    return success_({ account: accountPublic_(account) });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function adminSetRole_(body) {
+  var caller = accountFromToken_(body.token);
+  requireRole_(caller, ['admin']);
+
+  var accountId = String(body.accountId || '').trim();
+  var role = normalizeRoleStrict_(body.role);
+  var scope = sanitizeScope_(body.scope);
+
+  var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
+  ensureHeaders_(accounts, ACCOUNT_HEADERS);
+
+  var account = getAccountById_(accounts, accountId);
+  if (!account) {
+    throwAppError_('NOT_FOUND', 'Аккаунт не найден.');
+  }
+
+  var oldRole = normalizeRole_(account.role);
+  if (oldRole === 'admin' && role !== 'admin' && countAdmins_(accounts) <= 1) {
+    throwAppError_('LAST_ADMIN', 'Нельзя снять роль администратора с последнего администратора.');
+  }
+
+  var map = headerMap_(accounts);
+  accounts.getRange(account._row, map['role']).setValue(role);
+  accounts.getRange(account._row, map['scope']).setValue(scope);
+  accounts.getRange(account._row, map['updatedAt']).setValue(new Date());
+
+  return success_({
+    account: accountPublic_({
+      id: account.id,
+      name: account.name,
+      className: account.className,
+      track: account.track,
+      role: role,
+      scope: scope
+    })
+  });
+}
+
+function adminResetPassword_(body) {
+  var caller = accountFromToken_(body.token);
+  requireRole_(caller, ['admin']);
+
+  var accountId = String(body.accountId || '').trim();
+  var pwd = String(body.newPassword || '');
+  if (pwd.length < 6) {
+    throwAppError_('BAD_REQUEST', 'Пароль должен быть не короче 6 символов.');
+  }
+
+  var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
+  ensureHeaders_(accounts, ACCOUNT_HEADERS);
+
+  var account = getAccountById_(accounts, accountId);
+  if (!account) {
+    throwAppError_('NOT_FOUND', 'Аккаунт не найден.');
+  }
+
+  var map = headerMap_(accounts);
+  var salt = randomSalt_();
+  accounts.getRange(account._row, map['salt']).setValue(salt);
+  accounts.getRange(account._row, map['passwordHash']).setValue(hashPassword_(salt, pwd));
+  accounts.getRange(account._row, map['updatedAt']).setValue(new Date());
+
+  return success_({ accountId: account.id });
+}
+
+/**
+ * Результаты для учителя, родителя или администратора.
+ * Учитель видит только классы из своего scope, родитель — только
+ * привязанных детей, администратор — все результаты.
+ */
+function viewResults_(body) {
+  var caller = accountFromToken_(body.token);
+  var role = requireRole_(caller, ['teacher', 'parent', 'admin']);
+
+  var classes = [];
+  var childKeys = [];
+
+  if (role === 'teacher') {
+    classes = splitScope_(caller.scope);
+  } else if (role === 'parent') {
+    childKeys = splitScope_(caller.scope);
+  }
+
+  if ((role === 'teacher' && !classes.length) || (role === 'parent' && !childKeys.length)) {
+    return success_({
+      students: [], results: [],
+      scope: { classes: classes, childKeys: childKeys }
+    });
+  }
+
+  var sheet = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), RESULTS_SHEET);
+  ensureHeaders_(sheet, RESULT_HEADERS);
+  var map = headerMap_(sheet);
+  var values = sheet.getDataRange().getValues();
+
+  var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
+  ensureHeaders_(accounts, ACCOUNT_HEADERS);
+  var accMap = headerMap_(accounts);
+  var accValues = accounts.getDataRange().getValues();
+  var accountById = {};
+  var accountByKey = {};
+
+  for (var a = 1; a < accValues.length; a++) {
+    var acc = accountFromRow_(accValues[a], accMap, a + 1);
+    if (!acc.id) continue;
+    accountById[acc.id] = acc;
+    accountByKey[loginKey_(acc.name, acc.className)] = acc;
+  }
+
+  var results = [];
+
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    var rowAccountId = String(cell_(row, map, 'accountId') || '').trim();
+    var studentName = String(cell_(row, map, 'studentName') || '').trim();
+    var className = String(cell_(row, map, 'className') || '').trim();
+    var rowKey = loginKey_(studentName, className);
+    var accForRow = accountById[rowAccountId] || accountByKey[rowKey] || null;
+
+    // Служебные аккаунты не являются учениками и в отчёты не попадают.
+    if (accForRow && normalizeRole_(accForRow.role) !== 'student') continue;
+
+    var allowed = false;
+    if (role === 'admin') {
+      allowed = true;
+    } else if (role === 'teacher') {
+      allowed = classes.indexOf(className.toLowerCase()) !== -1;
+    } else if (role === 'parent') {
+      allowed = childKeys.indexOf(rowKey) !== -1;
+    }
+    if (!allowed) continue;
+
+    var tsRaw = cell_(row, map, 'timestamp');
+    var ts = tsRaw instanceof Date ? tsRaw.toISOString() : String(tsRaw || '');
+    var tsMs = ts ? new Date(ts).getTime() : 0;
+
+    results.push({
+      accountId: rowAccountId || (accForRow ? accForRow.id : ''),
+      studentName: studentName,
+      className: className,
+      lesson: String(cell_(row, map, 'lesson') || ''),
+      variant: String(cell_(row, map, 'variant') || ''),
+      score: toNumber_(cell_(row, map, 'score')),
+      maxScore: toNumber_(cell_(row, map, 'maxScore')),
+      grade: toNumber_(cell_(row, map, 'grade')),
+      workType: String(cell_(row, map, 'workType') || ''),
+      timestamp: ts,
+      _tsMs: isFinite(tsMs) ? tsMs : 0
+    });
+  }
+
+  results.sort(function (a, b) { return b._tsMs - a._tsMs; });
+  results = results.slice(0, 2000);
+
+  var byStudent = {};
+  results.forEach(function (r) {
+    var key = r.accountId || loginKey_(r.studentName, r.className);
+    if (!byStudent[key]) {
+      byStudent[key] = {
+        key: key,
+        accountId: r.accountId,
+        name: r.studentName,
+        className: r.className,
+        results: [],
+        bestByLesson: {}
+      };
+    }
+
+    var s = byStudent[key];
+    s.results.push(r);
+
+    var lessonKey = r.lesson || 'Без урока';
+    var pct = r.maxScore ? Math.round(r.score / r.maxScore * 100) : 0;
+    var prev = s.bestByLesson[lessonKey];
+    if (!prev || pct > prev.pct || (pct === prev.pct && r._tsMs > prev._tsMs)) {
+      s.bestByLesson[lessonKey] = {
+        lesson: lessonKey,
+        score: r.score,
+        maxScore: r.maxScore,
+        pct: pct,
+        grade: r.grade,
+        timestamp: r.timestamp,
+        _tsMs: r._tsMs
+      };
+    }
+  });
+
+  var students = Object.keys(byStudent).map(function (key) {
+    var s = byStudent[key];
+    var best = Object.keys(s.bestByLesson).map(function (k) {
+      var b = s.bestByLesson[k];
+      delete b._tsMs;
+      return b;
+    });
+    var sum = 0;
+    best.forEach(function (b) { sum += b.pct; });
+
+    var out = {
+      key: s.key,
+      accountId: s.accountId,
+      name: s.name,
+      className: s.className,
+      avgPct: best.length ? Math.round(sum / best.length) : 0,
+      lessonsCount: best.length,
+      resultsCount: s.results.length,
+      lastActive: s.results.length ? s.results[0].timestamp : '',
+      lessons: best,
+      results: s.results.slice(0, 30)
+    };
+    return out;
+  });
+
+  students.sort(function (a, b) {
+    return String(a.className).localeCompare(String(b.className), 'ru') ||
+      String(a.name).localeCompare(String(b.name), 'ru');
+  });
+
+  results.forEach(function (r) { delete r._tsMs; });
+
+  return success_({
+    students: students,
+    results: results,
+    scope: { classes: classes, childKeys: childKeys }
+  });
 }
 
 /**
@@ -473,6 +933,8 @@ function accountFromRow_(row, map, rowNumber) {
     track: String(cell_(row, map, 'track') || 'standard'),
     salt: String(cell_(row, map, 'salt') || ''),
     passwordHash: String(cell_(row, map, 'passwordHash') || ''),
+    role: normalizeRole_(cell_(row, map, 'role')),
+    scope: sanitizeScope_(cell_(row, map, 'scope')),
     _row: rowNumber
   };
 }
