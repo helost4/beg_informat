@@ -38,12 +38,18 @@ var ACCOUNT_HEADERS = [
 
 var VALID_ROLES = ['student', 'teacher', 'parent', 'admin'];
 
+// Метка версии видна при открытии /exec в браузере — так легко проверить,
+// что на сайте работает именно эта версия скрипта.
+var SCRIPT_VERSION = '2026-11-17-role-login-v2';
+
 /* ============================================================
    ТОЧКИ ВХОДА
    ============================================================ */
 
 function doGet() {
-  return ContentService.createTextOutput('Скрипт работает. Используйте POST.');
+  return ContentService.createTextOutput(
+    'Скрипт работает. Версия: ' + SCRIPT_VERSION + '. Используйте POST.'
+  );
 }
 
 function doPost(e) {
@@ -1272,6 +1278,34 @@ function diagnoseSetup_() {
     });
   } catch (e) {
     p('DIAGNOSTIC_ERROR', (e && e.stack) ? e.stack : String(e));
+  }
+
+  var text = lines.join('\n');
+  Logger.log(text);
+  return text;
+}
+
+/**
+ * Показывает точные имена, классы и роли всех аккаунтов из таблицы.
+ * Запустите diagnoseAccounts() в редакторе Apps Script, если вход по роли
+ * не находит аккаунт: по выводу сразу видно, какое имя вводить в форме.
+ */
+function diagnoseAccounts() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var accounts = getOrCreateSheet_(ss, ACCOUNTS_SHEET);
+  ensureHeaders_(accounts, ACCOUNT_HEADERS);
+
+  var map = headerMap_(accounts);
+  var values = accounts.getDataRange().getValues();
+  var lines = ['Версия скрипта: ' + SCRIPT_VERSION];
+
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    lines.push(
+      (i + 1) + '. имя=«' + cell_(row, map, 'name') + '» | класс=«' +
+      cell_(row, map, 'className') + '» | роль=' +
+      normalizeRole_(cell_(row, map, 'role'))
+    );
   }
 
   var text = lines.join('\n');
