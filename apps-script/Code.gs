@@ -1052,20 +1052,34 @@ function getOrCreateSheet_(ss, name) {
 
 function ensureHeaders_(sheet, required) {
   var lastCol = sheet.getLastColumn();
-  if (!lastCol) {
-    sheet.getRange(1, 1, 1, required.length).setValues([required]);
-    sheet.setFrozenRows(1);
-    return;
+  var headers = [];
+  if (lastCol) {
+    headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0]
+      .map(function (h) { return String(h || '').trim(); });
   }
 
-  var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0]
-    .map(function (h) { return String(h || '').trim(); });
-
   var missing = required.filter(function (h) { return headers.indexOf(h) === -1; });
-  if (!missing.length) return;
+  if (missing.length) {
+    sheet.getRange(1, lastCol ? lastCol + 1 : 1, 1, missing.length).setValues([missing]);
 
-  sheet.getRange(1, lastCol + 1, 1, missing.length).setValues([missing]);
-  sheet.setFrozenRows(1);
+    // Убедимся, что запись действительно дошла до таблицы.
+    var check = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
+      .map(function (h) { return String(h || '').trim(); });
+    var stillMissing = required.filter(function (h) { return check.indexOf(h) === -1; });
+    if (stillMissing.length) {
+      throw new Error('Не удалось записать заголовки [' + stillMissing.join(', ') +
+        '] на лист "' + sheet.getName() +
+        '". Проверьте, что у вас есть права «Редактор» на эту таблицу.');
+    }
+  }
+
+  // Закрепление строки — только косметика. Если оно запрещено, не срываем setup().
+  try {
+    sheet.setFrozenRows(1);
+  } catch (e) {
+    Logger.log('Предупреждение: не удалось закрепить строку на листе "' + sheet.getName() +
+      '": ' + (e && e.message ? e.message : String(e)) + '. На данные это не влияет.');
+  }
 }
 
 function headerMap_(sheet) {
@@ -1140,4 +1154,62 @@ function json_(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ============================================================
+   ДИАГНОСТИКА (только чтение, ничего не меняет в таблице)
+
+   Запустите diagnoseSetup_() в редакторе Apps Script и скопируйте
+   вывод из View -> Logs. Он покажет, к какой таблице реально
+   привязан скрипт, под какой учётной записью он выполняется
+   и есть ли защита листов/диапазонов.
+   ============================================================ */
+function diagnoseSetup_() {
+  var lines = [];
+  function p(k, v) { lines.push(k + ': ' + v); }
+
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    p('spreadsheet', ss ? ss.getName() + ' | id=' + ss.getId() + ' | ' + ss.getUrl() : 'NULL');
+    p('effectiveUser', Session.getEffectiveUser().getEmail());
+    try { p('activeUser', Session.getActiveUser().getEmail() || '(empty)'); }
+    catch (e) { p('activeUserError', e.message); }
+    try { p('owner', DriveApp.getFileById(ss.getId()).getOwner().getEmail()); }
+    catch (e) { p('ownerError', e.message); }
+
+    p('sheets', ss ? ss.getSheets().map(function (s) { return s.getName(); }).join(' | ') : '-');
+
+    ['Лист1', 'Аккаунты'].forEach(function (name) {
+      var sh = ss && ss.getSheetByName(name);
+      if (!sh) { p(name, 'MISSING'); return; }
+
+      p(name + '.frozenRows', sh.getFrozenRows());
+      p(name + '.lastRow', sh.getLastRow());
+      p(name + '.lastCol', sh.getLastColumn());
+      p(name + '.headers', JSON.stringify(
+        sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getValues()[0]
+      ));
+
+      var sheetProt = sh.getProtections(SpreadsheetApp.ProtectionType.SHEET);
+      p(name + '.sheetProtection', sheetProt.length
+        ? sheetProt.map(function (pr) {
+            return pr.getEditors().map(function (u) { return u.getEmail(); }).join(',') || '(no editors)';
+          }).join(' | ')
+        : 'none');
+
+      var rangeProt = sh.getProtections(SpreadsheetApp.ProtectionType.RANGE);
+      p(name + '.rangeProtections', rangeProt.length
+        ? rangeProt.map(function (pr) {
+            return pr.getRange().getA1Notation() + ' [' +
+              pr.getEditors().map(function (u) { return u.getEmail(); }).join(',') + ']';
+          }).join(' | ')
+        : 'none');
+    });
+  } catch (e) {
+    p('DIAGNOSTIC_ERROR', (e && e.stack) ? e.stack : String(e));
+  }
+
+  var text = lines.join('\n');
+  Logger.log(text);
+  return text;
 }
