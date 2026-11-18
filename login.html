@@ -58,10 +58,18 @@
           <option value="Администратор">Администратор</option>
         </optgroup>
       </select>
+
+      <label for="loginLetter">Буква подкласса</label>
+      <select id="loginLetter">
+        <option value="">без буквы</option>
+        <option value="а">а</option>
+        <option value="б">б</option>
+        <option value="в">в</option>
+        <option value="г">г</option>
+      </select>
       <p class="login-hint">
-        Учитель, родитель и администратор выбирают свою роль в списке «Класс»
-        и входят с именем и паролем аккаунта, который создал администратор.
-        Выбирать эти роли при регистрации нельзя.
+        Например: класс «5 класс» + буква «а» → аккаунт 5а. Учитель, родитель
+        и администратор выбирают роль в списке «Класс» и букву не указывают.
       </p>
 
       <label for="loginPassword">Пароль</label>
@@ -88,6 +96,15 @@
         <option value="9 класс">9 класс</option>
         <option value="10 класс">10 класс</option>
         <option value="11 класс">11 класс</option>
+      </select>
+
+      <label for="regLetter">Буква подкласса</label>
+      <select id="regLetter">
+        <option value="">без буквы</option>
+        <option value="а">а</option>
+        <option value="б">б</option>
+        <option value="в">в</option>
+        <option value="г">г</option>
       </select>
 
       <label for="regPassword">Пароль</label>
@@ -123,6 +140,43 @@
   var registerForm = document.getElementById('registerForm');
   var tabs = document.querySelectorAll('[data-auth-tab]');
 
+  var SERVICE_CLASSES = ['Учитель', 'Родитель', 'Администратор'];
+
+  function composeClass_(baseId, letterId) {
+    var base = document.getElementById(baseId).value;
+    if (!base) return '';
+    if (SERVICE_CLASSES.indexOf(base) !== -1) return base;
+    return Account.composeClassName(base, document.getElementById(letterId).value);
+  }
+
+  function fillLegacyClass_(legacyClass) {
+    if (!legacyClass) return;
+    var roles = {
+      'Администрация': 'Администратор',
+      'Учителя': 'Учитель',
+      'Родители': 'Родитель'
+    };
+    var loginClass = roles[legacyClass] || legacyClass;
+    var base = Account.baseClass(legacyClass);
+    var letter = Account.subclassOf(legacyClass);
+
+    if (SERVICE_CLASSES.indexOf(loginClass) !== -1) {
+      document.getElementById('loginClass').value = loginClass;
+      return;
+    }
+
+    var loginBase = document.getElementById('loginClass');
+    var regBase = document.getElementById('regClass');
+    if (Array.prototype.some.call(loginBase.options, function (o) { return o.value === base; })) {
+      loginBase.value = base;
+      document.getElementById('loginLetter').value = letter;
+    }
+    if (Array.prototype.some.call(regBase.options, function (o) { return o.value === base; })) {
+      regBase.value = base;
+      document.getElementById('regLetter').value = letter;
+    }
+  }
+
   /* Если уже вошли — сразу на главную страницу своей роли. */
   if (typeof Account !== 'undefined' && Account.isLoggedIn()) {
     window.location.href = Account.homeUrl();
@@ -140,18 +194,8 @@
     noteEl.classList.add('show');
 
     document.getElementById('regName').value = legacy.name;
-    if (legacy.class) document.getElementById('regClass').value = legacy.class;
-
     document.getElementById('loginName').value = legacy.name;
-    if (legacy.class) {
-      var legacyRoles = {
-        'Администрация': 'Администратор',
-        'Учителя': 'Учитель',
-        'Родители': 'Родитель'
-      };
-      document.getElementById('loginClass').value =
-        legacyRoles[legacy.class] || legacy.class;
-    }
+    fillLegacyClass_(legacy.class);
 
     switchTab('register');
   }
@@ -246,7 +290,7 @@
 
     var btn = document.getElementById('loginSubmit');
     var name = document.getElementById('loginName').value.trim().replace(/\s+/g, ' ');
-    var className = document.getElementById('loginClass').value;
+    var className = composeClass_('loginClass', 'loginLetter');
     var password = document.getElementById('loginPassword').value;
 
     if (name.length < 3) {
@@ -281,7 +325,7 @@
 
     var btn = document.getElementById('registerSubmit');
     var name = document.getElementById('regName').value.trim().replace(/\s+/g, ' ');
-    var className = document.getElementById('regClass').value;
+    var className = composeClass_('regClass', 'regLetter');
     var password = document.getElementById('regPassword').value;
     var password2 = document.getElementById('regPassword2').value;
 

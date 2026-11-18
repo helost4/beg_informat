@@ -51,6 +51,16 @@
             </optgroup>
           </select>
         </div>
+        <div>
+          <label for="newLetter">Буква подкласса</label>
+          <select id="newLetter">
+            <option value="">без буквы</option>
+            <option value="а">а</option>
+            <option value="б">б</option>
+            <option value="в">в</option>
+            <option value="г">г</option>
+          </select>
+        </div>
       </div>
       <div class="form-row">
         <div>
@@ -125,6 +135,28 @@
     admin: 'Не заполняется'
   };
 
+  var SERVICE_CLASSES = ['Учитель', 'Учителя', 'Родитель', 'Родители', 'Администратор', 'Администрация'];
+  var LETTERS = ['а', 'б', 'в', 'г'];
+
+  function composeClass_(baseId, letterId) {
+    var base = document.getElementById(baseId).value;
+    if (!base) return '';
+    if (SERVICE_CLASSES.indexOf(base) !== -1) return base;
+    return Account.composeClassName(base, document.getElementById(letterId).value);
+  }
+
+  function classSelectFor_(account) {
+    if (account.role !== 'student') return '';
+    var base = Account.baseClass(account.className);
+    var current = Account.subclassOf(account.className);
+    var options = ['<option value="">без буквы</option>'].concat(LETTERS.map(function (letter) {
+      return '<option value="' + letter + '"' + (letter === current ? ' selected' : '') + '>' +
+        letter + '</option>';
+    }));
+    return '<select class="class-select" data-id="' + esc(account.id) + '" data-base="' +
+      esc(base) + '" title="Подкласс">' + options.join('') + '</select>';
+  }
+
   document.getElementById('dashSub').textContent =
     '👤 ' + student.name + ' · ' + Account.roleLabel(student.role);
 
@@ -193,7 +225,8 @@
 
     document.getElementById('accountsBody').innerHTML = accounts.map(function (a) {
       return '<tr data-id="' + esc(a.id) + '">' +
-        '<td><b>' + esc(a.name) + '</b><small>' + esc(a.className) + '</small></td>' +
+        '<td><b>' + esc(a.name) + '</b><small>' + esc(a.className) + '</small>' +
+          classSelectFor_(a) + '</td>' +
         '<td><select class="role-select" data-id="' + esc(a.id) + '">' + roleOptions(a.role) + '</select></td>' +
         '<td><input class="scope-input" data-id="' + esc(a.id) + '" value="' + esc(a.scope) +
           '" placeholder="' + esc(SCOPE_PLACEHOLDERS[a.role] || '') + '"></td>' +
@@ -243,7 +276,7 @@
     var btn = document.getElementById('createBtn');
     var data = {
       name: document.getElementById('newName').value.trim().replace(/\s+/g, ' '),
-      className: document.getElementById('newClass').value,
+      className: composeClass_('newClass', 'newLetter'),
       role: document.getElementById('newRole').value,
       scope: document.getElementById('newScope').value.trim(),
       password: document.getElementById('newPassword').value
@@ -269,10 +302,29 @@
   });
 
   document.getElementById('accountsBody').addEventListener('change', function (e) {
-    if (!e.target.classList.contains('role-select')) return;
-    var role = e.target.value;
-    var input = e.target.closest('tr').querySelector('.scope-input');
-    if (input) input.placeholder = SCOPE_PLACEHOLDERS[role] || '';
+    if (e.target.classList.contains('role-select')) {
+      var role = e.target.value;
+      var input = e.target.closest('tr').querySelector('.scope-input');
+      if (input) input.placeholder = SCOPE_PLACEHOLDERS[role] || '';
+      return;
+    }
+
+    if (e.target.classList.contains('class-select')) {
+      var select = e.target;
+      var base = select.dataset.base;
+      var className = Account.composeClassName(base, select.value);
+      select.disabled = true;
+      setStatus('Меняем подкласс…');
+      Account.setStudentClass({ accountId: select.dataset.id, className: className })
+        .then(function () {
+          setStatus('Подкласс обновлён. Ключ ребёнка для родителя тоже обновлён.', 'ok');
+          return reload();
+        })
+        .catch(function (err) {
+          setStatus('Ошибка: ' + (err && err.message ? err.message : err), 'error');
+        })
+        .then(function () { select.disabled = false; });
+    }
   });
 
   document.getElementById('accountsBody').addEventListener('click', function (e) {

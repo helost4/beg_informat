@@ -201,7 +201,7 @@
   function authenticate(action, data) {
     return post(action, {
       name: data.name,
-      className: data.className,
+      className: normalizeClassName(data.className),
       track: data.track,
       password: data.password
     }).then(function (res) {
@@ -411,7 +411,45 @@
     return post('adminResetPassword', Object.assign({ token: token() }, data || {}));
   }
 
+  /** Смена класса/подкласса ученика — доступна учителю и администратору. */
+  function setStudentClass(data) {
+    requireAuth();
+    return post('setStudentClass', Object.assign({ token: token() }, data || {}))
+      .then(function (res) { return res.account; });
+  }
+
   /* ---------------- ПОМОЩНИКИ ДЛЯ ИНТЕРФЕЙСА ---------------- */
+
+  /** «5 а», «5-а», «5А» → «5а»; «5 класс» остаётся как есть. */
+  function normalizeClassName(value) {
+    var text = String(value || '').trim().replace(/\s+/g, ' ');
+    var withLetter = /^(\d{1,2})\s*(?:класс)?\s*-?\s*([а-яa-z])\s*$/i.exec(text);
+    if (withLetter) return withLetter[1] + withLetter[2].toLowerCase();
+    var base = /^(\d{1,2})\s*класс$/i.exec(text);
+    if (base) return base[1] + ' класс';
+    return text;
+  }
+
+  /** «5а» → «5 класс». Используется для каталога уроков и прав доступа. */
+  function baseClass(value) {
+    var text = normalizeClassName(value);
+    var m = /^(\d{1,2})(?: класс|[а-яa-z])$/i.exec(text);
+    return m ? m[1] + ' класс' : text;
+  }
+
+  /** Буква подкласса или пустая строка. */
+  function subclassOf(value) {
+    var text = normalizeClassName(value);
+    var m = /^(\d{1,2})([а-яa-z])$/i.exec(text);
+    return m ? m[2].toLowerCase() : '';
+  }
+
+  /** Собрать имя класса из базового класса и буквы. */
+  function composeClassName(base, letter) {
+    var normalizedBase = baseClass(base);
+    var suffix = String(letter || '').trim().toLowerCase();
+    return suffix ? normalizedBase.replace(/ класс$/, '') + suffix : normalizedBase;
+  }
 
   function percent(score, maxScore) {
     var s = Number(score) || 0;
@@ -504,6 +542,11 @@
     adminCreateAccount: adminCreateAccount,
     adminSetRole: adminSetRole,
     adminResetPassword: adminResetPassword,
+    setStudentClass: setStudentClass,
+    normalizeClassName: normalizeClassName,
+    baseClass: baseClass,
+    subclassOf: subclassOf,
+    composeClassName: composeClassName,
     queueResult: queueResult,
     flushQueue: flushQueue,
     pendingCount: pendingCount,

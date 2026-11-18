@@ -931,7 +931,9 @@ print("Привет!")</pre>
     if (!window.Account) return;
     var student = Account.currentStudent();
     if (student && student.class) {
-      LESSON_DATA.className = student.class;
+      // Для проверки доступа нужен базовый класс (5а → 5 класс),
+      // а в заголовке показываем точный подкласс ученика.
+      LESSON_DATA.className = Account.baseClass(student.class);
       LESSON_DATA.subtitle = student.class + ' · Astra Linux · Графическая среда IDLE';
     }
   })();

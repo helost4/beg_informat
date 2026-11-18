@@ -40,7 +40,7 @@ var VALID_ROLES = ['student', 'teacher', 'parent', 'admin'];
 
 // Метка версии видна при открытии /exec в браузере — так легко проверить,
 // что на сайте работает именно эта версия скрипта.
-var SCRIPT_VERSION = '2026-11-17-role-login-v2';
+var SCRIPT_VERSION = '2026-11-18-subclasses-v1';
 
 /* ============================================================
    ТОЧКИ ВХОДА
@@ -71,6 +71,7 @@ function doPost(e) {
       case 'adminCreateAccount': return json_(adminCreateAccount_(body));
       case 'adminSetRole':       return json_(adminSetRole_(body));
       case 'adminResetPassword': return json_(adminResetPassword_(body));
+      case 'setStudentClass':    return json_(setStudentClass_(body));
       default:
         throwAppError_('UNKNOWN_ACTION', 'Неизвестное действие: ' + action);
     }
@@ -226,7 +227,7 @@ function makeParent(name, className, childKeys) {
 
 function register_(body) {
   var name = normalizeName_(body.name);
-  var className = String(body.className || '').trim();
+  var className = normalizeClassName_(body.className);
   var track = normalizeTrack_(body.track);
   var password = String(body.password || '');
 
@@ -287,7 +288,7 @@ function register_(body) {
 
 function login_(body) {
   var name = normalizeName_(body.name);
-  var className = String(body.className || '').trim();
+  var className = normalizeClassName_(body.className);
   var password = String(body.password || '');
   var requestedTrack = body.track ? normalizeTrack_(body.track) : '';
 
@@ -403,7 +404,6 @@ function myResults_(body) {
 
   var map = headerMap_(sheet);
   var values = sheet.getDataRange().getValues();
-  var ownKey = loginKey_(account.name, account.className);
   var results = [];
 
   for (var i = 1; i < values.length; i++) {
@@ -415,8 +415,9 @@ function myResults_(body) {
       belongs = rowAccountId === account.id;
     } else {
       // Старые строки без accountId подтягиваем по имени и классу.
-      var rowKey = loginKey_(cell_(row, map, 'studentName'), cell_(row, map, 'className'));
-      belongs = rowKey === ownKey;
+      // После перевода ученика на «5а» строки «5 класс» тоже остаются его историей.
+      belongs = normalizeName_(cell_(row, map, 'studentName')) === account.name &&
+        classEquivalent_(cell_(row, map, 'className'), account.className);
     }
 
     if (!belongs) continue;
@@ -549,7 +550,7 @@ function adminCreateAccount_(body) {
   requireRole_(caller, ['admin']);
 
   var name = normalizeName_(body.name);
-  var className = String(body.className || '').trim();
+  var className = normalizeClassName_(body.className);
   var password = String(body.password || '');
   var role = normalizeRoleStrict_(body.role);
   var scope = sanitizeScope_(body.scope);
@@ -670,6 +671,94 @@ function adminResetPassword_(body) {
 }
 
 /**
+ * Меняет класс/подкласс ученика. Доступно администратору и учителю.
+ * Учитель может трогать только учеников из своего scope.
+ */
+function setStudentClass_(body) {
+  var caller = accountFromToken_(body.token);
+  requireRole_(caller, ['teacher', 'admin']);
+
+  var accountId = String(body.accountId || '').trim();
+  var className = normalizeClassName_(body.className);
+
+  if (!accountId) {
+    throwAppError_('BAD_REQUEST', 'Не выбран ученик.');
+  }
+  if (!isValidClassName_(className)) {
+    throwAppError_('BAD_REQUEST', 'Некорректный класс. Используйте например «5 класс» или «5а».');
+  }
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+
+  try {
+    var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
+    ensureHeaders_(accounts, ACCOUNT_HEADERS);
+
+    var account = getAccountById_(accounts, accountId);
+    if (!account) {
+      throwAppError_('NOT_FOUND', 'Аккаунт не найден.');
+    }
+    if (normalizeRole_(account.role) !== 'student') {
+      throwAppError_('FORBIDDEN', 'Подкласс можно менять только у учеников.');
+    }
+
+    if (normalizeRole_(caller.role) === 'teacher') {
+      var classes = splitScope_(caller.scope);
+      if (!classListMatchesScope_(classes, account.className) ||
+          !classListMatchesScope_(classes, className)) {
+        throwAppError_('FORBIDDEN', 'Этот ученик или класс вне вашей области доступа.');
+      }
+    }
+
+    var oldKey = loginKey_(account.name, account.className);
+    var newKey = loginKey_(account.name, className);
+    var existing = newKey === oldKey ? null : getAccountByLoginKey_(accounts, newKey);
+    if (existing && existing.id !== account.id) {
+      throwAppError_('ACCOUNT_EXISTS', 'Аккаунт с таким именем и классом уже существует.');
+    }
+
+    var map = headerMap_(accounts);
+    accounts.getRange(account._row, map['className']).setValue(className);
+    accounts.getRange(account._row, map['loginKey']).setValue(newKey);
+    accounts.getRange(account._row, map['updatedAt']).setValue(new Date());
+
+    if (oldKey !== newKey) {
+      updateParentScopesForClassChange_(accounts, map, oldKey, newKey);
+    }
+
+    account.className = className;
+    return success_({ account: accountPublic_(account) });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/** После смены класса обновляем ключи ребёнка в scope родителей. */
+function updateParentScopesForClassChange_(sheet, map, oldKey, newKey) {
+  var values = sheet.getDataRange().getValues();
+  var now = new Date();
+
+  for (var i = 1; i < values.length; i++) {
+    var acc = accountFromRow_(values[i], map, i + 1);
+    if (normalizeRole_(acc.role) !== 'parent' || !acc.scope) continue;
+
+    var keys = splitScope_(acc.scope);
+    var changed = false;
+    for (var j = 0; j < keys.length; j++) {
+      if (keys[j] === oldKey) {
+        keys[j] = newKey;
+        changed = true;
+      }
+    }
+    if (!changed) continue;
+
+    sheet.getRange(acc._row, map['scope']).setValue(keys.join(';'));
+    sheet.getRange(acc._row, map['updatedAt']).setValue(now);
+  }
+}
+
+/**
  * Результаты для учителя, родителя или администратора.
  * Учитель видит только классы из своего scope, родитель — только
  * привязанных детей, администратор — все результаты.
@@ -726,13 +815,19 @@ function viewResults_(body) {
     // Служебные аккаунты не являются учениками и в отчёты не попадают.
     if (accForRow && normalizeRole_(accForRow.role) !== 'student') continue;
 
+    // Для строк с привязанным аккаунтом используем текущий класс ученика:
+    // после перехода с «5 класс» на «5а» вся история остаётся в одном подклассе.
+    var effectiveName = accForRow ? accForRow.name : studentName;
+    var effectiveClass = accForRow ? accForRow.className : className;
+
     var allowed = false;
     if (role === 'admin') {
       allowed = true;
     } else if (role === 'teacher') {
-      allowed = classes.indexOf(className.toLowerCase()) !== -1;
+      allowed = classListMatchesScope_(classes, effectiveClass);
     } else if (role === 'parent') {
-      allowed = childKeys.indexOf(rowKey) !== -1;
+      allowed = parentScopeMatches_(childKeys, effectiveName, effectiveClass) ||
+        childKeys.indexOf(rowKey) !== -1;
     }
     if (!allowed) continue;
 
@@ -742,8 +837,8 @@ function viewResults_(body) {
 
     results.push({
       accountId: rowAccountId || (accForRow ? accForRow.id : ''),
-      studentName: studentName,
-      className: className,
+      studentName: effectiveName,
+      className: effectiveClass,
       lesson: String(cell_(row, map, 'lesson') || ''),
       variant: String(cell_(row, map, 'variant') || ''),
       score: toNumber_(cell_(row, map, 'score')),
@@ -1080,8 +1175,78 @@ function normalizeTrack_(value) {
   return track === 'ege' ? 'ege' : 'standard';
 }
 
+/**
+ * Приводит название класса к каноническому виду.
+ * «5 а», «5-а», «5А» → «5а»; «5 класс» остаётся «5 класс».
+ * Служебные метки («Учитель», «Администрация») не трогаем.
+ */
+function normalizeClassName_(value) {
+  var text = String(value || '').trim().replace(/\s+/g, ' ');
+  var withLetter = /^(\d{1,2})\s*(?:класс)?\s*[-]?\s*([а-яa-z])\s*$/i.exec(text);
+  if (withLetter) {
+    return withLetter[1] + withLetter[2].toLowerCase();
+  }
+  var base = /^(\d{1,2})\s*класс$/i.exec(text);
+  if (base) {
+    return base[1] + ' класс';
+  }
+  return text;
+}
+
+/** «5а» → «5 класс». Базовый класс используется для каталога и scope. */
+function baseClass_(className) {
+  var text = normalizeClassName_(className);
+  var m = /^(\d{1,2})(?: класс|[а-яa-z])$/i.exec(text);
+  return m ? m[1] + ' класс' : text;
+}
+
+function isValidClassName_(className) {
+  return /^\d{1,2}(?: класс|[а-яa-z])$/i.test(normalizeClassName_(className));
+}
+
+/**
+ * Элемент scope считает класс подходящим, если он совпадает точно
+ * («5а») либо является базовым для него («5 класс» включает 5а, 5б…).
+ */
+function classMatchesScope_(className, scopePart) {
+  var exact = normalizeClassName_(className).toLowerCase() ===
+    normalizeClassName_(scopePart).toLowerCase();
+  var covered = baseClass_(className).toLowerCase() ===
+    normalizeClassName_(scopePart).toLowerCase();
+  return exact || covered;
+}
+
+function classListMatchesScope_(classes, className) {
+  for (var i = 0; i < classes.length; i++) {
+    if (classMatchesScope_(className, classes[i])) return true;
+  }
+  return false;
+}
+
+/** Два класса считаются одним ученическим потоком (для старых строк без accountId). */
+function classEquivalent_(left, right) {
+  return normalizeClassName_(left).toLowerCase() === normalizeClassName_(right).toLowerCase() ||
+    baseClass_(left).toLowerCase() === baseClass_(right).toLowerCase();
+}
+
+/** Ключ ребёнка в scope родителя («имя|класс») с учётом смены подкласса. */
+function parentScopeMatches_(childKeys, name, className) {
+  var person = normalizeName_(name).toLowerCase();
+
+  for (var i = 0; i < childKeys.length; i++) {
+    var key = String(childKeys[i] || '');
+    var bar = key.indexOf('|');
+    if (bar === -1) continue;
+    if (normalizeName_(key.slice(0, bar)).toLowerCase() === person &&
+        classEquivalent_(key.slice(bar + 1), className)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function loginKey_(name, className) {
-  return (normalizeName_(name) + '|' + String(className || '').trim()).toLowerCase();
+  return (normalizeName_(name) + '|' + normalizeClassName_(className)).toLowerCase();
 }
 
 function validateRegistration_(name, className, password) {

@@ -10,8 +10,8 @@
 | `import.sql` | Импорт CSV-выгрузок листов «Аккаунты» и «Лист1». |
 | `functions/api/index.ts` | Точка входа Edge Function (CLI ожидает `index.ts`). |
 | `functions/api/index.js` | Логика `/functions/v1/api` — drop-in замена `/exec`. |
-| `functions/api/test.mjs` | 43 проверки контракта API на моке Supabase REST. |
-| `tests/clientid-test.js` | 7 проверок отправки `clientId` и офлайн-очереди. |
+| `functions/api/test.mjs` | 54 проверки контракта API на моке Supabase REST. |
+| `tests/clientid-test.js` | 15 проверок `clientId`, офлайн-очереди и подклассов. |
 | `../shared/account.js` | Клиент теперь всегда шлёт `clientId` (идемпотентность). |
 
 **Важно:** dual-write/тень (шаг 4 плана) ещё не реализован. Сейчас Edge Function пишет только в Supabase. Переключать трафик следует после импорта и сверки.
@@ -19,7 +19,8 @@
 ## Схема данных
 
 - `users.id` — прежний UUID из Apps Script. Соли и хеши паролей переносятся без изменений, поэтому старые пароли работают.
-- `users.login_key` — уникальный ключ `имя|класс` в нижнем регистре.
+- `users.login_key` — уникальный ключ `имя|класс` в нижнем регистре; при смене подкласса пересчитывается;
+- `users.class_name` — базовый (`5 класс`) или подкласс (`5а`, `5б`).
 - `attempts.client_id` — ключ идемпотентности из `_id`/`clientId` клиента. Повторная отправка после потери ответа не создаёт дубль.
 - `attempts.legacy_row` — номер строки CSV для сверки со старым листом.
 - `progress` — материализованное состояние урока; сейчас клиент по-прежнему хранит черновик в `localStorage`.
@@ -83,6 +84,21 @@ curl -X POST 'https://<PROJECT_REF>.supabase.co/functions/v1/api' \
 
 В ответе должен быть тот же формат, что у Apps Script: `{ok, result, token, account}` или `{ok:false, result:'error', error, message}`.
 
+### Подклассы
+
+Логика полностью совпадает с Apps Script (версия `2026-11-18-subclasses-v1`):
+
+```
+setStudentClass  { token, accountId, className } → { ok, result, account }
+```
+
+- доступно `teacher` и `admin`; учитель ограничен своим `scope`, где `5 класс` включает `5а`, `5б`, …;
+- `className` нормализуется (`5 а` / `5-а` / `5А` → `5а`), некорректные значения — `BAD_REQUEST`, занятые — `ACCOUNT_EXISTS`;
+- обновляются `login_key` ученика и ключи детей в `scope` родителей;
+- каталог уроков и экзаменов работает по базовому классу: `5а` видит материалы `5 класс`;
+- старые строки без `user_id` сопоставляются по имени и базовому классу, поэтому история сохраняется;
+- ответы `viewResults` для привязанных строк показывают текущий класс ученика.
+
 ## 5. Переключение клиента
 
 В `shared/account.js` уже есть переопределение URL:
@@ -98,10 +114,10 @@ window.ACCOUNT_API_URL = 'https://<PROJECT_REF>.supabase.co/functions/v1/api';
 ## 6. Тесты
 
 ```bash
-node supabase/functions/api/test.mjs
-node supabase/tests/clientid-test.js
-node /tmp/opencode/backend-test.js      # 33 теста Apps Script (регрессия)
-node /tmp/opencode/lessons-catalog-test.js
+node supabase/functions/api/test.mjs           # 54 проверки
+node supabase/tests/clientid-test.js           # 15 проверок
+node /tmp/opencode/backend-test.js             # 45 тестов Apps Script (регрессия)
+node /tmp/opencode/lessons-catalog-test.js     # 26 тестов каталога
 ```
 
 ## Порядок включения (рекомендуемый)

@@ -54,6 +54,19 @@ const Account = win.Account;
   ok('из очереди clientId не потерян', sent[sent.length - 1].result.clientId === queue[0].clientId);
   ok('очередь пуста', Account.pendingCount() === 0);
 
+  await Account.setStudentClass({ accountId: 'u2', className: '5а' });
+  const classReq = sent[sent.length - 1];
+  ok('setStudentClass отправляет действие', classReq.action === 'setStudentClass');
+  ok('setStudentClass отправляет токен', classReq.token === 'tok');
+  ok('setStudentClass отправляет accountId', classReq.accountId === 'u2');
+  ok('setStudentClass отправляет className', classReq.className === '5а');
+
+  ok('normalizeClassName: «5 а» → «5а»', Account.normalizeClassName('5 а') === '5а');
+  ok('baseClass: «5а» → «5 класс»', Account.baseClass('5а') === '5 класс');
+  ok('subclassOf: «5а» → «а»', Account.subclassOf('5а') === 'а');
+  ok('composeClassName: «5 класс» + «а» → «5а»',
+    Account.composeClassName('5 класс', 'а') === '5а');
+
   console.log('\nИТОГ: ' + pass + ' пройдено, ' + bad + ' провалено');
   if (bad) process.exitCode = 1;
 })();

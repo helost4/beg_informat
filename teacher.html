@@ -26,9 +26,18 @@
 
   <div class="dash-card">
     <h2>👥 Ученики</h2>
-    <div class="dash-form" style="max-width:320px;margin-bottom:14px;">
+    <div class="dash-form" style="max-width:520px;margin-bottom:14px;">
       <label for="classFilter">Класс</label>
       <select id="classFilter"><option value="">Все классы</option></select>
+
+      <label for="letterFilter">Буква</label>
+      <select id="letterFilter">
+        <option value="">Все буквы</option>
+        <option value="а">а</option>
+        <option value="б">б</option>
+        <option value="в">в</option>
+        <option value="г">г</option>
+      </select>
     </div>
     <div class="table-scroll">
       <table class="dash-table" id="studentsTable" hidden>
@@ -75,6 +84,7 @@
   var statusEl = document.getElementById('status');
   var students = [];
   var results = [];
+  var LETTERS = ['а', 'б', 'в', 'г'];
 
   document.getElementById('dashSub').textContent =
     '👤 ' + student.name + ' · ' + Account.roleLabel(student.role);
@@ -122,19 +132,44 @@
   }
 
   function renderClassFilter() {
+    // Фильтруем по базовому классу: «5 класс» включает 5а, 5б и т.д.
     var classes = {};
-    students.forEach(function (s) { if (s.className) classes[s.className] = true; });
+    students.forEach(function (s) {
+      var base = Account.baseClass(s.className);
+      if (base) classes[base] = true;
+    });
     var sel = document.getElementById('classFilter');
     var current = sel.value;
-    sel.innerHTML = '<option value="">Все классы</option>' + Object.keys(classes).sort().map(function (c) {
-      return '<option value="' + esc(c) + '">' + esc(c) + '</option>';
-    }).join('');
+    sel.innerHTML = '<option value="">Все классы</option>' +
+      Object.keys(classes).sort().map(function (c) {
+        return '<option value="' + esc(c) + '">' + esc(c) + '</option>';
+      }).join('');
     sel.value = current;
   }
 
+  function matchesFilters_(className) {
+    var classFilter = document.getElementById('classFilter').value;
+    var letter = document.getElementById('letterFilter').value;
+    if (classFilter && Account.baseClass(className) !== classFilter) return false;
+    if (letter && Account.subclassOf(className) !== letter) return false;
+    return true;
+  }
+
+  function classSelectFor_(s) {
+    if (!s.accountId) return '<span>' + esc(s.className) + '</span>';
+    var base = Account.baseClass(s.className);
+    var current = Account.subclassOf(s.className);
+    var options = ['<option value="">без буквы</option>'].concat(LETTERS.map(function (letter) {
+      return '<option value="' + letter + '"' + (letter === current ? ' selected' : '') + '>' +
+        letter + '</option>';
+    }));
+    return '<span class="class-cell"><span>' + esc(base) + '</span>' +
+      '<select class="class-select" data-id="' + esc(s.accountId) + '" data-base="' + esc(base) +
+      '" title="Подкласс">' + options.join('') + '</select></span>';
+  }
+
   function renderStudents() {
-    var filter = document.getElementById('classFilter').value;
-    var list = students.filter(function (s) { return !filter || s.className === filter; });
+    var list = students.filter(function (s) { return matchesFilters_(s.className); });
     var body = document.getElementById('studentsBody');
     var table = document.getElementById('studentsTable');
 
@@ -159,7 +194,7 @@
           (lessons ? '<details><summary style="cursor:pointer;color:#64748b;font-size:.8rem;">по темам (' +
             s.lessons.length + ')</summary><ul class="lesson-list-mini">' + lessons + '</ul></details>' : '') +
         '</td>' +
-        '<td>' + esc(s.className) + '</td>' +
+        '<td>' + classSelectFor_(s) + '</td>' +
         '<td><span class="' + pctClass(pct) + '">' + pct + '%</span>' +
           '<div class="pct-bar"><span style="width:' + pct + '%"></span></div></td>' +
         '<td>' + esc(s.resultsCount) + '</td>' +
@@ -169,8 +204,7 @@
   }
 
   function renderResults() {
-    var filter = document.getElementById('classFilter').value;
-    var list = results.filter(function (r) { return !filter || r.className === filter; }).slice(0, 60);
+    var list = results.filter(function (r) { return matchesFilters_(r.className); }).slice(0, 60);
     var table = document.getElementById('resultsTable');
     var empty = document.getElementById('resultsEmpty');
 
@@ -203,6 +237,36 @@
   document.getElementById('classFilter').addEventListener('change', function () {
     renderStudents();
     renderResults();
+  });
+
+  document.getElementById('letterFilter').addEventListener('change', function () {
+    renderStudents();
+    renderResults();
+  });
+
+  document.getElementById('studentsBody').addEventListener('change', function (e) {
+    if (!e.target.classList.contains('class-select')) return;
+    var select = e.target;
+    var className = Account.composeClassName(select.dataset.base, select.value);
+    select.disabled = true;
+    setStatus('Меняем подкласс…');
+    Account.setStudentClass({ accountId: select.dataset.id, className: className })
+      .then(function () {
+        students.forEach(function (s) {
+          if (s.accountId === select.dataset.id) s.className = className;
+        });
+        results.forEach(function (r) {
+          if (r.accountId === select.dataset.id) r.className = className;
+        });
+        renderClassFilter();
+        renderStudents();
+        renderResults();
+        setStatus('Подкласс обновлён.', 'ok');
+      })
+      .catch(function (err) {
+        setStatus('Ошибка: ' + (err && err.message ? err.message : err), 'error');
+      })
+      .then(function () { select.disabled = false; });
   });
 
   document.getElementById('exportBtn').onclick = function () {

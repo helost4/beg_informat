@@ -246,8 +246,57 @@ function normalizeTrack(value) {
   return String(value || '').trim().toLowerCase() === 'ege' ? 'ege' : 'standard';
 }
 
+/** «5 а», «5-а», «5А» → «5а»; «5 класс» остаётся как есть. */
+function normalizeClassName(value) {
+  const text = String(value || '').trim().replace(/\s+/g, ' ');
+  const withLetter = /^(\d{1,2})\s*(?:класс)?\s*-?\s*([а-яa-z])\s*$/i.exec(text);
+  if (withLetter) return withLetter[1] + withLetter[2].toLowerCase();
+  const base = /^(\d{1,2})\s*класс$/i.exec(text);
+  if (base) return base[1] + ' класс';
+  return text;
+}
+
+/** «5а» → «5 класс». */
+function baseClass(className) {
+  const text = normalizeClassName(className);
+  const m = /^(\d{1,2})(?: класс|[а-яa-z])$/i.exec(text);
+  return m ? m[1] + ' класс' : text;
+}
+
+function isValidClassName(className) {
+  return /^\d{1,2}(?: класс|[а-яa-z])$/i.test(normalizeClassName(className));
+}
+
+function classMatchesScope(className, scopePart) {
+  const exact = normalizeClassName(className).toLowerCase() ===
+    normalizeClassName(scopePart).toLowerCase();
+  const covered = baseClass(className).toLowerCase() ===
+    normalizeClassName(scopePart).toLowerCase();
+  return exact || covered;
+}
+
+function classListMatchesScope(classes, className) {
+  return classes.some(function (part) { return classMatchesScope(className, part); });
+}
+
+function classEquivalent(left, right) {
+  return normalizeClassName(left).toLowerCase() === normalizeClassName(right).toLowerCase() ||
+    baseClass(left).toLowerCase() === baseClass(right).toLowerCase();
+}
+
+/** Ключ ребёнка в scope родителя («имя|класс») с учётом смены подкласса. */
+function parentScopeMatches(childKeys, name, className) {
+  const person = normalizeName(name).toLowerCase();
+  return childKeys.some(function (key) {
+    const bar = String(key || '').indexOf('|');
+    if (bar === -1) return false;
+    return normalizeName(String(key).slice(0, bar)).toLowerCase() === person &&
+      classEquivalent(String(key).slice(bar + 1), className);
+  });
+}
+
 function loginKey(name, className) {
-  return (normalizeName(name) + '|' + String(className || '').trim()).toLowerCase();
+  return (normalizeName(name) + '|' + normalizeClassName(className)).toLowerCase();
 }
 
 function normalizeRole(value) {
@@ -416,7 +465,7 @@ function requireRole(account, roles) {
 
 async function register(body, deps) {
   const name = normalizeName(body.name);
-  const className = String(body.className || '').trim();
+  const className = normalizeClassName(body.className);
   const track = normalizeTrack(body.track);
   const password = String(body.password || '');
 
@@ -451,7 +500,7 @@ async function register(body, deps) {
 
 async function login(body, deps) {
   const name = normalizeName(body.name);
-  const className = String(body.className || '').trim();
+  const className = normalizeClassName(body.className);
   const password = String(body.password || '');
   const requestedTrack = body.track ? normalizeTrack(body.track) : '';
 
@@ -538,18 +587,19 @@ async function myResults(body, deps) {
     query: 'user_id=eq.' + eq(account.id) + select + '&order=created_at.desc&limit=500'
   }, deps);
 
-  // Старые строки без user_id искали по «имя|класс» — сохраняем и это поведение.
+  // Старые строки без user_id искали по «имя|класс». После смены «5 класс» → «5а»
+  // строки старого потока тоже должны остаться в истории ученика.
   const legacy = await db('GET', 'attempts', {
     query: 'user_id=is.null' +
       '&student_name=eq.' + eq(account.name) +
-      '&class_name=eq.' + eq(account.className) +
-      select + '&order=created_at.desc&limit=500'
+      select + '&order=created_at.desc&limit=1000'
   }, deps);
 
   const seen = {};
   const results = [];
   (own || []).concat(legacy || []).forEach(function (row) {
     if (seen[row.id]) return;
+    if (!row.user_id && !classEquivalent(row.class_name, account.className)) return;
     seen[row.id] = true;
     results.push(attemptToResult(row, false));
   });
@@ -599,14 +649,23 @@ async function viewResults(body, deps) {
     // Служебные аккаунты не ученики — в отчёты не попадают.
     if (acc && acc.role !== 'student') return;
 
+    // Для привязанных строк берём текущий класс ученика, а не старый снимок.
+    const effectiveName = acc ? acc.name : studentName;
+    const effectiveClass = acc ? acc.className : className;
+
     let allowed = false;
     if (role === 'admin') allowed = true;
-    else if (role === 'teacher') allowed = classes.indexOf(className.toLowerCase()) !== -1;
-    else if (role === 'parent') allowed = childKeys.indexOf(key) !== -1;
+    else if (role === 'teacher') allowed = classListMatchesScope(classes, effectiveClass);
+    else if (role === 'parent') {
+      allowed = parentScopeMatches(childKeys, effectiveName, effectiveClass) ||
+        childKeys.indexOf(key) !== -1;
+    }
     if (!allowed) return;
 
     const r = attemptToResult(row, true);
-    if (!r.accountId && acc) r.accountId = acc.id;
+    r.accountId = userId || (acc ? acc.id : '');
+    r.studentName = effectiveName;
+    r.className = effectiveClass;
     results.push(r);
   });
 
@@ -705,7 +764,7 @@ async function adminCreateAccount(body, deps) {
   await requireRole(await accountFromToken(body.token, deps), ['admin']);
 
   const name = normalizeName(body.name);
-  const className = String(body.className || '').trim();
+  const className = normalizeClassName(body.className);
   const password = String(body.password || '');
   const role = normalizeRoleStrict(body.role);
   const scope = sanitizeScope(body.scope);
@@ -781,12 +840,74 @@ async function adminResetPassword(body, deps) {
   return success({ accountId: account.id });
 }
 
+async function setStudentClass(body, deps) {
+  const caller = await accountFromToken(body.token, deps);
+  requireRole(caller, ['teacher', 'admin']);
+
+  const accountId = String(body.accountId || '').trim();
+  const className = normalizeClassName(body.className);
+
+  if (!accountId) fail('BAD_REQUEST', 'Не выбран ученик.');
+  if (!isValidClassName(className)) {
+    fail('BAD_REQUEST', 'Некорректный класс. Используйте например «5 класс» или «5а».');
+  }
+
+  const account = await getAccountById(accountId, deps);
+  if (!account) fail('NOT_FOUND', 'Аккаунт не найден.');
+  if (account.role !== 'student') {
+    fail('FORBIDDEN', 'Подкласс можно менять только у учеников.');
+  }
+
+  if (caller.role === 'teacher') {
+    const classes = splitScope(caller.scope);
+    if (!classListMatchesScope(classes, account.className) ||
+        !classListMatchesScope(classes, className)) {
+      fail('FORBIDDEN', 'Этот ученик или класс вне вашей области доступа.');
+    }
+  }
+
+  const oldKey = loginKey(account.name, account.className);
+  const newKey = loginKey(account.name, className);
+  if (oldKey !== newKey) {
+    const other = await getAccountByLoginKey(newKey, deps);
+    if (other && other.id !== account.id) {
+      fail('ACCOUNT_EXISTS', 'Аккаунт с таким именем и классом уже существует.');
+    }
+  }
+
+  const updated = await updateAccount(account.id, {
+    class_name: className,
+    login_key: newKey,
+    updated_at: new Date().toISOString()
+  }, deps);
+
+  if (oldKey !== newKey) {
+    await updateParentScopesForClassChange(oldKey, newKey, deps);
+  }
+
+  return success({ account: accountPublic(updated) });
+}
+
+async function updateParentScopesForClassChange(oldKey, newKey, deps) {
+  const accounts = await listAccounts(deps);
+  for (const acc of accounts) {
+    if (acc.role !== 'parent' || !acc.scope) continue;
+    const keys = splitScope(acc.scope);
+    if (keys.indexOf(oldKey) === -1) continue;
+    const scope = keys.map(function (key) { return key === oldKey ? newKey : key; }).join(';');
+    await updateAccount(acc.id, {
+      scope: scope,
+      updated_at: new Date().toISOString()
+    }, deps);
+  }
+}
+
 async function legacySave(body, deps) {
   const row = await insertAttempt({
     client_id: String(body.clientId || body._id || '').trim() || null,
     user_id: null,
     student_name: normalizeName(body.studentName),
-    class_name: String(body.className || '').trim(),
+    class_name: normalizeClassName(body.className),
     lesson: String(body.lesson || ''),
     variant: String(body.variant || ''),
     score: toNumber(body.score),
@@ -809,7 +930,8 @@ const ACTIONS = {
   adminListAccounts: adminListAccounts,
   adminCreateAccount: adminCreateAccount,
   adminSetRole: adminSetRole,
-  adminResetPassword: adminResetPassword
+  adminResetPassword: adminResetPassword,
+  setStudentClass: setStudentClass
 };
 
 async function parseBody(request) {

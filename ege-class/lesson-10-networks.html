@@ -308,7 +308,10 @@ let accountBest = {};
   if (!window.__student) return;
 
   const allowed = ['9 класс', '10 класс', '11 класс'];
-  if (allowed.indexOf(window.__student.class) === -1) {
+  const studentBaseClass = window.Account && Account.baseClass
+    ? Account.baseClass(window.__student.class)
+    : window.__student.class;
+  if (allowed.indexOf(studentBaseClass) === -1) {
     alert('Тренажёр доступен ученикам 9–11 классов. Вы вошли как ' +
       (window.__student.class || 'класс не указан') + '.');
     window.location.href = '../lessons.html';

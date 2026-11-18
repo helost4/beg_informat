@@ -54,7 +54,9 @@
   }
 
   function isAllowed(exam) {
-    return !!exam && !!student && exam.classes.indexOf(student.class) !== -1;
+    if (!exam || !student) return false;
+    var base = window.Account && Account.baseClass ? Account.baseClass(student.class) : student.class;
+    return exam.classes.indexOf(base) !== -1;
   }
 
   function findLesson(exam, num) {

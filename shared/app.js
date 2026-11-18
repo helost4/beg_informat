@@ -47,7 +47,8 @@
   //    уроки любого класса — например, чтобы проверить содержимое.
   const privileged = window.Account && Account.hasAnyRole &&
     Account.hasAnyRole(['teacher', 'parent', 'admin']);
-  if (LESSON_DATA.className && student.class !== LESSON_DATA.className && !privileged) {
+  var studentBaseClass = window.Account && Account.baseClass ? Account.baseClass(student.class) : student.class;
+  if (LESSON_DATA.className && studentBaseClass !== LESSON_DATA.className && !privileged) {
     alert(`Этот урок предназначен для ${LESSON_DATA.className}. Вы вошли как ${student.class}.`);
     window.location.href = '../lessons.html';
     throw new Error('Класс не совпадает');

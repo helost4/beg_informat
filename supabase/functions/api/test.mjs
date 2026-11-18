@@ -331,6 +331,63 @@ const run = async () => {
     eq('expired token', expired.error, 'TOKEN_EXPIRED');
   }
 
+  // 9. Подклассы: смена класса, охват базовым классом и обновление scope родителя.
+  {
+    const db = createDb();
+    const admin = legacyAccount(db, { id: 'admin', name: 'Админ', class_name: 'Администратор', role: 'admin' });
+    const teacher = legacyAccount(db, { id: 'teacher', name: 'Учитель', class_name: 'Учитель',
+      role: 'teacher', scope: '5 класс' });
+    const parent = legacyAccount(db, { id: 'parent', name: 'Родитель', class_name: 'Родитель',
+      role: 'parent', scope: 'иванов иван|5 класс' });
+    const student = legacyAccount(db, { id: 'student', name: 'Иванов Иван', class_name: '5 класс', role: 'student' });
+    [admin, teacher, parent, student].forEach(a => { a.password_hash = 'x'; });
+
+    const adminToken = await legacyToken('admin', Date.now() + 864e5);
+    const teacherToken = await legacyToken('teacher', Date.now() + 864e5);
+    const studentToken = await legacyToken('student', Date.now() + 864e5);
+
+    db.attempts.push({ id: 1, user_id: null, student_name: 'Иванов Иван', class_name: '5 класс',
+      lesson: 'Старый урок', variant: 'A', score: 4, max_score: 5, grade: 4,
+      work_type: 'test', created_at: '2026-01-01T00:00:00.000Z' });
+
+    const bad = await post({ action: 'setStudentClass', token: adminToken,
+      accountId: 'student', className: 'пять а' }, db);
+    eq('некорректный подкласс отклонён', bad.error, 'BAD_REQUEST');
+
+    const byStudent = await post({ action: 'setStudentClass', token: studentToken,
+      accountId: 'student', className: '5а' }, db);
+    eq('ученик не может менять подкласс', byStudent.error, 'FORBIDDEN');
+
+    const outside = await post({ action: 'setStudentClass', token: teacherToken,
+      accountId: 'student', className: '6а' }, db);
+    eq('учитель не может выйти за scope', outside.error, 'FORBIDDEN');
+
+    const changed = await post({ action: 'setStudentClass', token: adminToken,
+      accountId: 'student', className: '5-а' }, db);
+    eq('админ перевёл в 5а', changed.account.className, '5а');
+    eq('login_key обновлён', db.users.find(u => u.id === 'student').login_key, 'иванов иван|5а');
+    eq('scope родителя обновлён', db.users.find(u => u.id === 'parent').scope, 'иванов иван|5а');
+
+    const own = await post({ action: 'myResults', token: studentToken }, db);
+    eq('старая история видна после смены', own.results.map(r => r.lesson), ['Старый урок']);
+
+    const parentView = await post({ action: 'viewResults',
+      token: await legacyToken('parent', Date.now() + 864e5) }, db);
+    eq('родитель видит старую работу', parentView.results.map(r => r.lesson), ['Старый урок']);
+
+    const teacherView = await post({ action: 'viewResults', token: teacherToken }, db);
+    eq('учитель видит 5а через базовый класс', teacherView.students.length, 1);
+
+    const teacherChanged = await post({ action: 'setStudentClass', token: teacherToken,
+      accountId: 'student', className: '5б' }, db);
+    eq('учитель сменил букву', teacherChanged.account.className, '5б');
+
+    await post({ action: 'register', name: 'Иванов Иван', className: '5в', password: 'secret123' }, db);
+    const conflict = await post({ action: 'setStudentClass', token: adminToken,
+      accountId: 'student', className: '5в' }, db);
+    eq('конфликт подкласса', conflict.error, 'ACCOUNT_EXISTS');
+  }
+
   const ok = failures.length === 0;
   console.log((ok ? '✅' : '❌') + ' Supabase API: ' + passed + ' проверок пройдено' +
     (failures.length ? ', ошибок ' + failures.length : ''));

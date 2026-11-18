@@ -46,6 +46,10 @@
 .dash-table th{background:#f8fafc;color:#475569;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em;}
 .dash-table tr:last-child td{border-bottom:none;}
 .dash-table td small{display:block;color:#64748b;font-size:.78rem;margin-top:2px;}
+.class-cell{display:inline-flex;flex-direction:column;gap:4px;min-width:76px;}
+.class-select{padding:4px 8px;border:1.5px solid #cbd5e1;border-radius:8px;background:#fff;font-size:.82rem;cursor:pointer;}
+.class-select:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+.class-select:disabled{opacity:.55;cursor:wait;}
 .table-scroll{overflow-x:auto;}
 
 .pct-bar{height:8px;border-radius:999px;background:#e2e8f0;overflow:hidden;min-width:80px;margin-top:6px;}

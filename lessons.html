@@ -104,7 +104,8 @@
     try { localStorage.setItem(FILTER_KEY, value); } catch (e) { /* ignore */ }
   }
 
-  let selectedClass = showAll ? readFilter_() : student.class;
+  // Ученик 5а учится по каталогу 5 класса; в профиле показываем точный класс.
+  let selectedClass = showAll ? readFilter_() : Account.baseClass(student.class);
   if (showAll && selectedClass !== ALL_CLASSES &&
       CLASS_NAMES.indexOf(selectedClass) === -1) {
     selectedClass = ALL_CLASSES;
