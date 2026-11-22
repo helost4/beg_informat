@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практическая работа №6 «Создаём компьютерные документы» — 6 класс</title>
+<link rel="stylesheet" href="../shared/style.css">
+<style>
+  .practice-wrap{max-width:920px;margin:0 auto;padding:44px 20px 64px;}
+
+  .practice-header{
+    background:linear-gradient(135deg,#eff6ff,#fdf4ff,#f0fdf4);
+    border-radius:22px;padding:30px 26px;margin-bottom:24px;
+    border:2px solid #c7d2fe;text-align:center;
+    box-shadow:0 10px 30px rgba(59,130,246,.10);
+  }
+  .practice-header h1{
+    margin:0 0 6px;font-size:1.85rem;line-height:1.25;
+    background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .practice-header .task-title{
+    font-size:1.2rem;font-weight:800;color:#1e293b;
+    margin:6px auto 10px;max-width:640px;line-height:1.4;
+  }
+  .practice-header .lead{
+    margin:12px auto 0;max-width:680px;color:#334155;
+    font-size:.98rem;line-height:1.6;
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:5px;
+    background:#fff;border:1px solid #cbd5e1;border-radius:20px;
+    padding:6px 12px;font-size:.8rem;font-weight:600;color:#334155;
+  }
+  .chip.blue{background:#eff6ff;border-color:#93c5fd;color:#1e40af;}
+  .chip.green{background:#f0fdf4;border-color:#86efac;color:#166534;}
+  .chip.pink{background:#fdf2f8;border-color:#f9a8d4;color:#9d174d;}
+
+  .toc{
+    display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    margin:0 0 24px;
+  }
+  .toc a{
+    display:flex;align-items:center;gap:10px;text-decoration:none;
+    background:#fff;border:2px solid #e2e8f0;border-radius:14px;
+    padding:12px 14px;color:#1e293b;font-weight:700;font-size:.9rem;
+    transition:.2s;
+  }
+  .toc a:hover{border-color:#3b82f6;background:#eff6ff;transform:translateY(-2px);}
+  .toc .toc-letter{
+    width:32px;height:32px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;
+    font-size:.95rem;font-weight:900;
+  }
+
+  .stage{
+    display:flex;align-items:center;gap:12px;margin:30px 0 16px;
+    padding:12px 18px;border-radius:14px;
+    background:linear-gradient(90deg,#1e40af,#3b82f6);
+    color:#fff;font-weight:800;font-size:1.05rem;
+    box-shadow:0 6px 18px rgba(59,130,246,.25);
+  }
+  .stage .stage-letter{
+    width:34px;height:34px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    background:#fff;color:#1e40af;font-size:1.05rem;font-weight:900;
+  }
+  .stage small{display:block;font-weight:500;font-size:.78rem;opacity:.9;margin-top:2px;}
+
+  .step{
+    background:#fff;border-radius:18px;padding:24px;margin-bottom:18px;
+    box-shadow:0 6px 20px rgba(59,130,246,.08);border:1px solid #e2e8f0;
+    scroll-margin-top:90px;
+  }
+  .step-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:42px;height:42px;border-radius:50%;font-weight:900;font-size:1.15rem;
+    background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;
+    margin-right:10px;vertical-align:middle;flex:none;
+  }
+  .step h2{
+    display:inline-block;vertical-align:middle;margin:0 0 12px;
+    font-size:1.22rem;color:#1e293b;line-height:1.35;
+  }
+  .step h3{margin:22px 0 8px;font-size:1rem;color:#1e40af;}
+  .step p{margin:10px 0;line-height:1.65;color:#334155;}
+  .step ul,.step ol{margin:10px 0;padding-left:26px;line-height:1.7;color:#334155;}
+  .step li{margin:6px 0;}
+  .step li::marker{color:#3b82f6;font-weight:700;}
+
+  .callout{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:.95rem;line-height:1.55;}
+  .callout.tip{background:#eff6ff;border-left:4px solid #3b82f6;color:#1e40af;}
+  .callout.warn{background:#fffbeb;border-left:4px solid #f59e0b;color:#92400e;}
+  .callout.ok{background:#f0fdf4;border-left:4px solid #22c55e;color:#14532d;}
+  .callout.pink{background:#fdf2f8;border-left:4px solid #ec4899;color:#831843;}
+  .callout b{font-weight:800;}
+  .callout ul{margin:8px 0 0;}
+
+  .kbd{
+    display:inline-block;padding:2px 8px;border-radius:6px;
+    background:#f1f5f9;border:1px solid #cbd5e1;border-bottom-width:3px;
+    font-family:Consolas,monospace;font-size:.88rem;color:#1e293b;
+    white-space:nowrap;
+  }
+  code.inline{background:#f1f5f9;padding:1px 6px;border-radius:6px;
+    font-family:Consolas,monospace;font-size:.9em;color:#0f172a;}
+
+  .path-flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin:18px 0;}
+  .path-step{
+    background:#fff;border:2px solid #93c5fd;border-radius:12px;
+    padding:10px 13px;font-size:.86rem;font-weight:700;color:#1e3a8a;text-align:center;
+  }
+  .path-step small{display:block;font-weight:400;font-size:.72rem;color:#64748b;margin-top:2px;}
+  .path-step.accent{background:#eff6ff;border-color:#3b82f6;}
+  .path-arrow{color:#3b82f6;font-size:1.2rem;font-weight:900;}
+
+  .fig{
+    margin:18px 0;padding:14px;border-radius:16px;
+    background:linear-gradient(135deg,#f8fafc,#eff6ff);
+    border:1px solid #dbeafe;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  }
+  .fig-scroll{min-width:520px;}
+  .fig-cap{text-align:center;font-size:.82rem;color:#64748b;margin-top:10px;line-height:1.45;}
+  .fig-cap b{color:#1e40af;}
+  .fig-title{text-align:center;font-weight:800;color:#1e3a8a;margin-bottom:10px;font-size:.95rem;}
+
+  /* Макет файлового менеджера Astra Linux */
+  .fm{background:#fff;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden;
+    box-shadow:0 8px 24px rgba(15,23,42,.12);font-family:'Segoe UI',sans-serif;}
+  .fm-title{display:flex;justify-content:space-between;align-items:center;
+    background:#e8eef6;padding:7px 10px;font-size:.76rem;font-weight:700;color:#1e293b;
+    border-radius:10px 10px 0 0;border-bottom:1px solid #cbd5e1;}
+  .fm-winbtns{display:flex;gap:10px;color:#64748b;font-weight:400;}
+  .fm-toolbar{display:flex;align-items:center;gap:8px;padding:6px 10px;
+    background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.7rem;color:#475569;}
+  .fm-path{border:1px solid #cbd5e1;border-radius:5px;padding:4px 8px;background:#fff;flex:1;}
+  .fm-body{display:grid;grid-template-columns:130px 1fr;min-height:170px;}
+  .fm-side{background:#f1f5f9;border-right:1px solid #e2e8f0;padding:8px;font-size:.7rem;color:#475569;}
+  .fm-side div{padding:6px 7px;border-radius:6px;}
+  .fm-side .hl{background:#dbeafe;color:#1d4ed8;font-weight:700;}
+  .fm-sub div{padding:7px 9px;font-size:.72rem;}
+  .fm-sub .hl{background:#dbeafe;color:#1d4ed8;font-weight:700;}
+
+  /* Образец отчёта */
+  .doc-sample{
+    background:#fff;border:1px solid #cbd5e1;border-radius:10px;
+    padding:28px 32px;margin:16px 0;box-shadow:0 6px 18px rgba(15,23,42,.08);
+    font-family:'Liberation Serif','Times New Roman',serif;
+    font-size:1.04rem;line-height:1.6;color:#111827;
+  }
+  .doc-sample .doc-title{text-align:center;font-weight:700;font-size:1.15rem;
+    margin:0 0 4px;line-height:1.35;text-indent:0;}
+  .doc-sample .doc-sub{text-align:center;font-size:.92rem;margin:0 0 18px;text-indent:0;}
+  .doc-sample p{margin:0 0 12px;text-indent:1.25cm;text-align:justify;}
+  .doc-sample h4{text-indent:0;margin:14px 0 6px;font-size:1rem;}
+  .doc-sample .figcap{text-align:center;text-indent:0;font-size:.88rem;color:#475569;}
+
+  .goals{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin:14px 0;}
+  .goal-card{background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:14px;}
+  .goal-card .big{font-size:1.7rem;line-height:1;}
+  .goal-card h4{margin:6px 0 4px;font-size:.9rem;color:#1e293b;}
+  .goal-card p{margin:0;font-size:.8rem;color:#64748b;line-height:1.45;}
+  .goal-card.blue{border-color:#93c5fd;background:#eff6ff;}
+  .goal-card.green{border-color:#86efac;background:#f0fdf4;}
+  .goal-card.amber{border-color:#fcd34d;background:#fffbeb;}
+  .goal-card.pink{border-color:#f9a8d4;background:#fdf2f8;}
+
+  /* Таблицы */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:14px 0;}
+  table.tbl{width:100%;border-collapse:collapse;font-size:.88rem;min-width:480px;}
+  table.tbl th,table.tbl td{border:1px solid #e2e8f0;padding:8px 10px;text-align:left;vertical-align:top;word-break:break-word;}
+  table.tbl th{background:#eff6ff;color:#1e293b;font-weight:700;}
+  table.tbl tr:nth-child(even) td{background:#f8fafc;}
+  table.tbl td b{color:#1e40af;}
+  table.tbl.compact{min-width:360px;font-size:.82rem;}
+
+  /* Чек-лист */
+  .checklist{background:#f0fdf4;border:2px solid #bbf7d0;border-radius:14px;padding:18px;margin:8px 0 0;}
+  .checklist-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .checklist-head h3{margin:0;color:#15803d;font-size:1.05rem;}
+  .check-progress{font-weight:800;color:#15803d;background:#dcfce7;padding:4px 11px;border-radius:20px;font-size:.82rem;}
+  .check-bar{height:10px;background:#dcfce7;border-radius:6px;overflow:hidden;margin:10px 0;}
+  .check-bar > div{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#16a34a);transition:width .25s;}
+  .checklist label{display:block;position:relative;padding:8px 0 8px 30px;font-size:.93rem;
+    color:#166534;cursor:pointer;border-bottom:1px dashed #bbf7d0;line-height:1.45;}
+  .checklist label:last-of-type{border-bottom:none;}
+  .checklist label b{word-break:break-word;}
+  .checklist input{position:absolute;left:0;top:9px;width:20px;height:20px;
+    accent-color:#22c55e;cursor:pointer;}
+
+  .final-card{background:linear-gradient(135deg,#f0fdf4,#eff6ff);border:2px solid #86efac;
+    border-radius:18px;padding:26px;text-align:center;margin-top:24px;}
+  .final-card h2{justify-content:center;margin-bottom:8px;color:#166534;}
+  .final-card p{color:#334155;line-height:1.6;max-width:680px;margin:8px auto;}
+
+  @media(max-width:640px){
+    .practice-wrap{padding:70px 12px 48px;}
+    .practice-header{padding:20px 16px;}
+    .practice-header h1{font-size:1.45rem;}
+    .practice-header .task-title{font-size:1.05rem;}
+    .step{padding:18px 15px;}
+    .step-num{width:36px;height:36px;font-size:1rem;margin-right:8px;}
+    .step h2{font-size:1.08rem;}
+    .stage{font-size:.95rem;padding:10px 14px;}
+    .fig{padding:10px;}
+    .doc-sample{padding:18px 16px;font-size:1rem;}
+    .path-step{font-size:.78rem;padding:8px 10px;}
+    .fm-body{grid-template-columns:96px 1fr;}
+    table.tbl{min-width:0;font-size:.8rem;}
+    table.tbl th,table.tbl td{padding:6px 7px;}
+  }
+
+  @media print{
+    body{background:#fff;padding:0;}
+    .practice-wrap{max-width:none;padding:0;}
+    .toc{display:none;}
+    .step,.fig,.doc-sample,.checklist{break-inside:avoid;box-shadow:none;}
+    .practice-header{box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="practice-wrap">
+
+  <div class="practice-header">
+    <h1>🖥 Практическая работа № 6</h1>
+    <div class="task-title">Создаём компьютерные документы</div>
+    <div class="lead">
+      Тема: «Способы познания окружающего мира». Вы соберёте данные наблюдения, измерения и опыта,
+      оформите их в таблице LibreOffice Calc и подготовите отчёт в LibreOffice Writer.
+    </div>
+    <div class="chips">
+      <span class="chip blue">🏫 6 класс · УМК Босовой</span>
+      <span class="chip green">📊 Calc + 📄 Writer</span>
+      <span class="chip pink">🐧 Astra Linux 1.8</span>
+      <span class="chip">⏱ 35–40 минут</span>
+    </div>
+  </div>
+
+  <div class="toc">
+    <a href="#stage-a"><span class="toc-letter">А</span> Цель и теория</a>
+    <a href="#stage-b"><span class="toc-letter">Б</span> Папка для файлов</a>
+    <a href="#stage-c"><span class="toc-letter">В</span> Таблица в Calc</a>
+    <a href="#stage-d"><span class="toc-letter">Г</span> Отчёт в Writer</a>
+    <a href="#stage-e"><span class="toc-letter">Д</span> Проверка и оценивание</a>
+  </div>
+
+  <!-- ШАГ 1 -->
+  <div class="step">
+    <span class="step-num">1</span><h2>🎯 Что должно получиться</h2>
+    <p>В конце работы у вас должно быть <b>два файла</b> в одной папке: таблица с данными и текстовый отчёт.</p>
+
+    <div class="goals">
+      <div class="goal-card blue"><div class="big">📊</div><h4>Пр6_Данные_ФамилияИмя.ods</h4><p>Таблица в LibreOffice Calc: способ познания, что делали, результат, площадь и диаграмма.</p></div>
+      <div class="goal-card green"><div class="big">📄</div><h4>Пр6_Отчёт_ФамилияИмя.odt</h4><p>Отчёт в LibreOffice Writer: титул, 4 раздела, таблица, диаграмма и вывод.</p></div>
+      <div class="goal-card amber"><div class="big">📁</div><h4>Своя папка</h4><p>Рабочий стол → 6 класс → 6а / 6б / 6в / 6г → Фамилия Имя.</p></div>
+    </div>
+
+    <div class="callout tip">
+      💡 <b>Запомните правило:</b> сначала создайте папку, потом сохраняйте файлы. Так вы не потеряете работу.
+    </div>
+  </div>
+
+  <div class="stage" id="stage-a"><span class="stage-letter">А</span>
+    <div>Цель работы и краткая теория<small>Что нужно знать перед началом</small></div>
+  </div>
+
+  <!-- ШАГ 2 -->
+  <div class="step">
+    <span class="step-num">2</span><h2>Цель практической работы</h2>
+    <div class="goals">
+      <div class="goal-card blue"><h4>Образовательная</h4><p>Закрепить представления о способах познания: наблюдение, измерение, эксперимент.</p></div>
+      <div class="goal-card green"><h4>Развивающая</h4><p>Научиться собирать данные, заносить их в таблицу, строить диаграмму и оформлять отчёт.</p></div>
+      <div class="goal-card pink"><h4>Воспитывающая</h4><p>Формировать аккуратность и ответственность за правильность данных и правила сохранения файлов.</p></div>
+    </div>
+  </div>
+
+  <!-- ШАГ 3 -->
+  <div class="step">
+    <span class="step-num">3</span><h2>Краткая теория</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Способ познания</th><th>В чём суть</th><th>Пример</th></tr></thead>
+        <tbody>
+          <tr><td><b>Наблюдение</b></td><td>Целенаправленное рассматривание предмета или явления.</td><td>Рассмотрели предметы на парте: цвет, форму, материал.</td></tr>
+          <tr><td><b>Измерение</b></td><td>Сравнение с единицей измерения, получение числа.</td><td>Измерили длину тетради линейкой — 21 см.</td></tr>
+          <tr><td><b>Эксперимент (опыт)</b></td><td>Проверка предположения в одинаковых условиях.</td><td>Сравнили время чтения текста разным шрифтом.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>Компьютерный документ</b> — это информация, оформленная на компьютере и сохранённая в файле: текст, таблица, диаграмма. Сегодня вы создадите сразу два документа — таблицу и отчёт.</p>
+    <div class="callout warn">
+      ⚠️ <b>Важно:</b> числа в таблице должны быть взяты из ваших собственных наблюдений и измерений.
+      Не списывайте значения образца, если у вас получилось иначе.
+    </div>
+  </div>
+
+  <div class="stage" id="stage-b"><span class="stage-letter">Б</span>
+    <div>Папка для файлов<small>Готовим место на Рабочем столе</small></div>
+  </div>
+
+  <!-- ШАГ 4 -->
+  <div class="step">
+    <span class="step-num">4</span><h2>Куда сохранять файлы</h2>
+    <p>Путь на <b>Рабочем столе</b>:</p>
+
+    <div class="path-flow">
+      <span class="path-step">Рабочий стол</span><span class="path-arrow">→</span>
+      <span class="path-step">6 класс</span><span class="path-arrow">→</span>
+      <span class="path-step accent">6а / 6б / 6в / 6г<small>буква вашего класса</small></span><span class="path-arrow">→</span>
+      <span class="path-step">Фамилия Имя<small>например, Иванов Иван</small></span>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl compact">
+        <thead><tr><th>Ваш класс</th><th>Полный путь</th></tr></thead>
+        <tbody>
+          <tr><td><b>6 «а»</b></td><td><code class="inline">Рабочий стол/6 класс/6а/Фамилия Имя</code></td></tr>
+          <tr><td><b>6 «б»</b></td><td><code class="inline">Рабочий стол/6 класс/6б/Фамилия Имя</code></td></tr>
+          <tr><td><b>6 «в»</b></td><td><code class="inline">Рабочий стол/6 класс/6в/Фамилия Имя</code></td></tr>
+          <tr><td><b>6 «г»</b></td><td><code class="inline">Рабочий стол/6 класс/6г/Фамилия Имя</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout tip">
+      💡 Выберите <b>только одну</b> папку с буквой своего класса. В имени «Фамилия Имя» пишите фамилию и имя через пробел, без подчёркиваний.
+    </div>
+  </div>
+
+  <!-- ШАГ 5 -->
+  <div class="step">
+    <span class="step-num">5</span><h2>Шаг 1. Подготовьте папку</h2>
+    <ol>
+      <li>На Рабочем столе Astra Linux откройте менеджер файлов <b>«Файлы»</b> (значок папки на панели или Главное меню → Файлы).</li>
+      <li>В левой части окна выберите <b>«Рабочий стол»</b> (Desktop).</li>
+      <li>Нажмите правой кнопкой мыши в свободном месте → <b>«Создать папку»</b> → введите <code class="inline">6 класс</code> → <span class="kbd">Enter</span>.</li>
+      <li>Двойным щелчком войдите в папку <b>6 класс</b> → снова правый клик → <b>«Создать папку»</b> → введите <code class="inline">6а</code> (или <code class="inline">6б</code>, <code class="inline">6в</code>, <code class="inline">6г</code> — буква вашего класса) → <span class="kbd">Enter</span>.</li>
+      <li>Войдите в эту папку → создайте ещё одну папку со своим именем, например <code class="inline">Иванов Иван</code>.</li>
+    </ol>
+
+    <div class="fig">
+      <div class="fig-title">Так должна выглядеть цепочка папок</div>
+      <div class="fig-scroll">
+        <div class="fm">
+          <div class="fm-title"><span>📁 Файлы — Иванов Иван</span><span class="fm-winbtns">─ □ ×</span></div>
+          <div class="fm-toolbar"><span>⇐ ⇒</span><span class="fm-path">Рабочий стол / 6 класс / <b>6а</b> / Иванов Иван</span><span>＋ Папка</span></div>
+          <div class="fm-body">
+            <div class="fm-side">
+              <div class="hl">🏠 Рабочий стол</div>
+              <div>📄 Документы</div>
+              <div>🖼 Изображения</div>
+              <div>🗑 Корзина</div>
+            </div>
+            <div class="fm-sub">
+              <div>📁 6 класс</div>
+              <div class="hl">　📁 6а</div>
+              <div class="hl">　　　📁 Иванов Иван　← сюда сохраняем файлы</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fig-cap"><b>Проверка:</b> в строке адреса должно быть Рабочий стол → 6 класс → 6а → Иванов Иван.</div>
+    </div>
+  </div>
+
+  <div class="stage" id="stage-c"><span class="stage-letter">В</span>
+    <div>Собираем данные и строим таблицу<small>Работа в LibreOffice Calc</small></div>
+  </div>
+
+  <!-- ШАГ 6 -->
+  <div class="step">
+    <span class="step-num">6</span><h2>Шаг 2. Соберите данные</h2>
+    <p>Проведите три действия и сразу запишите результаты на черновике.</p>
+    <ol>
+      <li><b>Наблюдение.</b> Рассмотрите 3 предмета на парте (тетрадь, учебник, линейку). Запишите цвет, форму и материал.</li>
+      <li><b>Измерение.</b> Линейкой измерьте длину и ширину тетради. Запишите, например: длина — 21 см, ширина — 14 см. Площадь посчитаем в Calc.</li>
+      <li><b>Эксперимент.</b> Попросите соседа по парте прочитать одну и ту же фразу два раза: сначала шрифтом 12, затем шрифтом 20. Засеките время. Запишите, например: 8 с и 5 с.</li>
+    </ol>
+    <div class="callout ok">
+      ✅ <b>Подсказка:</b> для опыта можно взять фразу: «Информатика помогает познавать окружающий мир».
+      Главное — оба раза читал один и тот же человек и одну и ту же фразу.
+    </div>
+  </div>
+
+  <!-- ШАГ 7 -->
+  <div class="step">
+    <span class="step-num">7</span><h2>Шаг 3. Создайте таблицу в LibreOffice Calc</h2>
+
+    <h3>3.1. Откройте Calc</h3>
+    <p>Главное меню Astra Linux → <b>«Офис» → «LibreOffice Calc»</b>. Другой способ: нажмите <span class="kbd">Ctrl</span>+<span class="kbd">Alt</span>+<span class="kbd">T</span>, введите <code class="inline">libreoffice --calc</code> и нажмите <span class="kbd">Enter</span>.</p>
+
+    <h3>3.2. Заполните основную таблицу</h3>
+    <div class="tbl-wrap">
+      <table class="tbl compact">
+        <thead><tr><th>Ячейка</th><th>Что ввести</th></tr></thead>
+        <tbody>
+          <tr><td><b>A1</b></td><td>Способ познания</td></tr>
+          <tr><td><b>B1</b></td><td>Что делали</td></tr>
+          <tr><td><b>C1</b></td><td>Результат</td></tr>
+          <tr><td><b>A2</b></td><td>Наблюдение</td></tr>
+          <tr><td><b>B2</b></td><td>Рассмотрели предметы на парте</td></tr>
+          <tr><td><b>C2</b></td><td>Цвет, форма, материал</td></tr>
+          <tr><td><b>A3</b></td><td>Измерение</td></tr>
+          <tr><td><b>B3</b></td><td>Измерили тетрадь линейкой</td></tr>
+          <tr><td><b>C3</b></td><td>21 см × 14 см</td></tr>
+          <tr><td><b>A4</b></td><td>Эксперимент</td></tr>
+          <tr><td><b>B4</b></td><td>Читали фразу шрифтом 12 и 20</td></tr>
+          <tr><td><b>C4</b></td><td>8 с и 5 с</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout tip">
+      💡 Чтобы быстро расширить столбцы, выделите их заголовки (A, B, C) и дважды щёлкните по границе между ними — ширина подстроится под текст.
+    </div>
+
+    <h3>3.3. Посчитайте площадь тетради</h3>
+    <ol>
+      <li>В ячейку <b>E1</b> введите: <code class="inline">Площадь тетради, см²</code>.</li>
+      <li>В ячейку <b>E2</b> введите формулу <code class="inline">=21*14</code> и нажмите <span class="kbd">Enter</span>.</li>
+      <li>Должно получиться число <b>294</b>. Если у вас получились другие размеры, подставьте свои числа, например <code class="inline">=20*15</code>.</li>
+    </ol>
+
+    <h3>3.4. Подготовьте данные для диаграммы</h3>
+    <p>В ячейки <b>A7:B10</b> внесите данные опыта:</p>
+    <div class="tbl-wrap">
+      <table class="tbl compact">
+        <thead><tr><th>A</th><th>B</th></tr></thead>
+        <tbody>
+          <tr><td>Размер шрифта</td><td>Время чтения, с</td></tr>
+          <tr><td>12</td><td>8</td></tr>
+          <tr><td>16</td><td>6</td></tr>
+          <tr><td>20</td><td>5</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3.5. Вставьте диаграмму</h3>
+    <ol>
+      <li>Выделите диапазон <b>A7:B10</b> (протяните мышью от A7 до B10).</li>
+      <li>Меню <b>«Вставка» → «Диаграмма…»</b>.</li>
+      <li>Выберите тип <b>«Гистограмма»</b> (Normal/Обычная) → нажмите <b>«Готово»</b>.</li>
+      <li>Щёлкните один раз за пределами диаграммы, чтобы выйти из режима её редактирования.</li>
+    </ol>
+
+    <h3>3.6. Сохраните таблицу</h3>
+    <ol>
+      <li>Нажмите <span class="kbd">Ctrl</span>+<span class="kbd">S</span>.</li>
+      <li>В поле имени введите <code class="inline">Пр6_Данные_ФамилияИмя</code> (вместо «ФамилияИмя» — ваши фамилия и имя слитно).</li>
+      <li>Тип файла оставьте <b>ODF Spreadsheet (.ods)</b>.</li>
+      <li>Проверьте в окне сохранения путь: <b>Рабочий стол → 6 класс → 6а → Иванов Иван</b> → нажмите <b>«Сохранить»</b>.</li>
+    </ol>
+    <div class="callout warn">
+      ⚠️ Если LibreOffice предлагает сохранить в формате Excel (.xlsx), откажитесь и выберите <b>ODF Spreadsheet (.ods)</b>.
+    </div>
+  </div>
+
+  <div class="stage" id="stage-d"><span class="stage-letter">Г</span>
+    <div>Оформляем отчёт<small>Работа в LibreOffice Writer</small></div>
+  </div>
+
+  <!-- ШАГ 8 -->
+  <div class="step">
+    <span class="step-num">8</span><h2>Шаг 4. Создайте отчёт в LibreOffice Writer</h2>
+
+    <h3>4.1. Откройте Writer и наберите титул</h3>
+    <p>Главное меню → <b>«Офис» → «LibreOffice Writer»</b>. Наберите по центру:</p>
+    <div class="fig">
+      <div class="doc-sample">
+        <p class="doc-title">Способы познания окружающего мира</p>
+        <p class="doc-sub">Практическая работа № 6 «Создаём компьютерные документы»<br>
+        Выполнил(а): Иванов Иван, 6 «а»</p>
+      </div>
+      <div class="fig-cap">Для 6 «б», 6 «в» и 6 «г» укажите свою букву класса.</div>
+    </div>
+
+    <h3>4.2. Оформите четыре раздела</h3>
+
+    <p><b>1. Что я узнал(а).</b> Своими словами объясните три способа познания — наблюдение, измерение и эксперимент. По 1–2 предложения на каждый.</p>
+
+    <p><b>2. Результаты работы.</b> Вставьте таблицу: меню <b>«Таблица» → «Вставить таблицу»</b>, 3 столбца, 4 строки. Заполните её теми же данными, что и в Calc:</p>
+    <div class="tbl-wrap">
+      <table class="tbl compact">
+        <thead><tr><th>Способ познания</th><th>Что делали</th><th>Результат</th></tr></thead>
+        <tbody>
+          <tr><td>Наблюдение</td><td>Рассмотрели предметы на парте</td><td>Цвет, форма, материал</td></tr>
+          <tr><td>Измерение</td><td>Измерили тетрадь линейкой</td><td>21 см × 14 см</td></tr>
+          <tr><td>Эксперимент</td><td>Читали фразу шрифтом 12 и 20</td><td>8 с и 5 с</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><b>3. Диаграмма.</b> Перейдите в открытый Calc, щёлкните <b>один раз по белому полю диаграммы</b> (не по столбцам), нажмите <span class="kbd">Ctrl</span>+<span class="kbd">C</span>. Вернитесь в Writer, поставьте курсор после заголовка «3. Диаграмма», нажмите <span class="kbd">Ctrl</span>+<span class="kbd">V</span>. Если появится вопрос, выберите <b>«Встроенный объект LibreOffice»</b>.</p>
+    <p>Под диаграммой добавьте подпись по центру:</p>
+    <p class="fig" style="text-align:center;margin:8px 0;"><code class="inline">Рис. 1 — Время чтения фразы при разном размере шрифта</code></p>
+
+    <p><b>4. Вывод.</b> Напишите 2–3 предложения. Пример:</p>
+    <div class="callout pink">
+      «Я убедился(ась), что данные удобнее всего записывать в таблицу, а сравнивать — по диаграмме.
+      Самый точный способ познания — измерение: он даёт конкретное число. Эксперимент показал,
+      что крупный шрифт читать быстрее».
+    </div>
+
+    <div class="callout tip">
+      💡 Не копируйте вывод дословно — напишите своими словами, опираясь на свои результаты.
+    </div>
+  </div>
+
+  <!-- ШАГ 9 -->
+  <div class="step">
+    <span class="step-num">9</span><h2>Шаг 5. Оформите документ</h2>
+    <ul>
+      <li>Шрифт <b>Times New Roman</b> (или Liberation Serif), размер <b>14</b>.</li>
+      <li>Межстрочный интервал <b>1,5</b>: меню <b>«Формат» → «Абзац»</b> → вкладка «Отступы и интервалы».</li>
+      <li>Абзацный отступ (красная строка) <b>1,25 см</b> — там же, в диалоге «Абзац».</li>
+      <li>Основной текст — <b>по ширине</b>, заголовки — <b>по центру</b>.</li>
+      <li>У таблицы должны быть видны границы: <b>«Таблица» → «Свойства» → вкладка «Границы»</b>.</li>
+      <li>Подпись к рисунку — по центру, размер <b>12</b>.</li>
+    </ul>
+    <div class="callout ok">
+      ✅ Проверьте, что заголовок «Способы познания окружающего мира» и название работы не имеют красной строки, а остальные абзацы — имеют.
+    </div>
+  </div>
+
+  <!-- ШАГ 10 -->
+  <div class="step">
+    <span class="step-num">10</span><h2>Шаг 6. Сохраните и покажите учителю</h2>
+    <ol>
+      <li>Нажмите <span class="kbd">Ctrl</span>+<span class="kbd">S</span> → имя <code class="inline">Пр6_Отчёт_ФамилияИмя</code> → тип <b>ODF Text Document (.odt)</b> → <b>«Сохранить»</b>.</li>
+      <li>Откройте свою папку и убедитесь, что в ней лежат <b>два файла</b>: <code class="inline">.ods</code> и <code class="inline">.odt</code>.</li>
+      <li>Закройте и снова откройте оба файла двойным щелчком — они должны открыться без ошибок.</li>
+      <li>Поднимите руку. Покажите учителю отчёт на экране и окно папки, где сохранены файлы.</li>
+    </ol>
+    <div class="callout warn">
+      ⚠️ Не переименовывайте файлы после сохранения и не меняйте расширения — учитель проверяет именно эти имена.
+    </div>
+  </div>
+
+  <div class="stage" id="stage-e"><span class="stage-letter">Д</span>
+    <div>Проверка и оценивание<small>Чек-лист, критерии, ошибки</small></div>
+  </div>
+
+  <!-- ШАГ 11 -->
+  <div class="step">
+    <span class="step-num">11</span><h2>Проверьте себя по чек-листу</h2>
+    <p>Отмечайте пункты по одному. Когда все галочки будут стоять, работа готова.</p>
+
+    <div class="checklist">
+      <div class="checklist-head">
+        <h3>✅ Чек-лист готовности</h3>
+        <span class="check-progress" id="checkProgress">Выполнено 0 из 10</span>
+      </div>
+      <div class="check-bar"><div id="checkBar"></div></div>
+
+      <label><input type="checkbox" class="pcheck"> Папка <b>Рабочий стол → 6 класс → 6а/6б/6в/6г → Фамилия Имя</b> создана.</label>
+      <label><input type="checkbox" class="pcheck"> Файл <b>Пр6_Данные_ФамилияИмя.ods</b> сохранён в эту папку.</label>
+      <label><input type="checkbox" class="pcheck"> Файл <b>Пр6_Отчёт_ФамилияИмя.odt</b> сохранён в эту папку.</label>
+      <label><input type="checkbox" class="pcheck"> В отчёте есть титул и все 4 раздела.</label>
+      <label><input type="checkbox" class="pcheck"> Таблица в Writer совпадает с данными в Calc.</label>
+      <label><input type="checkbox" class="pcheck"> В Calc посчитана площадь тетради (ячейка E2).</label>
+      <label><input type="checkbox" class="pcheck"> Диаграмма вставлена в отчёт и имеет подпись «Рис. 1».</label>
+      <label><input type="checkbox" class="pcheck"> В выводе объяснено, какой способ познания самый точный.</label>
+      <label><input type="checkbox" class="pcheck"> Соблюдены оформление: шрифт 14, интервал 1,5, отступ 1,25 см.</label>
+      <label><input type="checkbox" class="pcheck"> Я закрыл(а) и снова открыл(а) оба файла — они открываются.</label>
+    </div>
+
+    <div class="callout tip">
+      💡 Если какой-то пункт не выполняется, вернитесь к нужному шагу: за папку отвечает шаг 1, за таблицу — шаг 3, за отчёт — шаг 4.
+    </div>
+  </div>
+
+  <!-- ШАГ 12 -->
+  <div class="step">
+    <span class="step-num">12</span><h2>Как оценивается работа</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Оценка</th><th>Что сделано</th></tr></thead>
+        <tbody>
+          <tr><td><b>5</b></td><td>Оба файла в правильной папке, данные верные, таблица и диаграмма оформлены, вывод самостоятельный и грамотный.</td></tr>
+          <tr><td><b>4</b></td><td>Всё выполнено, но есть 1–2 недочёта в оформлении: например, нет подписи к рисунку или не тот интервал.</td></tr>
+          <tr><td><b>3</b></td><td>Есть отчёт и таблица, но отсутствует диаграмма или вывод.</td></tr>
+          <tr><td><b>2</b></td><td>Задание выполнено частично, файлы не сохранились в нужной папке с буквой класса.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ШАГ 13 -->
+  <div class="step">
+    <span class="step-num">13</span><h2>Частые ошибки в Astra Linux</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Проблема</th><th>Как исправить</th></tr></thead>
+        <tbody>
+          <tr><td>Имя файла набрано латиницей вместо кириллицы.</td><td>Переключите раскладку (<span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>) и переименуйте файл.</td></tr>
+          <tr><td>Файл сохранился не туда.</td><td>В окне сохранения слева выберите «Рабочий стол» и проверьте путь вверху.</td></tr>
+          <tr><td>LibreOffice предлагает формат Word/Excel.</td><td>Выберите <b>ODF Text Document (.odt)</b> или <b>ODF Spreadsheet (.ods)</b>.</td></tr>
+          <tr><td>Диаграмма не вставляется в Writer.</td><td>Скопируйте её, кликнув один раз по белому полю диаграммы; в Writer — <span class="kbd">Ctrl</span>+<span class="kbd">V</span> и выберите «Встроенный объект».</td></tr>
+          <tr><td>Русский текст отображается кракозябрами.</td><td>Установите шрифт Times New Roman или DejaVu Serif.</td></tr>
+          <tr><td>Формула в E2 показывает текст, а не число.</td><td>Проверьте, что в начале введён знак <code class="inline">=</code> без пробела.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ШАГ 14 -->
+  <div class="step">
+    <span class="step-num">14</span><h2>Дополнительное задание</h2>
+    <p>Если закончили раньше других, добавьте в конец отчёта раздел <b>«Способы познания в других предметах»</b>: запишите по одному примеру наблюдения (биология), измерения (физика) и эксперимента (химия).</p>
+    <div class="callout ok">
+      🏆 За дополнительное задание можно получить бонусный балл, если примеры не повторяют примеры из практической работы.
+    </div>
+  </div>
+
+  <!-- ШАГ 15 -->
+  <div class="step">
+    <span class="step-num">15</span><h2>Мини-словарик</h2>
+    <div class="goals">
+      <div class="goal-card blue"><h4>Наблюдение</h4><p>Целенаправленное рассматривание предмета или явления.</p></div>
+      <div class="goal-card green"><h4>Измерение</h4><p>Сравнение величины с единицей измерения, результат — число.</p></div>
+      <div class="goal-card amber"><h4>Эксперимент</h4><p>Опыт, который проверяет предположение в одинаковых условиях.</p></div>
+      <div class="goal-card pink"><h4>Компьютерный документ</h4><p>Информация, оформленная на компьютере и сохранённая в файле.</p></div>
+      <div class="goal-card blue"><h4>Формула</h4><p>Запись в ячейке Calc, начинается со знака «=» и вычисляет значение.</p></div>
+      <div class="goal-card green"><h4>Диаграмма</h4><p>Наглядное представление данных; позволяет быстро сравнивать числа.</p></div>
+      <div class="goal-card amber"><h4>ODS</h4><p>Формат файла таблицы LibreOffice Calc.</p></div>
+      <div class="goal-card pink"><h4>ODT</h4><p>Формат файла текстового документа LibreOffice Writer.</p></div>
+    </div>
+  </div>
+
+  <div class="final-card">
+    <h2>🏆 Работа готова!</h2>
+    <p>Теперь вы умеете собирать данные наблюдения, измерения и опыта, оформлять их в таблице
+    и представлять результаты в виде отчёта с диаграммой.</p>
+    <p style="font-weight:700;color:#166534;">Рабочий стол → 6 класс → 6а/6б/6в/6г → Фамилия Имя → Пр6_Данные…ods и Пр6_Отчёт…odt</p>
+    <p style="font-size:.9rem;color:#64748b;">Практическая работа № 6 · 6 класс · УМК Босовой · LibreOffice · Astra Linux 1.8</p>
+  </div>
+
+</div>
+
+<script src="../shared/account.js"></script>
+<script src="../shared/nav-auth.js"></script>
+<script>
+(function () {
+  var boxes = Array.from(document.querySelectorAll('.pcheck'));
+  var label = document.getElementById('checkProgress');
+  var bar = document.getElementById('checkBar');
+  if (!boxes.length || !label || !bar) return;
+
+  function update() {
+    var done = boxes.filter(function (b) { return b.checked; }).length;
+    var total = boxes.length;
+    bar.style.width = (done / total * 100) + '%';
+    if (done === total) {
+      label.textContent = 'Всё готово! 🎉';
+    } else {
+      label.textContent = 'Выполнено ' + done + ' из ' + total;
+    }
+  }
+
+  boxes.forEach(function (b) { b.addEventListener('change', update); });
+  update();
+})();
+</script>
+</body>
+</html>
