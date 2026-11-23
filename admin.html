@@ -96,6 +96,52 @@
   <div class="dash-card">
     <h2>👥 Аккаунты</h2>
     <p class="dash-muted">Роль и права проверяются сервером по записи в таблице — не по данным браузера.</p>
+
+    <div class="dash-form" style="max-width:none;margin-bottom:14px;">
+      <div class="form-row">
+        <div>
+          <label for="accountSearch">Поиск</label>
+          <input id="accountSearch" type="search" placeholder="Имя, класс, роль, доступ">
+        </div>
+        <div>
+          <label for="accountClassFilter">Класс</label>
+          <select id="accountClassFilter"><option value="">Все классы</option></select>
+        </div>
+        <div>
+          <label for="accountLetterFilter">Буква</label>
+          <select id="accountLetterFilter">
+            <option value="">Все буквы</option>
+            <option value="а">а</option><option value="б">б</option>
+            <option value="в">в</option><option value="г">г</option>
+          </select>
+        </div>
+        <div>
+          <label for="accountRoleFilter">Роль</label>
+          <select id="accountRoleFilter">
+            <option value="">Все роли</option>
+            <option value="student">Ученик</option>
+            <option value="teacher">Учитель</option>
+            <option value="parent">Родитель</option>
+            <option value="admin">Администратор</option>
+          </select>
+        </div>
+        <div>
+          <label for="accountSort">Сортировка</label>
+          <select id="accountSort">
+            <option value="name-asc">Фамилия А → Я</option>
+            <option value="name-desc">Фамилия Я → А</option>
+            <option value="class-asc">Класс 5 → 11</option>
+            <option value="class-desc">Класс 11 → 5</option>
+            <option value="role-asc">Роль</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="dash-btn ghost small" type="button" id="resetAccountFilters">Сбросить фильтры</button>
+        <span class="dash-muted" id="accountsFound"></span>
+      </div>
+    </div>
+
     <div class="table-scroll">
       <table class="dash-table" id="accountsTable" hidden>
         <thead>
@@ -105,7 +151,7 @@
       </table>
     </div>
     <div class="empty-state" id="accountsEmpty" hidden>
-      <span class="empty-emoji">📭</span><div>Аккаунтов пока нет.</div>
+      <span class="empty-emoji">📭</span><div id="accountsEmptyText">Аккаунтов пока нет.</div>
     </div>
   </div>
 
@@ -192,6 +238,8 @@
 
   var SERVICE_CLASSES = ['Учитель', 'Учителя', 'Родитель', 'Родители', 'Администратор', 'Администрация'];
   var LETTERS = ['а', 'б', 'в', 'г'];
+  var CLASS_BASES = ['5 класс','6 класс','7 класс','8 класс','9 класс','10 класс','11 класс'];
+  var SERVICE_GROUP = '__service__';
 
   function composeClass_(baseId, letterId) {
     var base = document.getElementById(baseId).value;
@@ -265,20 +313,142 @@
     }).join('');
   }
 
+  function lower_(value) {
+    return String(value == null ? '' : value).trim().toLowerCase();
+  }
+
+  function classBaseRank_(base) {
+    var m = /^(\d+)/.exec(String(base || ''));
+    return m ? Number(m[1]) : 100;
+  }
+
+  function accountClassGroup_(account) {
+    if (account.role !== 'student') return SERVICE_GROUP;
+    var base = Account.baseClass(account.className);
+    if (!base || SERVICE_CLASSES.indexOf(base) !== -1) return SERVICE_GROUP;
+    return base;
+  }
+
+  function populateAccountClassFilter() {
+    var sel = document.getElementById('accountClassFilter');
+    var current = sel.value;
+    var bases = CLASS_BASES.slice();
+
+    accounts.forEach(function (a) {
+      var group = accountClassGroup_(a);
+      if (group !== SERVICE_GROUP && bases.indexOf(group) === -1) bases.push(group);
+    });
+
+    bases.sort(function (a, b) {
+      return classBaseRank_(a) - classBaseRank_(b);
+    });
+
+    sel.innerHTML = '<option value="">Все классы</option>' +
+      bases.map(function (base) {
+        return '<option value="' + esc(base) + '">' + esc(base) + '</option>';
+      }).join('') +
+      '<option value="' + SERVICE_GROUP + '">Служебные аккаунты</option>';
+
+    sel.value = current;
+    if (!current || !Array.prototype.some.call(sel.options, function (o) { return o.value === current; })) {
+      sel.value = '';
+    }
+  }
+
+  function accountSearchText_(account) {
+    return lower_([
+      account.name,
+      account.className,
+      account.role,
+      Account.roleLabel(account.role),
+      account.scope,
+      account.childKey
+    ].join(' '));
+  }
+
+  function matchesAccountFilters_(account) {
+    var search = lower_(document.getElementById('accountSearch').value);
+    var classFilter = document.getElementById('accountClassFilter').value;
+    var letter = document.getElementById('accountLetterFilter').value;
+    var role = document.getElementById('accountRoleFilter').value;
+
+    if (search && accountSearchText_(account).indexOf(search) === -1) return false;
+    if (classFilter) {
+      if (classFilter === SERVICE_GROUP) {
+        if (account.role === 'student') return false;
+      } else if (accountClassGroup_(account) !== classFilter) {
+        return false;
+      }
+    }
+    if (letter && (account.role !== 'student' || Account.subclassOf(account.className) !== letter)) return false;
+    if (role && account.role !== role) return false;
+    return true;
+  }
+
+  function accountClassSortRank_(account) {
+    if (account.role !== 'student') return 100;
+    var base = Account.baseClass(account.className);
+    var m = /^(\d+)/.exec(base);
+    return m ? Number(m[1]) : 100;
+  }
+
+  function compareAccounts_(a, b) {
+    var collator = new Intl.Collator('ru', { numeric: true, sensitivity: 'base' });
+    var byName = collator.compare(String(a.name || ''), String(b.name || ''));
+    var mode = document.getElementById('accountSort').value;
+
+    if (mode === 'name-desc') return -byName;
+    if (mode === 'role-asc') {
+      var byRole = collator.compare(Account.roleLabel(a.role), Account.roleLabel(b.role));
+      return byRole || byName;
+    }
+    if (mode === 'class-asc' || mode === 'class-desc') {
+      var ra = accountClassSortRank_(a);
+      var rb = accountClassSortRank_(b);
+      if (ra !== rb) {
+        if (ra === 100) return 1;
+        if (rb === 100) return -1;
+        return mode === 'class-asc' ? ra - rb : rb - ra;
+      }
+      var la = (a.role === 'student' ? Account.subclassOf(a.className) : '') || '';
+      var lb = (b.role === 'student' ? Account.subclassOf(b.className) : '') || '';
+      var byLetter = collator.compare(la, lb);
+      return byLetter || byName;
+    }
+    return byName;
+  }
+
+  function visibleAccounts_() {
+    return accounts.filter(matchesAccountFilters_).sort(compareAccounts_);
+  }
+
   function renderAccounts() {
     var table = document.getElementById('accountsTable');
     var empty = document.getElementById('accountsEmpty');
+    var emptyText = document.getElementById('accountsEmptyText');
+    var found = document.getElementById('accountsFound');
+    var list = visibleAccounts_();
+
+    found.textContent = accounts.length ? 'Найдено: ' + list.length + ' из ' + accounts.length : '';
 
     if (!accounts.length) {
       table.hidden = true;
       empty.hidden = false;
+      emptyText.textContent = 'Аккаунтов пока нет.';
+      return;
+    }
+
+    if (!list.length) {
+      table.hidden = true;
+      empty.hidden = false;
+      emptyText.textContent = 'По выбранным фильтрам ничего не найдено.';
       return;
     }
 
     empty.hidden = true;
     table.hidden = false;
 
-    document.getElementById('accountsBody').innerHTML = accounts.map(function (a) {
+    document.getElementById('accountsBody').innerHTML = list.map(function (a) {
       return '<tr data-id="' + esc(a.id) + '">' +
         '<td><b>' + esc(a.name) + '</b><small>' + esc(a.className) + '</small>' +
           classSelectFor_(a) + '</td>' +
@@ -312,6 +482,7 @@
 
   function renderAll() {
     renderStats();
+    populateAccountClassFilter();
     renderAccounts();
     renderChildKeys();
   }
@@ -393,6 +564,25 @@
     syncCreatePasswordMode();
   });
   document.getElementById('newGeneratePassword').addEventListener('change', syncCreatePasswordMode);
+
+  [
+    { id: 'accountSearch', event: 'input' },
+    { id: 'accountClassFilter', event: 'change' },
+    { id: 'accountLetterFilter', event: 'change' },
+    { id: 'accountRoleFilter', event: 'change' },
+    { id: 'accountSort', event: 'change' }
+  ].forEach(function (filter) {
+    document.getElementById(filter.id).addEventListener(filter.event, renderAccounts);
+  });
+
+  document.getElementById('resetAccountFilters').addEventListener('click', function () {
+    document.getElementById('accountSearch').value = '';
+    document.getElementById('accountClassFilter').value = '';
+    document.getElementById('accountLetterFilter').value = '';
+    document.getElementById('accountRoleFilter').value = '';
+    document.getElementById('accountSort').value = 'name-asc';
+    renderAccounts();
+  });
 
   document.getElementById('createForm').addEventListener('submit', function (e) {
     e.preventDefault();
