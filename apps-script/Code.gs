@@ -12,6 +12,7 @@
      adminCreateAccount { token, name, className, password, role, scope }
      adminSetRole       { token, accountId, role, scope }
      adminResetPassword { token, accountId, newPassword }
+     adminDeleteAccount { token, accountId }                       // только admin
 
    Старый формат без action тоже поддерживается: строка просто
    дописывается в лист результатов (как раньше).
@@ -40,7 +41,7 @@ var VALID_ROLES = ['student', 'teacher', 'parent', 'admin'];
 
 // Метка версии видна при открытии /exec в браузере — так легко проверить,
 // что на сайте работает именно эта версия скрипта.
-var SCRIPT_VERSION = '2026-11-23-teacher-create-v1';
+var SCRIPT_VERSION = '2026-11-23-admin-delete-v1';
 
 /* ============================================================
    ТОЧКИ ВХОДА
@@ -71,6 +72,7 @@ function doPost(e) {
       case 'adminCreateAccount':  return json_(adminCreateAccount_(body));
       case 'adminSetRole':        return json_(adminSetRole_(body));
       case 'adminResetPassword':  return json_(adminResetPassword_(body));
+      case 'adminDeleteAccount':  return json_(adminDeleteAccount_(body));
       case 'setStudentClass':     return json_(setStudentClass_(body));
       case 'createStudentAccount':return json_(createStudentAccount_(body));
       case 'adminUpdateAccount':  return json_(adminUpdateAccount_(body));
@@ -856,6 +858,106 @@ function adminUpdateAccount_(body) {
   } finally {
     lock.releaseLock();
   }
+}
+
+/**
+ * Админ удаляет аккаунт и все привязки к нему:
+ * результаты ученика и ключ ребёнка в scope родителей.
+ */
+function adminDeleteAccount_(body) {
+  var caller = accountFromToken_(body.token);
+  requireRole_(caller, ['admin']);
+
+  var accountId = String(body.accountId || '').trim();
+  if (!accountId) throwAppError_('BAD_REQUEST', 'Не выбран аккаунт.');
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+
+  try {
+    var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
+    ensureHeaders_(accounts, ACCOUNT_HEADERS);
+    var account = getAccountById_(accounts, accountId);
+    if (!account) throwAppError_('NOT_FOUND', 'Аккаунт не найден.');
+
+    var role = normalizeRole_(account.role);
+    if (role === 'admin' && countAdmins_(accounts) <= 1) {
+      throwAppError_('LAST_ADMIN', 'Нельзя удалить последнего администратора.');
+    }
+
+    var map = headerMap_(accounts);
+    var parentLinks = role === 'student'
+      ? removeChildLinksForDeletedAccount_(accounts, map, account)
+      : 0;
+    var results = deleteResultsForAccount_(account);
+
+    accounts.deleteRows(account._row, 1);
+
+    return success_({
+      account: accountPublic_(account),
+      deleted: { results: results, parentLinks: parentLinks }
+    });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/** Убирает ключ удалённого ученика из scope всех родителей. */
+function removeChildLinksForDeletedAccount_(sheet, map, account) {
+  var values = sheet.getDataRange().getValues();
+  var now = new Date();
+  var changed = 0;
+
+  for (var i = 1; i < values.length; i++) {
+    var acc = accountFromRow_(values[i], map, i + 1);
+    if (normalizeRole_(acc.role) !== 'parent' || !acc.scope) continue;
+
+    var keys = splitScope_(acc.scope);
+    var kept = [];
+    for (var j = 0; j < keys.length; j++) {
+      if (!parentScopeMatches_([keys[j]], account.name, account.className)) {
+        kept.push(keys[j]);
+      }
+    }
+    if (kept.length === keys.length) continue;
+
+    sheet.getRange(acc._row, map['scope']).setValue(kept.join(';'));
+    sheet.getRange(acc._row, map['updatedAt']).setValue(now);
+    changed++;
+  }
+  return changed;
+}
+
+/** Удаляет результаты аккаунта, включая старые строки без accountId. */
+function deleteResultsForAccount_(account) {
+  var sheet = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), RESULTS_SHEET);
+  ensureHeaders_(sheet, RESULT_HEADERS);
+  var map = headerMap_(sheet);
+  var values = sheet.getDataRange().getValues();
+  var rowsToDelete = [];
+  var accountId = String(account.id || '');
+  var name = normalizeName_(account.name).toLowerCase();
+  var isStudent = normalizeRole_(account.role) === 'student';
+
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    var rowId = String(cell_(row, map, 'accountId') || '').trim();
+    var belongs = false;
+
+    if (accountId && rowId === accountId) {
+      belongs = true;
+    } else if (!rowId && isStudent) {
+      belongs = normalizeName_(cell_(row, map, 'studentName')).toLowerCase() === name &&
+        classEquivalent_(cell_(row, map, 'className'), account.className);
+    }
+
+    if (belongs) rowsToDelete.push(i + 1);
+  }
+
+  for (var j = rowsToDelete.length - 1; j >= 0; j--) {
+    sheet.deleteRows(rowsToDelete[j], 1);
+  }
+  return rowsToDelete.length;
 }
 
 /**

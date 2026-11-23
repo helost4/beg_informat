@@ -437,6 +437,18 @@
       .then(function (res) { return { account: res.account, credentials: res.credentials || null }; });
   }
 
+  /** Админ удаляет аккаунт вместе с результатами и ключом у родителей. */
+  function adminDeleteAccount(data) {
+    requireAuth();
+    return post('adminDeleteAccount', Object.assign({ token: token() }, data || {}))
+      .then(function (res) {
+        return {
+          account: res.account,
+          deleted: res.deleted || { results: 0, parentLinks: 0 }
+        };
+      });
+  }
+
   /* ---------------- ПОМОЩНИКИ ДЛЯ ИНТЕРФЕЙСА ---------------- */
 
   /** «5 а», «5-а», «5А» → «5а»; «5 класс» остаётся как есть. */
@@ -564,6 +576,7 @@
     setStudentClass: setStudentClass,
     createStudentAccount: createStudentAccount,
     adminUpdateAccount: adminUpdateAccount,
+    adminDeleteAccount: adminDeleteAccount,
     normalizeClassName: normalizeClassName,
     baseClass: baseClass,
     subclassOf: subclassOf,

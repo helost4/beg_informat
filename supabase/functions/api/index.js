@@ -161,6 +161,51 @@ async function countAdmins(deps) {
   return rows ? rows.length : 0;
 }
 
+async function deleteAccount(id, deps) {
+  const rows = await db('DELETE', 'users', {
+    query: 'id=eq.' + eq(id),
+    prefer: 'return=representation'
+  }, deps);
+  return Array.isArray(rows) && rows[0] ? accountFromRow(rows[0]) : null;
+}
+
+async function deleteAttemptsByIds(ids, deps) {
+  const list = Object.keys(ids).filter(Boolean);
+  if (!list.length) return 0;
+  await db('DELETE', 'attempts', {
+    query: 'id=in.(' + list.map(eq).join(',') + ')',
+    prefer: 'return=representation'
+  }, deps);
+  return list.length;
+}
+
+async function deleteAttemptsForAccount(account, deps) {
+  const ids = {};
+  const userId = String(account.id || '');
+
+  if (userId) {
+    const byUser = await db('GET', 'attempts', {
+      query: 'select=id&user_id=eq.' + eq(userId)
+    }, deps);
+    (byUser || []).forEach(row => { ids[String(row.id)] = true; });
+  }
+
+  const name = normalizeName(account.name);
+  if (account.role === 'student' && name) {
+    const byName = await db('GET', 'attempts', {
+      query: 'select=' + ATTEMPT_COLUMNS + '&student_name=eq.' + eq(name)
+    }, deps);
+    (byName || []).forEach(row => {
+      if (row.user_id) return;
+      if (normalizeName(row.student_name).toLowerCase() !== name.toLowerCase()) return;
+      if (!classEquivalent(row.class_name, account.className)) return;
+      ids[String(row.id)] = true;
+    });
+  }
+
+  return deleteAttemptsByIds(ids, deps);
+}
+
 async function insertAttempt(row, deps) {
   let rows = await db('POST', 'attempts', {
     query: 'on_conflict=client_id',
@@ -963,6 +1008,32 @@ async function adminUpdateAccount(body, deps) {
   return success(res);
 }
 
+async function adminDeleteAccount(body, deps) {
+  await requireRole(await accountFromToken(body.token, deps), ['admin']);
+
+  const accountId = String(body.accountId || '').trim();
+  if (!accountId) fail('BAD_REQUEST', 'Не выбран аккаунт.');
+
+  const account = await getAccountById(accountId, deps);
+  if (!account) fail('NOT_FOUND', 'Аккаунт не найден.');
+  if (account.role === 'admin' && await countAdmins(deps) <= 1) {
+    fail('LAST_ADMIN', 'Нельзя удалить последнего администратора.');
+  }
+
+  let parentLinks = 0;
+  let results = 0;
+  if (account.role === 'student') {
+    parentLinks = await removeChildKeyFromParentScopes(account, deps);
+  }
+  results = await deleteAttemptsForAccount(account, deps);
+  await deleteAccount(account.id, deps);
+
+  return success({
+    account: accountPublic(account),
+    deleted: { results: results, parentLinks: parentLinks }
+  });
+}
+
 async function setStudentClass(body, deps) {
   const caller = await accountFromToken(body.token, deps);
   requireRole(caller, ['teacher', 'admin']);
@@ -1025,6 +1096,27 @@ async function updateParentScopesForClassChange(oldKey, newKey, deps) {
   }
 }
 
+async function removeChildKeyFromParentScopes(account, deps) {
+  const accounts = await listAccounts(deps);
+  let changed = 0;
+
+  for (const acc of accounts) {
+    if (acc.role !== 'parent' || !acc.scope) continue;
+    const keys = splitScope(acc.scope);
+    const kept = keys.filter(function (key) {
+      return !parentScopeMatches([key], account.name, account.className);
+    });
+    if (kept.length === keys.length) continue;
+
+    await updateAccount(acc.id, {
+      scope: kept.join(';'),
+      updated_at: new Date().toISOString()
+    }, deps);
+    changed++;
+  }
+  return changed;
+}
+
 async function legacySave(body, deps) {
   const row = await insertAttempt({
     client_id: String(body.clientId || body._id || '').trim() || null,
@@ -1056,7 +1148,8 @@ const ACTIONS = {
   adminResetPassword: adminResetPassword,
   setStudentClass: setStudentClass,
   createStudentAccount: createStudentAccount,
-  adminUpdateAccount: adminUpdateAccount
+  adminUpdateAccount: adminUpdateAccount,
+  adminDeleteAccount: adminDeleteAccount
 };
 
 async function parseBody(request) {

@@ -68,9 +68,9 @@ id, name, className, track, loginKey, salt, passwordHash, createdAt, updatedAt, 
 > Без шагов 2–5 фронтенд будет готов, но вход и сохранение результатов работать не будут:
 > старый скрипт не знает действий `login`, `saveResult`, `myResults`,
 > `viewResults`, `admin*`, `setStudentClass`, `createStudentAccount`,
-> `adminUpdateAccount`.
+> `adminUpdateAccount`, `adminDeleteAccount`.
 >
-> Текущая версия скрипта — `2026-11-23-teacher-create-v1`. После деплоя откройте
+> Текущая версия скрипта — `2026-11-23-admin-delete-v1`. После деплоя откройте
 > URL `/exec` в браузере: в ответе должна быть эта версия.
 
 ## Роли и права
@@ -124,6 +124,8 @@ makeAdmin('Иванов Иван', '10 класс')
 сгенерировать пароль». Пароль появится один раз; сразу нажмите «Печать
 карточек» и раздайте карточки ученикам. В панели администратора (`admin.html`)
 доступны такие же действия плюс редактирование ФИО, класса и пароля ученика.
+Там же можно удалить аккаунт: вместе с ним удалятся результаты ученика и ключ
+ребёнка в `scope` родителей. Последнего администратора удалить нельзя.
 
 
 Для ручного назначения ролей есть вспомогательные функции:
@@ -149,6 +151,8 @@ createStudentAccount { token, name, className }                 → created[], e
                      { token, students: [{name, className}] }   (роль teacher/admin)
 adminUpdateAccount   { token, accountId, name?, className?,     → account, credentials?
                        newPassword?, generatePassword? }         (только admin, только student)
+adminDeleteAccount   { token, accountId }                       → account, deleted
+                                                                (только admin)
 ```
 
 `createStudentAccount` создаёт учеников с серверно-сгенерированным паролем.
@@ -159,6 +163,12 @@ adminUpdateAccount   { token, accountId, name?, className?,     → account, cre
 `adminUpdateAccount` позволяет администратору изменить ФИО, класс и/или пароль
 ученика. При смене ФИО/класса обновляются `loginKey` ученика и ключи ребёнка в
 `scope` родителей; исторические строки попыток не переписываются.
+
+`adminDeleteAccount` удаляет аккаунт и все привязки к нему. Для ученика это
+все строки результатов (включая старые строки без `accountId`) и ключ ребёнка
+в `scope` родителей. В ответе приходит счётчик `deleted.results` и
+`deleted.parentLinks`. Удаление последнего администратора запрещено (`LAST_ADMIN`).
+Операция необратима: интерфейс запрашивает обычное подтверждение браузера.
 
 `viewResults` доступен ролям `teacher`, `parent` и `admin`. Учитель получит
 только строки своих классов, родитель — только привязанных детей. Ответы

@@ -274,6 +274,11 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  function isSelfAccount_(account) {
+    var selfId = student && (student.accountId || student.id);
+    return !!selfId && String(account.id) === String(selfId);
+  }
+
   function setStatus(text, kind) {
     statusEl.textContent = text;
     statusEl.className = 'dash-status' + (kind ? ' ' + kind : '');
@@ -459,6 +464,9 @@
           (a.role === 'student' ? '<button class="dash-btn small edit-student" type="button" data-id="' + esc(a.id) + '">✏️ Изменить</button>' : '') +
           '<button class="dash-btn small save-role" type="button" data-id="' + esc(a.id) + '">💾 Роль/доступ</button>' +
           '<button class="dash-btn small danger reset-pwd" type="button" data-id="' + esc(a.id) + '">🔑 Пароль</button>' +
+          (isSelfAccount_(a)
+            ? '<button class="dash-btn small danger" type="button" disabled title="Нельзя удалить свой аккаунт">🗑 Удалить</button>'
+            : '<button class="dash-btn small danger delete-account" type="button" data-id="' + esc(a.id) + '">🗑 Удалить</button>') +
         '</div></td>' +
         '</tr>';
     }).join('');
@@ -667,6 +675,7 @@
     var saveBtn = e.target.closest('.save-role');
     var resetBtn = e.target.closest('.reset-pwd');
     var editBtn = e.target.closest('.edit-student');
+    var deleteBtn = e.target.closest('.delete-account');
 
     if (saveBtn) {
       var row = saveBtn.closest('tr');
@@ -711,6 +720,31 @@
       var account = accounts.find(function (a) { return a.id === editBtn.dataset.id; });
       if (!account) return;
       openEditStudent(account);
+      return;
+    }
+
+    if (deleteBtn) {
+      var account = accounts.find(function (a) { return a.id === deleteBtn.dataset.id; });
+      if (!account) return;
+      var label = account.name + (account.className ? ' · ' + account.className : '');
+      var detail = account.role === 'student'
+        ? 'Будут удалены все его результаты и ключ ребёнка у родителей.'
+        : 'Будет удалён аккаунт и все его результаты.';
+      if (!window.confirm('Удалить аккаунт «' + label + '»?\n\n' + detail +
+          '\n\nОтменить это действие нельзя.')) return;
+
+      deleteBtn.disabled = true;
+      setStatus('Удаляем аккаунт…');
+      Account.adminDeleteAccount({ accountId: account.id }).then(function (res) {
+        var deleted = res.deleted || {};
+        setStatus('Аккаунт удалён. Результатов: ' + (deleted.results || 0) +
+          '. Связей у родителей: ' + (deleted.parentLinks || 0) + '.', 'ok');
+        return reload();
+      }).catch(function (err) {
+        setStatus('Ошибка: ' + (err && err.message ? err.message : err), 'error');
+      }).then(function () {
+        deleteBtn.disabled = false;
+      });
     }
   });
 

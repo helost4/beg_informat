@@ -69,6 +69,15 @@ function makeFetch(db) {
         Object.assign(row, body);
         return json(prefer.includes('representation') ? [row] : []);
       }
+      if (method === 'DELETE') {
+        const raw = String(q.get('id') || '');
+        const ids = raw.startsWith('in.(')
+          ? raw.slice(4, -1).split(',').map(v => decodeURIComponent(v))
+          : [raw.replace(/^eq\./, '')];
+        const removed = db.users.filter(r => ids.includes(String(r.id)));
+        db.users = db.users.filter(r => !ids.includes(String(r.id)));
+        return json(prefer.includes('representation') ? removed : []);
+      }
     }
 
     if (table === 'attempts') {
@@ -100,6 +109,15 @@ function makeFetch(db) {
         const row = Object.assign({ id: db.nextAttemptId++ }, body);
         db.attempts.push(row);
         return json(prefer.includes('representation') ? [row] : []);
+      }
+      if (method === 'DELETE') {
+        const raw = String(q.get('id') || '');
+        const ids = raw.startsWith('in.(')
+          ? raw.slice(4, -1).split(',').map(v => decodeURIComponent(v))
+          : [raw.replace(/^eq\./, '')];
+        const removed = db.attempts.filter(r => ids.includes(String(r.id)));
+        db.attempts = db.attempts.filter(r => !ids.includes(String(r.id)));
+        return json(prefer.includes('representation') ? removed : []);
       }
     }
 
@@ -460,6 +478,64 @@ const run = async () => {
     const notStudent = await post({ action: 'adminUpdateAccount', token: adminToken,
       accountId: 'teacher', name: 'Учитель Два' }, db);
     eq('нельзя менять не-ученика', notStudent.error, 'FORBIDDEN');
+  }
+
+  // 11. Админ удаляет аккаунт вместе с результатами и привязками родителей.
+  {
+    const solo = createDb();
+    const onlyAdmin = legacyAccount(solo, { id: 'only-admin', name: 'Один Админ',
+      class_name: 'Администрация', role: 'admin' });
+    onlyAdmin.password_hash = 'x';
+    const last = await post({ action: 'adminDeleteAccount',
+      token: await legacyToken('only-admin', Date.now() + 864e5), accountId: 'only-admin' }, solo);
+    eq('последний админ не удаляется', last.error, 'LAST_ADMIN');
+    eq('админ остался в базе', solo.users.length, 1);
+  }
+
+  {
+    const db = createDb();
+    const admin = legacyAccount(db, { id: 'admin', name: 'Админ', class_name: 'Администрация', role: 'admin' });
+    const teacher = legacyAccount(db, { id: 'teacher', name: 'Учитель', class_name: 'Учитель', role: 'teacher', scope: '5 класс' });
+    const parent = legacyAccount(db, { id: 'parent', name: 'Родитель', class_name: 'Родитель', role: 'parent',
+      scope: 'иванов иван|5а;петров пётр|6 класс' });
+    const student = legacyAccount(db, { id: 'student', name: 'Иванов Иван', class_name: '5а', role: 'student' });
+    const other = legacyAccount(db, { id: 'other', name: 'Петров Пётр', class_name: '6 класс', role: 'student' });
+    [admin, teacher, parent, student, other].forEach(a => { a.password_hash = 'x'; });
+
+    const adminToken = await legacyToken('admin', Date.now() + 864e5);
+    const teacherToken = await legacyToken('teacher', Date.now() + 864e5);
+
+    const mkRow = (id, user, lesson, cls) => ({ id, user_id: user ? user.id : null,
+      student_name: user ? user.name : 'Иванов Иван', class_name: cls, lesson, variant: 'A',
+      score: 4, max_score: 5, grade: 4, work_type: 'test',
+      created_at: '2026-01-0' + id + 'T00:00:00.000Z' });
+    db.attempts.push(mkRow(1, student, 'Своя', '5а'), mkRow(2, null, 'Старая', '5 класс'),
+      mkRow(3, other, 'Чужая', '6 класс'), mkRow(4, student, 'Ещё своя', '5а'));
+
+    const forbidden = await post({ action: 'adminDeleteAccount', token: teacherToken, accountId: 'student' }, db);
+    eq('учитель не может удалять', forbidden.error, 'FORBIDDEN');
+
+    const missing = await post({ action: 'adminDeleteAccount', token: adminToken, accountId: 'нет' }, db);
+    eq('удаление несуществующего', missing.error, 'NOT_FOUND');
+
+    const removed = await post({ action: 'adminDeleteAccount', token: adminToken, accountId: 'student' }, db);
+    check('adminDeleteAccount ok', removed.ok === true, JSON.stringify(removed));
+    eq('удалённый аккаунт в ответе', removed.account.id, 'student');
+    eq('удалено результатов', removed.deleted.results, 3);
+    eq('удалено связей у родителей', removed.deleted.parentLinks, 1);
+    check('аккаунт исчез', !db.users.some(u => u.id === 'student'));
+    eq('остались только чужие результаты', db.attempts.map(r => r.lesson).sort(), ['Чужая']);
+    eq('ключ ребёнка убран, другой остался', db.users.find(u => u.id === 'parent').scope,
+      'петров пётр|6 класс');
+
+    const oldToken = await legacyToken('student', Date.now() + 864e5);
+    const denied = await post({ action: 'myResults', token: oldToken }, db);
+    eq('токен удалённого не работает', denied.error, 'AUTH_REQUIRED');
+
+    const delTeacher = await post({ action: 'adminDeleteAccount', token: adminToken, accountId: 'teacher' }, db);
+    eq('учитель удалён', delTeacher.deleted.results, 0);
+    check('ученик не пострадал', db.users.some(u => u.id === 'other'));
+    eq('результат ученика остался', db.attempts.length, 1);
   }
 
   const ok = failures.length === 0;

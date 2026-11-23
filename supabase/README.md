@@ -118,7 +118,7 @@ values
 
 ### Подклассы
 
-Логика полностью совпадает с Apps Script (версия `2026-11-23-teacher-create-v1`):
+Логика полностью совпадает с Apps Script (версия `2026-11-23-admin-delete-v1`):
 
 ```
 setStudentClass       { token, accountId, className } → { ok, result, account }
@@ -126,12 +126,17 @@ createStudentAccount  { token, name, className } → { ok, result, created[], er
                       { token, students: [{name, className}] }
 adminUpdateAccount    { token, accountId, name?, className?, newPassword?, generatePassword? }
                                                 → { ok, result, account, credentials? }
+adminDeleteAccount    { token, accountId }        → { ok, result, account, deleted }
 ```
 
 Публичная регистрация (`register`) отключена: сервер возвращает
 `REGISTRATION_DISABLED`. Учеников создаёт учитель (только в своём `scope`) или
 администратор; пароль генерируется на сервере и показывается один раз.
 `adminUpdateAccount` доступен только администратору и только для роли `student`.
+`adminDeleteAccount` тоже доступен только администратору: он удаляет аккаунт,
+все результаты ученика (включая старые строки без `user_id`) и ключ ребёнка
+в `scope` родителей. Ответ содержит `deleted.results` и `deleted.parentLinks`.
+Последнего администратора удалить нельзя (`LAST_ADMIN`).
 
 - доступно `teacher` и `admin`; учитель ограничен своим `scope`, где `5 класс` включает `5а`, `5б`, …;
 - `className` нормализуется (`5 а` / `5-а` / `5А` → `5а`), некорректные значения — `BAD_REQUEST`, занятые — `ACCOUNT_EXISTS`;

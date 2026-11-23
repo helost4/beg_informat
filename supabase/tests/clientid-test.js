@@ -61,6 +61,13 @@ const Account = win.Account;
   ok('setStudentClass отправляет accountId', classReq.accountId === 'u2');
   ok('setStudentClass отправляет className', classReq.className === '5а');
 
+  const delRes = await Account.adminDeleteAccount({ accountId: 'u3' });
+  const delReq = sent[sent.length - 1];
+  ok('adminDeleteAccount отправляет действие', delReq.action === 'adminDeleteAccount');
+  ok('adminDeleteAccount отправляет токен', delReq.token === 'tok');
+  ok('adminDeleteAccount отправляет accountId', delReq.accountId === 'u3');
+  ok('adminDeleteAccount возвращает deleted', !!delRes.deleted && delRes.deleted.results === 0);
+
   ok('normalizeClassName: «5 а» → «5а»', Account.normalizeClassName('5 а') === '5а');
   ok('baseClass: «5а» → «5 класс»', Account.baseClass('5а') === '5 класс');
   ok('subclassOf: «5а» → «а»', Account.subclassOf('5а') === 'а');
