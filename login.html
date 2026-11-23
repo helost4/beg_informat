@@ -9,7 +9,7 @@
   .login-wrap{max-width:480px;margin:60px auto;padding:0 20px;}
   .login-card{background:#fff;border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(59,130,246,.18);border:1px solid #e2e8f0;}
   .login-card h1{font-size:1.6rem;text-align:center;margin:0 0 8px;background:linear-gradient(90deg,#3b82f6,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .login-card .sub{text-align:center;margin-bottom:22px;}
+  .login-card .sub{text-align:center;margin-bottom:22px;color:#475569;}
   .login-card label{display:block;font-weight:700;margin:16px 0 6px;color:#1e293b;font-size:.95rem;}
   .login-card input, .login-card select{width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e2e8f0;font-size:1rem;outline:none;background:#fff;}
   .login-card input:focus, .login-card select:focus{border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.15);}
@@ -21,23 +21,19 @@
   .login-note.show{display:block;}
   .login-hint{font-size:.8rem;color:#64748b;line-height:1.45;margin:8px 0 0;}
   .login-foot{text-align:center;color:#64748b;font-size:.82rem;margin-top:18px;line-height:1.5;}
+  .reg-info{background:#f0fdf4;border:2px solid #86efac;color:#166534;padding:14px 16px;border-radius:12px;margin-top:18px;font-size:.9rem;line-height:1.55;}
+  .reg-info b{color:#14532d;}
 </style>
 </head>
 <body>
 <div class="login-wrap">
   <div class="login-card">
     <h1>🧑‍🎓 Личный кабинет</h1>
-    <p class="sub muted">Войдите или создайте аккаунт, чтобы сохранять результаты</p>
-
-    <div class="auth-tabs" role="tablist" aria-label="Вход и регистрация">
-      <button type="button" class="auth-tab active" data-auth-tab="login" role="tab" aria-selected="true">Вход</button>
-      <button type="button" class="auth-tab" data-auth-tab="register" role="tab" aria-selected="false">Регистрация</button>
-    </div>
+    <p class="sub">Войдите, чтобы сохранять результаты и видеть свой прогресс</p>
 
     <div class="login-note" id="legacyNote"></div>
     <div class="login-error" id="authError" role="alert"></div>
 
-    <!-- ======================= ВХОД ======================= -->
     <form id="loginForm" autocomplete="on">
       <label for="loginName">Фамилия и имя</label>
       <input type="text" id="loginName" name="username" placeholder="Например: Иванов Иван" autocomplete="username" required>
@@ -81,46 +77,11 @@
       <button type="submit" class="btn" id="loginSubmit">Войти →</button>
     </form>
 
-    <!-- ==================== РЕГИСТРАЦИЯ ==================== -->
-    <form id="registerForm" class="hidden" autocomplete="on">
-      <label for="regName">Фамилия и имя</label>
-      <input type="text" id="regName" name="name" placeholder="Например: Иванов Иван" autocomplete="name" required>
-
-      <label for="regClass">Класс</label>
-      <select id="regClass" required>
-        <option value="">— выберите класс —</option>
-        <option value="5 класс">5 класс</option>
-        <option value="6 класс">6 класс</option>
-        <option value="7 класс">7 класс</option>
-        <option value="8 класс">8 класс</option>
-        <option value="9 класс">9 класс</option>
-        <option value="10 класс">10 класс</option>
-        <option value="11 класс">11 класс</option>
-      </select>
-
-      <label for="regLetter">Буква подкласса</label>
-      <select id="regLetter">
-        <option value="">без буквы</option>
-        <option value="а">а</option>
-        <option value="б">б</option>
-        <option value="в">в</option>
-        <option value="г">г</option>
-      </select>
-
-      <label for="regPassword">Пароль</label>
-      <div class="password-wrap">
-        <input type="password" id="regPassword" placeholder="Минимум 6 символов" autocomplete="new-password" minlength="6" required>
-        <button type="button" class="password-toggle" data-toggle-password="regPassword" aria-label="Показать пароль">👁</button>
-      </div>
-
-      <label for="regPassword2">Повторите пароль</label>
-      <div class="password-wrap">
-        <input type="password" id="regPassword2" placeholder="Ещё раз" autocomplete="new-password" minlength="6" required>
-        <button type="button" class="password-toggle" data-toggle-password="regPassword2" aria-label="Показать пароль">👁</button>
-      </div>
-
-      <button type="submit" class="btn" id="registerSubmit">Создать аккаунт →</button>
-    </form>
+    <div class="reg-info">
+      <b>Нет аккаунта?</b><br>
+      Самостоятельная регистрация отключена. Аккаунт создаёт учитель или администратор —
+      вы получите фамилию, класс и пароль для входа. Если забыли пароль, обратитесь к учителю.
+    </div>
 
     <p class="login-foot">
       Пароль хранится только в виде соли и хеша.<br>
@@ -137,9 +98,6 @@
   var errorEl = document.getElementById('authError');
   var noteEl = document.getElementById('legacyNote');
   var loginForm = document.getElementById('loginForm');
-  var registerForm = document.getElementById('registerForm');
-  var tabs = document.querySelectorAll('[data-auth-tab]');
-
   var SERVICE_CLASSES = ['Учитель', 'Родитель', 'Администратор'];
 
   function composeClass_(baseId, letterId) {
@@ -151,74 +109,36 @@
 
   function fillLegacyClass_(legacyClass) {
     if (!legacyClass) return;
-    var roles = {
-      'Администрация': 'Администратор',
-      'Учителя': 'Учитель',
-      'Родители': 'Родитель'
-    };
+    var roles = { 'Администрация': 'Администратор', 'Учителя': 'Учитель', 'Родители': 'Родитель' };
     var loginClass = roles[legacyClass] || legacyClass;
     var base = Account.baseClass(legacyClass);
     var letter = Account.subclassOf(legacyClass);
-
     if (SERVICE_CLASSES.indexOf(loginClass) !== -1) {
       document.getElementById('loginClass').value = loginClass;
       return;
     }
-
     var loginBase = document.getElementById('loginClass');
-    var regBase = document.getElementById('regClass');
     if (Array.prototype.some.call(loginBase.options, function (o) { return o.value === base; })) {
       loginBase.value = base;
       document.getElementById('loginLetter').value = letter;
     }
-    if (Array.prototype.some.call(regBase.options, function (o) { return o.value === base; })) {
-      regBase.value = base;
-      document.getElementById('regLetter').value = letter;
-    }
   }
 
-  /* Если уже вошли — сразу на главную страницу своей роли. */
   if (typeof Account !== 'undefined' && Account.isLoggedIn()) {
     window.location.href = Account.homeUrl();
     return;
   }
 
-  /* ---------------- Старая сессия без пароля ---------------- */
   var legacy = null;
   try { legacy = JSON.parse(localStorage.getItem('student') || 'null'); } catch (e) { legacy = null; }
-
   if (legacy && legacy.name && !localStorage.getItem('accountToken')) {
-    noteEl.textContent = 'У вас есть старая сессия без пароля: ' +
-      legacy.name + ' · ' + (legacy.class || 'класс не указан') +
-      '. Создайте аккаунт с тем же именем и классом — результаты сохранятся.';
+    noteEl.textContent = 'У вас есть старая сессия: ' + legacy.name + ' · ' + (legacy.class || 'класс не указан') +
+      '. Обратитесь к учителю или администратору — вам создадут аккаунт с паролем для входа.';
     noteEl.classList.add('show');
-
-    document.getElementById('regName').value = legacy.name;
     document.getElementById('loginName').value = legacy.name;
     fillLegacyClass_(legacy.class);
-
-    switchTab('register');
   }
 
-  /* ---------------- Вкладки ---------------- */
-  function switchTab(name) {
-    tabs.forEach(function (tab) {
-      var active = tab.dataset.authTab === name;
-      tab.classList.toggle('active', active);
-      tab.setAttribute('aria-selected', active ? 'true' : 'false');
-    });
-    loginForm.classList.toggle('hidden', name !== 'login');
-    registerForm.classList.toggle('hidden', name !== 'register');
-    hideError();
-  }
-
-  tabs.forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      switchTab(tab.dataset.authTab);
-    });
-  });
-
-  /* ---------------- Показать/скрыть пароль ---------------- */
   document.querySelectorAll('[data-toggle-password]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var input = document.getElementById(btn.dataset.togglePassword);
@@ -230,23 +150,17 @@
     });
   });
 
-  /* ---------------- Ошибки ---------------- */
-  function showError(message) {
-    errorEl.textContent = message;
-    errorEl.classList.add('show');
-  }
-
-  function hideError() {
-    errorEl.textContent = '';
-    errorEl.classList.remove('show');
-  }
+  function showError(message) { errorEl.textContent = message; errorEl.classList.add('show'); }
+  function hideError() { errorEl.textContent = ''; errorEl.classList.remove('show'); }
 
   function messageFor(err) {
     switch (err && err.code) {
+      case 'REGISTRATION_DISABLED':
+        return 'Самостоятельная регистрация отключена. Обратитесь к учителю или администратору — вам создадут аккаунт.';
       case 'ACCOUNT_EXISTS':
-        return 'Аккаунт с таким именем и классом уже существует. Перейдите на вкладку «Вход».';
+        return 'Аккаунт с таким именем и классом уже существует. Проверьте данные или обратитесь к учителю.';
       case 'NO_ACCOUNT':
-        return err.message || 'Аккаунт не найден. Проверьте имя и класс (роль) или зарегистрируйтесь.';
+        return err.message || 'Аккаунт не найден. Проверьте имя и класс (роль) или обратитесь к учителю.';
       case 'WRONG_PASSWORD':
         return 'Неверный пароль. Попробуйте ещё раз.';
       case 'BAD_REQUEST':
@@ -257,7 +171,7 @@
       case 'NETWORK_ERROR':
         return 'Не удалось связаться с сервером. Проверьте интернет и попробуйте ещё раз.';
       case 'BAD_RESPONSE':
-        return 'Сервер не ответил как ожидалось. Возможно, Apps Script ещё не обновлён до новой версии.';
+        return 'Сервер не ответил как ожидалось. Возможно, сервер ещё не обновлён до новой версии.';
       case 'FORBIDDEN':
         return 'У вас нет доступа к этому разделу. Обратитесь к администратору.';
       case 'LAST_ADMIN':
@@ -274,16 +188,6 @@
     btn.textContent = busy ? busyText : normalText;
   }
 
-  function homeFor(role) {
-    switch (role) {
-      case 'teacher': return 'teacher.html';
-      case 'parent':  return 'parent.html';
-      case 'admin':   return 'admin.html';
-      default:        return 'lessons.html';
-    }
-  }
-
-  /* ---------------- Вход ---------------- */
   loginForm.addEventListener('submit', function (e) {
     e.preventDefault();
     hideError();
@@ -293,72 +197,19 @@
     var className = composeClass_('loginClass', 'loginLetter');
     var password = document.getElementById('loginPassword').value;
 
-    if (name.length < 3) {
-      showError('Введите фамилию и имя (минимум 3 символа).');
-      return;
-    }
-    if (!className) {
-      showError('Выберите класс.');
-      return;
-    }
-    if (password.length < 6) {
-      showError('Пароль должен быть не короче 6 символов.');
-      return;
-    }
+    if (name.length < 3) { showError('Введите фамилию и имя (минимум 3 символа).'); return; }
+    if (!className) { showError('Выберите класс.'); return; }
+    if (password.length < 6) { showError('Пароль должен быть не короче 6 символов.'); return; }
 
     setBusy(btn, true, 'Входим…', 'Войти →');
-
     Account.login({ name: name, className: className, password: password })
       .then(function (student) {
-        window.location.href = homeFor(student && student.role);
+        window.location.href = Account.homeUrl(student && student.role);
       })
       .catch(function (err) {
         showError(messageFor(err));
         setBusy(btn, false, '', 'Войти →');
       });
-  });
-
-  /* ---------------- Регистрация ---------------- */
-  registerForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    hideError();
-
-    var btn = document.getElementById('registerSubmit');
-    var name = document.getElementById('regName').value.trim().replace(/\s+/g, ' ');
-    var className = composeClass_('regClass', 'regLetter');
-    var password = document.getElementById('regPassword').value;
-    var password2 = document.getElementById('regPassword2').value;
-
-    if (name.length < 3) {
-      showError('Введите фамилию и имя (минимум 3 символа).');
-      return;
-    }
-    if (!className) {
-      showError('Выберите класс.');
-      return;
-    }
-    if (password.length < 6) {
-      showError('Пароль должен быть не короче 6 символов.');
-      return;
-    }
-    if (password !== password2) {
-      showError('Пароли не совпадают.');
-      return;
-    }
-
-    setBusy(btn, true, 'Создаём аккаунт…', 'Создать аккаунт →');
-
-    Account.register({
-      name: name,
-      className: className,
-      password: password
-    }).then(function () {
-      window.location.href = 'lessons.html';
-    }).catch(function (err) {
-      showError(messageFor(err));
-      setBusy(btn, false, '', 'Создать аккаунт →');
-      if (err && err.code === 'ACCOUNT_EXISTS') switchTab('login');
-    });
   });
 })();
 </script>

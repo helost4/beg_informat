@@ -40,7 +40,7 @@ var VALID_ROLES = ['student', 'teacher', 'parent', 'admin'];
 
 // Метка версии видна при открытии /exec в браузере — так легко проверить,
 // что на сайте работает именно эта версия скрипта.
-var SCRIPT_VERSION = '2026-11-18-subclasses-v1';
+var SCRIPT_VERSION = '2026-11-23-teacher-create-v1';
 
 /* ============================================================
    ТОЧКИ ВХОДА
@@ -62,16 +62,18 @@ function doPost(e) {
     }
 
     switch (action) {
-      case 'register':   return json_(register_(body));
-      case 'login':      return json_(login_(body));
-      case 'saveResult': return json_(saveResult_(body));
-      case 'myResults':  return json_(myResults_(body));
-      case 'viewResults':        return json_(viewResults_(body));
-      case 'adminListAccounts':  return json_(adminListAccounts_(body));
-      case 'adminCreateAccount': return json_(adminCreateAccount_(body));
-      case 'adminSetRole':       return json_(adminSetRole_(body));
-      case 'adminResetPassword': return json_(adminResetPassword_(body));
-      case 'setStudentClass':    return json_(setStudentClass_(body));
+      case 'register':            return json_(register_(body));
+      case 'login':               return json_(login_(body));
+      case 'saveResult':          return json_(saveResult_(body));
+      case 'myResults':           return json_(myResults_(body));
+      case 'viewResults':         return json_(viewResults_(body));
+      case 'adminListAccounts':   return json_(adminListAccounts_(body));
+      case 'adminCreateAccount':  return json_(adminCreateAccount_(body));
+      case 'adminSetRole':        return json_(adminSetRole_(body));
+      case 'adminResetPassword':  return json_(adminResetPassword_(body));
+      case 'setStudentClass':     return json_(setStudentClass_(body));
+      case 'createStudentAccount':return json_(createStudentAccount_(body));
+      case 'adminUpdateAccount':  return json_(adminUpdateAccount_(body));
       default:
         throwAppError_('UNKNOWN_ACTION', 'Неизвестное действие: ' + action);
     }
@@ -221,17 +223,19 @@ function makeParent(name, className, childKeys) {
   return setAccountRole(name, className, 'parent', toScopeString_(childKeys));
 }
 
-/* ============================================================
-   РЕГИСТРАЦИЯ И ВХОД
-   ============================================================ */
-
-function register_(body) {
-  var name = normalizeName_(body.name);
-  var className = normalizeClassName_(body.className);
-  var track = normalizeTrack_(body.track);
-  var password = String(body.password || '');
-
-  validateRegistration_(name, className, password);
+/**
+ * Ручное создание первого аккаунта после отключения публичной регистрации.
+ * Запускать из редактора Apps Script, например:
+ *   createManualAccount('Иванов Иван', '10 класс', 'сложныйпароль')
+ *   makeAdmin('Иванов Иван', '10 класс')
+ */
+function createManualAccount(name, className, password, role, scope) {
+  var normalizedName = normalizeName_(name);
+  var normalizedClass = normalizeClassName_(className);
+  var pwd = String(password || '');
+  var normalizedRole = normalizeRoleStrict_(role || 'student');
+  var normalizedScope = sanitizeScope_(scope || '');
+  validateRegistration_(normalizedName, normalizedClass, pwd);
 
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
@@ -240,50 +244,48 @@ function register_(body) {
     var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
     ensureHeaders_(accounts, ACCOUNT_HEADERS);
 
-    var key = loginKey_(name, className);
+    var key = loginKey_(normalizedName, normalizedClass);
     if (getAccountByLoginKey_(accounts, key)) {
-      throwAppError_('ACCOUNT_EXISTS', 'Аккаунт с таким именем и классом уже существует. Войдите в него.');
+      throw new Error('Аккаунт уже существует: ' + normalizedName + ' · ' + normalizedClass +
+        '. Если нужно только изменить роль, вызовите makeAdmin/makeTeacher/makeParent.');
     }
 
-    var map = headerMap_(accounts);
     var now = new Date();
-    var id = Utilities.getUuid();
     var salt = randomSalt_();
-    var hash = hashPassword_(salt, password);
-
-    var row = [];
-    row[map['id'] - 1] = id;
-    row[map['name'] - 1] = name;
-    row[map['className'] - 1] = className;
-    row[map['track'] - 1] = track;
-    row[map['loginKey'] - 1] = key;
-    row[map['salt'] - 1] = salt;
-    row[map['passwordHash'] - 1] = hash;
-    row[map['createdAt'] - 1] = now;
-    row[map['updatedAt'] - 1] = now;
-    // Публичная регистрация всегда создаёт ученика. Поле role из запроса
-    // намеренно игнорируется: привилегированные роли выдаёт администратор.
-    row[map['role'] - 1] = 'student';
-    row[map['scope'] - 1] = '';
-
-    accounts.appendRow(padRow_(row, accounts.getLastColumn()));
-
-    var account = {
-      id: id,
-      name: name,
-      className: className,
-      track: track,
-      role: 'student',
-      scope: ''
-    };
-
-    return success_({
-      token: issueToken_(account.id),
-      account: accountPublic_(account)
+    appendByHeaders_(accounts, {
+      id: Utilities.getUuid(),
+      name: normalizedName,
+      className: normalizedClass,
+      track: 'standard',
+      loginKey: key,
+      salt: salt,
+      passwordHash: hashPassword_(salt, pwd),
+      createdAt: now,
+      updatedAt: now,
+      role: normalizedRole,
+      scope: normalizedScope
     });
+
+    var message = 'Аккаунт создан: ' + normalizedName + ' · ' + normalizedClass +
+      ' · роль ' + normalizedRole + '. Пароль надёжно сохранён как соль и хеш.';
+    Logger.log(message);
+    return message;
   } finally {
     lock.releaseLock();
   }
+}
+
+/* ============================================================
+   РЕГИСТРАЦИЯ И ВХОД
+   ============================================================ */
+
+function register_(body) {
+  // Публичная самостоятельная регистрация отключена: аккаунты создаёт учитель
+  // или администратор, чтобы избежать фейковых записей.
+  throwAppError_(
+    'REGISTRATION_DISABLED',
+    'Самостоятельная регистрация отключена. Обратитесь к учителю или администратору — вам создадут аккаунт и выдадут пароль.'
+  );
 }
 
 function login_(body) {
@@ -668,6 +670,192 @@ function adminResetPassword_(body) {
   accounts.getRange(account._row, map['updatedAt']).setValue(new Date());
 
   return success_({ accountId: account.id });
+}
+
+/**
+ * Создаёт аккаунты учеников (учитель или администратор).
+ * Учитель может создавать только в своих классах. Пароль генерируется сервером
+ * и возвращается один раз — для печати/раздачи ученикам.
+ */
+function createStudentAccount_(body) {
+  var caller = accountFromToken_(body.token);
+  var callerRole = requireRole_(caller, ['teacher', 'admin']);
+
+  var items = Array.isArray(body.students) ? body.students.slice() : null;
+  if (!items) {
+    items = [{ name: body.name, className: body.className }];
+  }
+  if (!items.length) {
+    throwAppError_('BAD_REQUEST', 'Добавьте хотя бы одного ученика.');
+  }
+  if (items.length > 50) {
+    throwAppError_('BAD_REQUEST', 'За один раз можно создать не больше 50 учеников.');
+  }
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+
+  try {
+    var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
+    ensureHeaders_(accounts, ACCOUNT_HEADERS);
+    var map = headerMap_(accounts);
+    var teacherClasses = callerRole === 'teacher' ? splitScope_(caller.scope) : [];
+
+    var created = [];
+    var errors = [];
+    var seenKeys = {};
+
+    for (var i = 0; i < items.length; i++) {
+      var raw = items[i] || {};
+      var name = normalizeName_(raw.name);
+      var className = normalizeClassName_(raw.className);
+      var label = name || ('Строка ' + (i + 1));
+
+      try {
+        if (!name || name.length < 3) {
+          throwAppError_('BAD_REQUEST', 'Укажите фамилию и имя ученика (минимум 3 символа).');
+        }
+        if (!isValidClassName_(className)) {
+          throwAppError_('BAD_REQUEST', 'Некорректный класс. Используйте например «5 класс» или «5а».');
+        }
+        if (callerRole === 'teacher' && !classListMatchesScope_(teacherClasses, className)) {
+          throwAppError_('FORBIDDEN', 'Класс ' + className + ' вне вашей области доступа.');
+        }
+
+        var key = loginKey_(name, className);
+        if (seenKeys[key]) {
+          throwAppError_('ACCOUNT_EXISTS', 'Этот ученик повторяется в списке.');
+        }
+        if (getAccountByLoginKey_(accounts, key)) {
+          throwAppError_('ACCOUNT_EXISTS', 'Аккаунт с таким именем и классом уже существует.');
+        }
+
+        var password = generatePassword_();
+        var now = new Date();
+        var id = Utilities.getUuid();
+        var salt = randomSalt_();
+        var hash = hashPassword_(salt, password);
+
+        var row = [];
+        row[map['id'] - 1] = id;
+        row[map['name'] - 1] = name;
+        row[map['className'] - 1] = className;
+        row[map['track'] - 1] = 'standard';
+        row[map['loginKey'] - 1] = key;
+        row[map['salt'] - 1] = salt;
+        row[map['passwordHash'] - 1] = hash;
+        row[map['createdAt'] - 1] = now;
+        row[map['updatedAt'] - 1] = now;
+        row[map['role'] - 1] = 'student';
+        row[map['scope'] - 1] = '';
+
+        accounts.appendRow(padRow_(row, accounts.getLastColumn()));
+        seenKeys[key] = true;
+
+        var account = {
+          id: id, name: name, className: className, track: 'standard',
+          role: 'student', scope: ''
+        };
+        created.push({
+          account: accountPublic_(account),
+          credentials: { name: name, className: className, password: password }
+        });
+      } catch (err) {
+        errors.push({
+          name: name,
+          className: className,
+          error: err.code || 'ERROR',
+          message: err.message || String(err)
+        });
+      }
+    }
+
+    return success_({ created: created, errors: errors });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Администратор меняет данные ученика: ФИО, класс, пароль.
+ * При смене ФИО/класса обновляется loginKey и scope родителей.
+ */
+function adminUpdateAccount_(body) {
+  var caller = accountFromToken_(body.token);
+  requireRole_(caller, ['admin']);
+
+  var accountId = String(body.accountId || '').trim();
+  if (!accountId) throwAppError_('BAD_REQUEST', 'Не выбран аккаунт.');
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+
+  try {
+    var accounts = getOrCreateSheet_(SpreadsheetApp.getActiveSpreadsheet(), ACCOUNTS_SHEET);
+    ensureHeaders_(accounts, ACCOUNT_HEADERS);
+    var account = getAccountById_(accounts, accountId);
+    if (!account) throwAppError_('NOT_FOUND', 'Аккаунт не найден.');
+
+    var role = normalizeRole_(account.role);
+    if (role !== 'student') {
+      throwAppError_('FORBIDDEN', 'Этот метод предназначен для изменения данных ученика.');
+    }
+
+    var nextName = body.name !== undefined ? normalizeName_(body.name) : account.name;
+    var nextClass = body.className !== undefined ? normalizeClassName_(body.className) : account.className;
+    var newPassword = body.newPassword !== undefined ? String(body.newPassword || '') : '';
+    var generatePwd = !!body.generatePassword;
+
+    if (!nextName || nextName.length < 3) {
+      throwAppError_('BAD_REQUEST', 'Укажите фамилию и имя (минимум 3 символа).');
+    }
+    if (!isValidClassName_(nextClass)) {
+      throwAppError_('BAD_REQUEST', 'Некорректный класс. Используйте например «5 класс» или «5а».');
+    }
+    if (newPassword && newPassword.length < 6) {
+      throwAppError_('BAD_REQUEST', 'Пароль должен быть не короче 6 символов.');
+    }
+
+    var oldKey = loginKey_(account.name, account.className);
+    var newKey = loginKey_(nextName, nextClass);
+    if (oldKey !== newKey) {
+      var existing = getAccountByLoginKey_(accounts, newKey);
+      if (existing && existing.id !== account.id) {
+        throwAppError_('ACCOUNT_EXISTS', 'Аккаунт с таким именем и классом уже существует.');
+      }
+    }
+
+    var map = headerMap_(accounts);
+    var now = new Date();
+    var credentials = null;
+
+    accounts.getRange(account._row, map['name']).setValue(nextName);
+    accounts.getRange(account._row, map['className']).setValue(nextClass);
+    accounts.getRange(account._row, map['loginKey']).setValue(newKey);
+    accounts.getRange(account._row, map['updatedAt']).setValue(now);
+
+    if (generatePwd || newPassword) {
+      var pwd = generatePwd ? generatePassword_() : newPassword;
+      var salt = randomSalt_();
+      accounts.getRange(account._row, map['salt']).setValue(salt);
+      accounts.getRange(account._row, map['passwordHash']).setValue(hashPassword_(salt, pwd));
+      credentials = { name: nextName, className: nextClass, password: pwd };
+    }
+
+    if (oldKey !== newKey) {
+      updateParentScopesForClassChange_(accounts, map, oldKey, newKey);
+    }
+
+    var updated = {
+      id: account.id, name: nextName, className: nextClass,
+      track: account.track, role: role, scope: account.scope || ''
+    };
+    var res = { account: accountPublic_(updated) };
+    if (credentials) res.credentials = credentials;
+    return success_(res);
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 /**
@@ -1117,6 +1305,29 @@ function updateAccountTrack_(sheet, account, track) {
 
 function randomSalt_() {
   return Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+}
+
+/**
+ * Генерирует читаемый пароль для выдачи ученику.
+ * Формат: Slg9-Slg3-Slg7 — латиница, цифры, без похожих символов.
+ */
+function generatePassword_() {
+  var syllables = [
+    'ba','be','bi','bo','bu','da','de','di','do','du','fa','fe','fi','fo','fu',
+    'ga','ge','gi','go','gu','ka','ke','ki','ko','ku','la','le','li','lo','lu',
+    'ma','me','mi','mo','mu','na','ne','ni','no','nu','pa','pe','pi','po','pu',
+    'ra','re','ri','ro','ru','sa','se','si','so','su','ta','te','ti','to','tu',
+    'va','ve','vi','vo','vu','za','ze','zi','zo','zu'
+  ];
+  var digits = '23456789';
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function pickDigit() { return digits.charAt(Math.floor(Math.random() * digits.length)); }
+  var parts = [];
+  for (var i = 0; i < 3; i++) {
+    var s = pick(syllables);
+    parts.push(s.charAt(0).toUpperCase() + s.slice(1) + pickDigit());
+  }
+  return parts.join('-');
 }
 
 function hashPassword_(salt, password) {

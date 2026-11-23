@@ -24,6 +24,37 @@
   <div class="stat-grid" id="statGrid"></div>
   <div class="dash-status" id="status">Загрузка данных…</div>
 
+  <div class="dash-card" id="createCard">
+    <h2>➕ Создать аккаунт ученика</h2>
+    <p class="dash-muted">Введите фамилию, имя и класс — система сама создаст пароль. После создания распечатайте карточку и выдайте ученику.</p>
+    <form class="dash-form" id="createStudentForm" style="max-width:720px;">
+      <div class="form-row">
+        <div>
+          <label for="newStudentName">Фамилия и имя</label>
+          <input id="newStudentName" required minlength="3" placeholder="Например: Иванов Иван">
+        </div>
+        <div>
+          <label for="newStudentClass">Класс</label>
+          <select id="newStudentClass" required></select>
+        </div>
+        <div>
+          <label for="newStudentLetter">Буква</label>
+          <select id="newStudentLetter">
+            <option value="">без буквы</option>
+            <option value="а">а</option>
+            <option value="б">б</option>
+            <option value="в">в</option>
+            <option value="г">г</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="dash-btn" type="submit" id="createStudentBtn">Создать и сгенерировать пароль</button>
+      </div>
+    </form>
+    <div id="createdCredentials" style="margin-top:14px;"></div>
+  </div>
+
   <div class="dash-card">
     <h2>👥 Ученики</h2>
     <div class="dash-form" style="max-width:520px;margin-bottom:14px;">
@@ -84,7 +115,10 @@
   var statusEl = document.getElementById('status');
   var students = [];
   var results = [];
+  var createdList = [];
+  var scope = { classes: [], childKeys: [] };
   var LETTERS = ['а', 'б', 'в', 'г'];
+  var ALL_CLASS_BASES = ['5 класс','6 класс','7 класс','8 класс','9 класс','10 класс','11 класс'];
 
   document.getElementById('dashSub').textContent =
     '👤 ' + student.name + ' · ' + Account.roleLabel(student.role);
@@ -234,6 +268,114 @@
     renderResults();
   }
 
+  function populateCreateClasses() {
+    var sel = document.getElementById('newStudentClass');
+    var btn = document.getElementById('createStudentBtn');
+    var bases = (student.role === 'admin') ? ALL_CLASS_BASES.slice() : (scope.classes || []).slice();
+    var current = sel.value;
+    sel.innerHTML = '<option value="">— выберите класс —</option>' +
+      bases.map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + '</option>'; }).join('');
+    if (current && bases.indexOf(current) !== -1) sel.value = current;
+
+    var noScope = student.role === 'teacher' && !bases.length;
+    sel.disabled = noScope;
+    document.getElementById('newStudentLetter').disabled = noScope;
+    document.getElementById('newStudentName').disabled = noScope;
+    btn.disabled = noScope;
+    var note = document.getElementById('createScopeNote');
+    if (!note) {
+      note = document.createElement('div');
+      note.id = 'createScopeNote';
+      note.className = 'callout warn';
+      note.style.marginTop = '10px';
+      document.getElementById('createCard').appendChild(note);
+    }
+    note.hidden = !noScope;
+    note.textContent = noScope ? 'Вам пока не назначены классы. Обратитесь к администратору, чтобы он указал классы в вашей области доступа.' : '';
+  }
+
+  function renderCreated() {
+    var box = document.getElementById('createdCredentials');
+    if (!createdList.length) { box.innerHTML = ''; return; }
+    var rows = createdList.map(function (item, idx) {
+      var c = item.credentials;
+      return '<tr><td>' + (idx + 1) + '</td><td>' + esc(c.name) + '</td><td>' + esc(c.className) +
+        '</td><td><code style="font-size:1rem;font-weight:700;letter-spacing:.5px;">' + esc(c.password) + '</code></td></tr>';
+    }).join('');
+    box.innerHTML =
+      '<div class="callout ok" style="margin-bottom:10px;"><b>Аккаунты созданы.</b> Пароль показывается только сейчас — распечатайте или сохраните карточки перед закрытием страницы.</div>' +
+      '<div class="table-scroll"><table class="dash-table"><thead><tr><th>#</th><th>Фамилия и имя</th><th>Класс</th><th>Пароль</th></tr></thead><tbody>' +
+      rows + '</tbody></table></div>' +
+      '<div class="btn-row" style="margin-top:10px;"><button class="dash-btn" type="button" id="printCredsBtn">🖨 Печать карточек</button>' +
+      '<button class="dash-btn ghost" type="button" id="clearCredsBtn">Очистить список</button></div>';
+    var printBtn = document.getElementById('printCredsBtn');
+    var clearBtn = document.getElementById('clearCredsBtn');
+    if (printBtn) printBtn.onclick = printCreated;
+    if (clearBtn) clearBtn.onclick = function () { createdList = []; renderCreated(); };
+  }
+
+  function printCreated() {
+    if (!createdList.length) return;
+    var cards = createdList.map(function (item) {
+      var c = item.credentials;
+      return '<div class="card"><div class="title">Доступ к сайту</div>' +
+        '<div class="row"><span class="label">Фамилия и имя</span><span class="value">' + esc(c.name) + '</span></div>' +
+        '<div class="row"><span class="label">Класс</span><span class="value">' + esc(c.className) + '</span></div>' +
+        '<div class="row"><span class="label">Пароль</span><span class="value pwd">' + esc(c.password) + '</span></div>' +
+        '<div class="hint">Вход: выберите класс, введите фамилию и имя, затем пароль. Пароль никому не сообщайте.</div></div>';
+    }).join('');
+    var html = '<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>Карточки для входа</title>' +
+      '<style>body{font-family:Arial,sans-serif;margin:16px;color:#111} .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}' +
+      '.card{border:2px solid #334155;border-radius:12px;padding:14px;break-inside:avoid}' +
+      '.title{font-size:18px;font-weight:700;margin-bottom:10px;text-align:center} .row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #cbd5e1}' +
+      '.label{color:#475569} .value{font-weight:700;text-align:right} .pwd{font-size:20px;letter-spacing:1px;color:#1d4ed8}' +
+      '.hint{margin-top:10px;font-size:12px;color:#475569;line-height:1.35} @media print{body{margin:0}}</style></head><body>' +
+      '<div class="grid">' + cards + '</div><script>window.onload=function(){window.print();};<' + '/script></body></html>';
+    var w = window.open('', '_blank');
+    if (!w) { setStatus('Разрешите всплывающие окна для печати карточек.', 'error'); return; }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  }
+
+  document.getElementById('createStudentForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = document.getElementById('createStudentBtn');
+    var name = document.getElementById('newStudentName').value.trim().replace(/\s+/g, ' ');
+    var base = document.getElementById('newStudentClass').value;
+    var letter = document.getElementById('newStudentLetter').value;
+    var className = base ? Account.composeClassName(base, letter) : '';
+    if (name.length < 3) { setStatus('Введите фамилию и имя ученика (минимум 3 символа).', 'error'); return; }
+    if (!className) { setStatus('Выберите класс.', 'error'); return; }
+
+    btn.disabled = true;
+    setStatus('Создаём аккаунт…');
+    Account.createStudentAccount({ name: name, className: className })
+      .then(function (res) {
+        var created = (res && res.created) || [];
+        var errors = (res && res.errors) || [];
+        if (created.length) {
+          createdList = createdList.concat(created);
+          document.getElementById('newStudentName').value = '';
+          setStatus('Аккаунт создан: ' + created[0].credentials.name + '. Пароль показан ниже — распечатайте карточку.', 'ok');
+        }
+        if (errors.length) {
+          setStatus('Ошибка: ' + errors[0].message, 'error');
+        }
+        renderCreated();
+        return Account.viewResults().then(function (data) {
+          students = data.students || [];
+          results = data.results || [];
+          scope = data.scope || scope;
+          renderStats(); renderAll(); populateCreateClasses();
+        });
+      })
+      .catch(function (err) {
+        setStatus('Ошибка: ' + (err && err.message ? err.message : err), 'error');
+      })
+      .then(function () { btn.disabled = false; });
+  });
+
   document.getElementById('classFilter').addEventListener('change', function () {
     renderStudents();
     renderResults();
@@ -298,10 +440,15 @@
   Account.viewResults().then(function (data) {
     students = data.students || [];
     results = data.results || [];
+    scope = data.scope || scope;
     renderStats();
     renderAll();
-    setStatus('Загружено учеников: ' + students.length + ', работ: ' + results.length + '.', 'ok');
-    setTimeout(function () { setStatus(''); }, 4000);
+    populateCreateClasses();
+    var scopeNote = (student.role === 'teacher' && !(scope.classes || []).length)
+      ? ' Для вас пока не назначены классы — обратитесь к администратору.'
+      : '';
+    setStatus('Загружено учеников: ' + students.length + ', работ: ' + results.length + '.' + scopeNote, scopeNote ? 'error' : 'ok');
+    if (!scopeNote) setTimeout(function () { setStatus(''); }, 4000);
   }).catch(function (err) {
     setStatus('Не удалось загрузить данные: ' + (err && err.message ? err.message : err), 'error');
     if (err && (err.code === 'AUTH_REQUIRED' || err.code === 'TOKEN_EXPIRED')) {

@@ -65,25 +65,28 @@ id, name, className, track, loginKey, salt, passwordHash, createdAt, updatedAt, 
 > в шагах 7–8: скрипт выполняется от имени ученика или у владельца скрипта
 > нет прав редактора на таблицу. Чтение при этом может работать.
 
-> Без шагов 2–5 фронтенд будет готов, но регистрация и вход работать не будут:
-> старый скрипт не знает действий `register`, `login`, `saveResult`,
-> `myResults`, `viewResults`, `admin*` и `setStudentClass`.
+> Без шагов 2–5 фронтенд будет готов, но вход и сохранение результатов работать не будут:
+> старый скрипт не знает действий `login`, `saveResult`, `myResults`,
+> `viewResults`, `admin*`, `setStudentClass`, `createStudentAccount`,
+> `adminUpdateAccount`.
 >
-> Текущая версия скрипта — `2026-11-18-subclasses-v1`. После деплоя откройте
+> Текущая версия скрипта — `2026-11-23-teacher-create-v1`. После деплоя откройте
 > URL `/exec` в браузере: в ответе должна быть эта версия.
 
 ## Роли и права
 
 | Роль | Кто создаёт | Что видит |
 |------|-------------|-----------|
-| `student` (ученик) | публичная регистрация | только свои результаты |
+| `student` (ученик) | учитель или администратор | только свои результаты |
 | `teacher` (учитель) | администратор | результаты классов из своего `scope` |
 | `parent` (родитель) | администратор | результаты детей из своего `scope` |
 | `admin` (администратор) | администратор | все аккаунты и все результаты |
 
-Публичная регистрация всегда создаёт роль `student` — поле `role` в запросе
-игнорируется. Привилегированные аккаунты создаёт администратор в своей панели
-(`admin.html`) через действие `adminCreateAccount`.
+Публичная самостоятельная регистрация отключена: действие `register` возвращает
+`REGISTRATION_DISABLED`. Аккаунты учеников создаёт учитель (в пределах своего
+`scope`) или администратор через `createStudentAccount`; сервер сам генерирует
+пароль и возвращает его один раз для печати/раздачи. Привилегированные аккаунты
+создаёт администратор в своей панели (`admin.html`) через `adminCreateAccount`.
 
 Роль хранится в таблице и возвращается сервером при входе. Значение в
 `localStorage` используется только для выбора нужной страницы после входа;
@@ -103,14 +106,25 @@ id, name, className, track, loginKey, salt, passwordHash, createdAt, updatedAt, 
 
 ### Первый администратор
 
-После обновления `Code.gs` и повторного запуска `setup()` зарегистрируйтесь
-обычным способом, затем в редакторе Apps Script вызовите:
+Публичная регистрация отключена, поэтому сначала нужно вручную создать
+обычный аккаунт. После обновления `Code.gs` и повторного запуска `setup()`
+вызовите в редакторе Apps Script, например:
 
 ```js
+createManualAccount('Иванов Иван', '10 класс', 'сложныйпароль')
 makeAdmin('Иванов Иван', '10 класс')
 ```
 
+Если нужный аккаунт уже есть (создан до отключения регистрации), достаточно
+`makeAdmin(...)`. Войдите под ним в `login.html` (класс «Администратор»).
 Дальнейшие аккаунты и роли создаются через панель администратора на сайте.
+
+Для учеников можно создавать аккаунты прямо из кабинета учителя: откройте
+`teacher.html`, укажите фамилию, имя, класс и букву, нажмите «Создать и
+сгенерировать пароль». Пароль появится один раз; сразу нажмите «Печать
+карточек» и раздайте карточки ученикам. В панели администратора (`admin.html`)
+доступны такие же действия плюс редактирование ФИО, класса и пароля ученика.
+
 
 Для ручного назначения ролей есть вспомогательные функции:
 
@@ -125,13 +139,26 @@ makeParent('Иванов Иван', 'Родители', 'иванов иван|5
 ### Новые действия API
 
 ```
-viewResults         { token }                               → students, results, scope
-adminListAccounts   { token }                               → accounts
-adminCreateAccount  { token, name, className, password, role, scope }
-adminSetRole        { token, accountId, role, scope }
-adminResetPassword  { token, accountId, newPassword }
-setStudentClass     { token, accountId, className }      → account
+viewResults          { token }                                  → students, results, scope
+adminListAccounts    { token }                                  → accounts
+adminCreateAccount   { token, name, className, password, role, scope }
+adminSetRole         { token, accountId, role, scope }
+adminResetPassword   { token, accountId, newPassword }
+setStudentClass      { token, accountId, className }            → account
+createStudentAccount { token, name, className }                 → created[], errors[]
+                     { token, students: [{name, className}] }   (роль teacher/admin)
+adminUpdateAccount   { token, accountId, name?, className?,     → account, credentials?
+                       newPassword?, generatePassword? }         (только admin, только student)
 ```
+
+`createStudentAccount` создаёт учеников с серверно-сгенерированным паролем.
+Пароль возвращается **один раз** в `credentials.password` — после закрытия
+страницы восстановить его нельзя, только сбросить. Учитель может создавать
+аккаунты только в классах из своего `scope`.
+
+`adminUpdateAccount` позволяет администратору изменить ФИО, класс и/или пароль
+ученика. При смене ФИО/класса обновляются `loginKey` ученика и ключи ребёнка в
+`scope` родителей; исторические строки попыток не переписываются.
 
 `viewResults` доступен ролям `teacher`, `parent` и `admin`. Учитель получит
 только строки своих классов, родитель — только привязанных детей. Ответы

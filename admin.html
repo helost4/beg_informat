@@ -26,7 +26,7 @@
 
   <div class="dash-card">
     <h2>➕ Создать аккаунт</h2>
-    <p class="dash-muted">Так создаются аккаунты учителей, родителей и администраторов. Публичная регистрация всегда создаёт только ученика.</p>
+    <p class="dash-muted">Самостоятельная регистрация отключена. Здесь создаются аккаунты учеников, учителей, родителей и администраторов. Для ученика можно сгенерировать пароль автоматически.</p>
     <form class="dash-form" id="createForm">
       <div class="form-row">
         <div>
@@ -72,11 +72,15 @@
             <option value="admin">Администратор</option>
           </select>
         </div>
-        <div>
+        <div id="newPasswordWrap">
           <label for="newPassword">Пароль (минимум 6 символов)</label>
-          <input id="newPassword" type="password" required minlength="6" autocomplete="new-password">
+          <input id="newPassword" type="password" minlength="6" autocomplete="new-password">
         </div>
       </div>
+      <label style="display:flex;gap:8px;align-items:center;font-weight:600;margin:4px 0 8px;">
+        <input type="checkbox" id="newGeneratePassword" checked style="width:auto;">
+        Сгенерировать пароль автоматически (для ученика)
+      </label>
       <div>
         <label for="newScope">Область доступа</label>
         <input id="newScope" placeholder="Не заполняется для ученика и администратора">
@@ -86,6 +90,7 @@
         <button class="dash-btn" type="submit" id="createBtn">Создать аккаунт</button>
       </div>
     </form>
+    <div id="createdCredentials" style="margin-top:14px;"></div>
   </div>
 
   <div class="dash-card">
@@ -111,6 +116,55 @@
   </div>
 </div>
 
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:1000;padding:20px;overflow:auto;">
+  <div style="max-width:640px;margin:40px auto;background:#fff;border-radius:18px;padding:24px;box-shadow:0 20px 50px rgba(15,23,42,.25);">
+    <h2 style="margin:0 0 6px;font-size:1.25rem;">✏️ Изменить данные ученика</h2>
+    <p class="dash-muted" id="editModalSub" style="margin-bottom:14px;"></p>
+    <form class="dash-form" id="editStudentForm">
+      <input type="hidden" id="editAccountId">
+      <div class="form-row">
+        <div>
+          <label for="editName">Фамилия и имя</label>
+          <input id="editName" required minlength="3">
+        </div>
+        <div>
+          <label for="editClass">Класс</label>
+          <select id="editClass" required>
+            <option value="5 класс">5 класс</option>
+            <option value="6 класс">6 класс</option>
+            <option value="7 класс">7 класс</option>
+            <option value="8 класс">8 класс</option>
+            <option value="9 класс">9 класс</option>
+            <option value="10 класс">10 класс</option>
+            <option value="11 класс">11 класс</option>
+          </select>
+        </div>
+        <div>
+          <label for="editLetter">Буква</label>
+          <select id="editLetter">
+            <option value="">без буквы</option>
+            <option value="а">а</option><option value="б">б</option>
+            <option value="в">в</option><option value="г">г</option>
+          </select>
+        </div>
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;font-weight:600;margin:4px 0 8px;">
+        <input type="checkbox" id="editGeneratePassword" style="width:auto;">
+        Сгенерировать новый пароль автоматически
+      </label>
+      <div id="editPasswordWrap">
+        <label for="editPassword">Новый пароль (оставьте пустым, чтобы не менять)</label>
+        <input id="editPassword" type="password" minlength="6" autocomplete="new-password" placeholder="Не менять пароль">
+      </div>
+      <div class="callout warn" style="margin-top:10px;font-size:.88rem;">Если пароль будет изменён или сгенерирован, он покажется один раз после сохранения — распечатайте карточку.</div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="dash-btn" type="submit" id="editSaveBtn">Сохранить</button>
+        <button class="dash-btn ghost" type="button" id="editCancelBtn">Отмена</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="shared/account.js"></script>
 <script>
 (function () {
@@ -121,6 +175,7 @@
   var student = Account.currentStudent();
   var statusEl = document.getElementById('status');
   var accounts = [];
+  var createdList = [];
 
   var SCOPE_HINTS = {
     student: 'Не используется.',
@@ -231,7 +286,8 @@
         '<td><input class="scope-input" data-id="' + esc(a.id) + '" value="' + esc(a.scope) +
           '" placeholder="' + esc(SCOPE_PLACEHOLDERS[a.role] || '') + '"></td>' +
         '<td><div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-          '<button class="dash-btn small save-role" type="button" data-id="' + esc(a.id) + '">💾 Сохранить</button>' +
+          (a.role === 'student' ? '<button class="dash-btn small edit-student" type="button" data-id="' + esc(a.id) + '">✏️ Изменить</button>' : '') +
+          '<button class="dash-btn small save-role" type="button" data-id="' + esc(a.id) + '">💾 Роль/доступ</button>' +
           '<button class="dash-btn small danger reset-pwd" type="button" data-id="' + esc(a.id) + '">🔑 Пароль</button>' +
         '</div></td>' +
         '</tr>';
@@ -260,6 +316,56 @@
     renderChildKeys();
   }
 
+  function renderCreated() {
+    var box = document.getElementById('createdCredentials');
+    if (!createdList.length) { box.innerHTML = ''; return; }
+    var rows = createdList.map(function (item, idx) {
+      var c = item.credentials;
+      return '<tr><td>' + (idx + 1) + '</td><td>' + esc(c.name) + '</td><td>' + esc(c.className) +
+        '</td><td><code style="font-size:1rem;font-weight:700;letter-spacing:.5px;">' + esc(c.password) + '</code></td></tr>';
+    }).join('');
+    box.innerHTML =
+      '<div class="callout ok" style="margin-bottom:10px;"><b>Учётные данные созданы.</b> Пароль показывается только сейчас — распечатайте или сохраните карточки перед закрытием страницы.</div>' +
+      '<div class="table-scroll"><table class="dash-table"><thead><tr><th>#</th><th>Фамилия и имя</th><th>Класс</th><th>Пароль</th></tr></thead><tbody>' +
+      rows + '</tbody></table></div>' +
+      '<div class="btn-row" style="margin-top:10px;"><button class="dash-btn" type="button" id="printCredsBtn">🖨 Печать карточек</button>' +
+      '<button class="dash-btn ghost" type="button" id="clearCredsBtn">Очистить список</button></div>';
+    var printBtn = document.getElementById('printCredsBtn');
+    var clearBtn = document.getElementById('clearCredsBtn');
+    if (printBtn) printBtn.onclick = printCreated;
+    if (clearBtn) clearBtn.onclick = function () { createdList = []; renderCreated(); };
+  }
+
+  function printCreated() {
+    if (!createdList.length) return;
+    var cards = createdList.map(function (item) {
+      var c = item.credentials;
+      return '<div class="card"><div class="title">Доступ к сайту</div>' +
+        '<div class="row"><span class="label">Фамилия и имя</span><span class="value">' + esc(c.name) + '</span></div>' +
+        '<div class="row"><span class="label">Класс</span><span class="value">' + esc(c.className) + '</span></div>' +
+        '<div class="row"><span class="label">Пароль</span><span class="value pwd">' + esc(c.password) + '</span></div>' +
+        '<div class="hint">Вход: выберите класс, введите фамилию и имя, затем пароль. Пароль никому не сообщайте.</div></div>';
+    }).join('');
+    var html = '<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>Карточки для входа</title>' +
+      '<style>body{font-family:Arial,sans-serif;margin:16px;color:#111} .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}' +
+      '.card{border:2px solid #334155;border-radius:12px;padding:14px;break-inside:avoid}' +
+      '.title{font-size:18px;font-weight:700;margin-bottom:10px;text-align:center} .row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #cbd5e1}' +
+      '.label{color:#475569} .value{font-weight:700;text-align:right} .pwd{font-size:20px;letter-spacing:1px;color:#1d4ed8}' +
+      '.hint{margin-top:10px;font-size:12px;color:#475569;line-height:1.35} @media print{body{margin:0}}</style></head><body>' +
+      '<div class="grid">' + cards + '</div><script>window.onload=function(){window.print();};<' + '/script></body></html>';
+    var w = window.open('', '_blank');
+    if (!w) { setStatus('Разрешите всплывающие окна для печати карточек.', 'error'); return; }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  }
+
+  function addCredential(account, credentials) {
+    if (!credentials) return;
+    createdList.push({ account: account, credentials: credentials });
+    renderCreated();
+  }
+
   function reload() {
     return Account.adminListAccounts().then(function (list) {
       accounts = list || [];
@@ -267,32 +373,72 @@
     });
   }
 
+  function syncCreatePasswordMode() {
+    var role = document.getElementById('newRole').value;
+    var gen = document.getElementById('newGeneratePassword');
+    var wrap = document.getElementById('newPasswordWrap');
+    var input = document.getElementById('newPassword');
+    var isStudent = role === 'student';
+    gen.disabled = !isStudent;
+    if (!isStudent) gen.checked = false;
+    var useGen = isStudent && gen.checked;
+    wrap.style.opacity = useGen ? '.55' : '1';
+    input.required = !useGen;
+    input.disabled = useGen;
+    if (useGen) input.value = '';
+  }
+
   document.getElementById('newRole').addEventListener('change', function () {
     updateScopeHint(this.value);
+    syncCreatePasswordMode();
   });
+  document.getElementById('newGeneratePassword').addEventListener('change', syncCreatePasswordMode);
 
   document.getElementById('createForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var btn = document.getElementById('createBtn');
+    var role = document.getElementById('newRole').value;
+    var generatePwd = role === 'student' && document.getElementById('newGeneratePassword').checked;
     var data = {
       name: document.getElementById('newName').value.trim().replace(/\s+/g, ' '),
       className: composeClass_('newClass', 'newLetter'),
-      role: document.getElementById('newRole').value,
+      role: role,
       scope: document.getElementById('newScope').value.trim(),
       password: document.getElementById('newPassword').value
     };
 
-    if (data.name.length < 3 || !data.className || data.password.length < 6) {
-      setStatus('Заполните имя, класс и пароль (минимум 6 символов).', 'error');
+    if (data.name.length < 3 || !data.className) {
+      setStatus('Заполните имя и класс.', 'error');
+      return;
+    }
+    if (!generatePwd && data.password.length < 6) {
+      setStatus('Пароль должен быть не короче 6 символов, либо включите генерацию.', 'error');
       return;
     }
 
     btn.disabled = true;
     setStatus('Создаём аккаунт…');
-    Account.adminCreateAccount(data).then(function () {
+
+    var req;
+    if (generatePwd) {
+      req = Account.createStudentAccount({ name: data.name, className: data.className }).then(function (res) {
+        var created = (res && res.created) || [];
+        var errors = (res && res.errors) || [];
+        if (errors.length) throw Object.assign(new Error(errors[0].message), { code: errors[0].error });
+        if (created.length) addCredential(created[0].account, created[0].credentials);
+        setStatus('Аккаунт создан: ' + data.name + '. Пароль показан ниже — распечатайте карточку.', 'ok');
+      });
+    } else {
+      req = Account.adminCreateAccount(data).then(function () {
+        setStatus('Аккаунт создан: ' + data.name, 'ok');
+      });
+    }
+
+    req.then(function () {
       e.target.reset();
+      document.getElementById('newGeneratePassword').checked = true;
       updateScopeHint('student');
-      setStatus('Аккаунт создан: ' + data.name, 'ok');
+      syncCreatePasswordMode();
       return reload();
     }).catch(function (err) {
       setStatus('Ошибка: ' + (err && err.message ? err.message : err), 'error');
@@ -330,6 +476,7 @@
   document.getElementById('accountsBody').addEventListener('click', function (e) {
     var saveBtn = e.target.closest('.save-role');
     var resetBtn = e.target.closest('.reset-pwd');
+    var editBtn = e.target.closest('.edit-student');
 
     if (saveBtn) {
       var row = saveBtn.closest('tr');
@@ -352,8 +499,8 @@
 
     if (resetBtn) {
       var id2 = resetBtn.dataset.id;
-      var pwd = window.prompt('Новый пароль (минимум 6 символов):', '');
-      if (!pwd) return;
+      var pwd = window.prompt('Новый пароль (минимум 6 символов). Оставьте пустым и нажмите Отмена, чтобы не менять.', '');
+      if (pwd === null) return;
       if (pwd.length < 6) {
         setStatus('Пароль должен быть не короче 6 символов.', 'error');
         return;
@@ -367,6 +514,13 @@
       }).then(function () {
         resetBtn.disabled = false;
       });
+      return;
+    }
+
+    if (editBtn) {
+      var account = accounts.find(function (a) { return a.id === editBtn.dataset.id; });
+      if (!account) return;
+      openEditStudent(account);
     }
   });
 
@@ -385,7 +539,78 @@
     }
   });
 
+  function openEditStudent(account) {
+    document.getElementById('editAccountId').value = account.id;
+    document.getElementById('editName').value = account.name || '';
+    document.getElementById('editClass').value = Account.baseClass(account.className) || '5 класс';
+    document.getElementById('editLetter').value = Account.subclassOf(account.className) || '';
+    document.getElementById('editGeneratePassword').checked = false;
+    document.getElementById('editPassword').value = '';
+    document.getElementById('editPassword').disabled = false;
+    document.getElementById('editPasswordWrap').style.opacity = '1';
+    document.getElementById('editModalSub').textContent = 'Текущий аккаунт: ' + account.name + ' · ' + account.className;
+    document.getElementById('editModal').style.display = 'block';
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+  }
+
+  document.getElementById('editGeneratePassword').addEventListener('change', function () {
+    var on = this.checked;
+    var input = document.getElementById('editPassword');
+    input.disabled = on;
+    input.required = false;
+    if (on) input.value = '';
+    document.getElementById('editPasswordWrap').style.opacity = on ? '.55' : '1';
+  });
+
+  document.getElementById('editCancelBtn').addEventListener('click', closeEditModal);
+  document.getElementById('editModal').addEventListener('click', function (e) {
+    if (e.target === this) closeEditModal();
+  });
+
+  document.getElementById('editStudentForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = document.getElementById('editSaveBtn');
+    var accountId = document.getElementById('editAccountId').value;
+    var name = document.getElementById('editName').value.trim().replace(/\s+/g, ' ');
+    var className = Account.composeClassName(
+      document.getElementById('editClass').value,
+      document.getElementById('editLetter').value
+    );
+    var generatePwd = document.getElementById('editGeneratePassword').checked;
+    var newPassword = document.getElementById('editPassword').value;
+
+    if (name.length < 3) { setStatus('Фамилия и имя должны быть не короче 3 символов.', 'error'); return; }
+    if (!className) { setStatus('Выберите класс.', 'error'); return; }
+    if (!generatePwd && newPassword && newPassword.length < 6) {
+      setStatus('Новый пароль должен быть не короче 6 символов.', 'error');
+      return;
+    }
+
+    var payload = { accountId: accountId, name: name, className: className };
+    if (generatePwd) payload.generatePassword = true;
+    else if (newPassword) payload.newPassword = newPassword;
+
+    btn.disabled = true;
+    setStatus('Сохраняем данные ученика…');
+    Account.adminUpdateAccount(payload).then(function (res) {
+      if (res && res.credentials) {
+        addCredential(res.account, res.credentials);
+        setStatus('Данные ученика обновлены. Новый пароль показан ниже — распечатайте карточку.', 'ok');
+      } else {
+        setStatus('Данные ученика обновлены.', 'ok');
+      }
+      closeEditModal();
+      return reload();
+    }).catch(function (err) {
+      setStatus('Ошибка: ' + (err && err.message ? err.message : err), 'error');
+    }).then(function () { btn.disabled = false; });
+  });
+
   updateScopeHint('student');
+  syncCreatePasswordMode();
   reload().catch(function (err) {
     setStatus('Не удалось загрузить аккаунты: ' + (err && err.message ? err.message : err), 'error');
     if (err && (err.code === 'AUTH_REQUIRED' || err.code === 'TOKEN_EXPIRED')) {

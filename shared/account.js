@@ -418,6 +418,25 @@
       .then(function (res) { return res.account; });
   }
 
+  /** Создание учеников учителем/админом. Пароли генерируются сервером. */
+  function createStudentAccount(data) {
+    requireAuth();
+    return post('createStudentAccount', Object.assign({ token: token() }, data || {}))
+      .then(function (res) {
+        return {
+          created: Array.isArray(res.created) ? res.created : [],
+          errors: Array.isArray(res.errors) ? res.errors : []
+        };
+      });
+  }
+
+  /** Админ меняет данные ученика (ФИО, класс, пароль). */
+  function adminUpdateAccount(data) {
+    requireAuth();
+    return post('adminUpdateAccount', Object.assign({ token: token() }, data || {}))
+      .then(function (res) { return { account: res.account, credentials: res.credentials || null }; });
+  }
+
   /* ---------------- ПОМОЩНИКИ ДЛЯ ИНТЕРФЕЙСА ---------------- */
 
   /** «5 а», «5-а», «5А» → «5а»; «5 класс» остаётся как есть. */
@@ -543,6 +562,8 @@
     adminSetRole: adminSetRole,
     adminResetPassword: adminResetPassword,
     setStudentClass: setStudentClass,
+    createStudentAccount: createStudentAccount,
+    adminUpdateAccount: adminUpdateAccount,
     normalizeClassName: normalizeClassName,
     baseClass: baseClass,
     subclassOf: subclassOf,

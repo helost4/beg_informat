@@ -10,7 +10,7 @@
 | `import.sql` | Импорт CSV-выгрузок листов «Аккаунты» и «Лист1». |
 | `functions/api/index.ts` | Точка входа Edge Function (CLI ожидает `index.ts`). |
 | `functions/api/index.js` | Логика `/functions/v1/api` — drop-in замена `/exec`. |
-| `functions/api/test.mjs` | 54 проверки контракта API на моке Supabase REST. |
+| `functions/api/test.mjs` | 71 проверка контракта API на моке Supabase REST. |
 | `tests/clientid-test.js` | 15 проверок `clientId`, офлайн-очереди и подклассов. |
 | `../shared/account.js` | Клиент теперь всегда шлёт `clientId` (идемпотентность). |
 
@@ -84,13 +84,54 @@ curl -X POST 'https://<PROJECT_REF>.supabase.co/functions/v1/api' \
 
 В ответе должен быть тот же формат, что у Apps Script: `{ok, result, token, account}` или `{ok:false, result:'error', error, message}`.
 
+### Первый администратор
+
+Публичная регистрация отключена. Если аккаунты ещё не импортированы из Apps
+Script, создайте первого администратора в Supabase SQL Editor:
+
+```sql
+-- если расширение ещё не включено
+create extension if not exists pgcrypto with schema extensions;
+
+-- ЗАМЕНИТЕ три значения: имя, соль и пароль
+insert into public.users
+  (id, name, class_name, track, login_key, password_salt, password_hash,
+   role, scope, created_at, updated_at)
+values
+  (gen_random_uuid()::text,
+   'Иванов Иван',
+   'Администратор',
+   'standard',
+   'иванов иван|администратор',
+   'замените-на-длинную-случайную-соль',
+   encode(digest('замените-на-длинную-случайную-соль' || 'сложныйпароль', 'sha256'), 'hex'),
+   'admin',
+   '',
+   now(),
+   now());
+```
+
+Соль и пароль в примере обязательно замените. Пароль в таблице не хранится:
+сохраняется только `SHA-256(соль || пароль)`. Вход выполняйте, выбрав в форме
+класс «Администратор» и введя те же имя и пароль. Если функция `digest` не
+найдена, используйте `extensions.digest(...)`.
+
 ### Подклассы
 
-Логика полностью совпадает с Apps Script (версия `2026-11-18-subclasses-v1`):
+Логика полностью совпадает с Apps Script (версия `2026-11-23-teacher-create-v1`):
 
 ```
-setStudentClass  { token, accountId, className } → { ok, result, account }
+setStudentClass       { token, accountId, className } → { ok, result, account }
+createStudentAccount  { token, name, className } → { ok, result, created[], errors[] }
+                      { token, students: [{name, className}] }
+adminUpdateAccount    { token, accountId, name?, className?, newPassword?, generatePassword? }
+                                                → { ok, result, account, credentials? }
 ```
+
+Публичная регистрация (`register`) отключена: сервер возвращает
+`REGISTRATION_DISABLED`. Учеников создаёт учитель (только в своём `scope`) или
+администратор; пароль генерируется на сервере и показывается один раз.
+`adminUpdateAccount` доступен только администратору и только для роли `student`.
 
 - доступно `teacher` и `admin`; учитель ограничен своим `scope`, где `5 класс` включает `5а`, `5б`, …;
 - `className` нормализуется (`5 а` / `5-а` / `5А` → `5а`), некорректные значения — `BAD_REQUEST`, занятые — `ACCOUNT_EXISTS`;
@@ -114,10 +155,8 @@ window.ACCOUNT_API_URL = 'https://<PROJECT_REF>.supabase.co/functions/v1/api';
 ## 6. Тесты
 
 ```bash
-node supabase/functions/api/test.mjs           # 54 проверки
+node supabase/functions/api/test.mjs           # 71 проверка
 node supabase/tests/clientid-test.js           # 15 проверок
-node /tmp/opencode/backend-test.js             # 45 тестов Apps Script (регрессия)
-node /tmp/opencode/lessons-catalog-test.js     # 26 тестов каталога
 ```
 
 ## Порядок включения (рекомендуемый)

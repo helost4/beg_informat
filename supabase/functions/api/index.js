@@ -388,6 +388,28 @@ function randomSalt() {
     webCrypto.randomUUID().replace(/-/g, '');
 }
 
+function generatePassword() {
+  const syllables = [
+    'ba','be','bi','bo','bu','da','de','di','do','du','fa','fe','fi','fo','fu',
+    'ga','ge','gi','go','gu','ka','ke','ki','ko','ku','la','le','li','lo','lu',
+    'ma','me','mi','mo','mu','na','ne','ni','no','nu','pa','pe','pi','po','pu',
+    'ra','re','ri','ro','ru','sa','se','si','so','su','ta','te','ti','to','tu',
+    'va','ve','vi','vo','vu','za','ze','zi','zo','zu'
+  ];
+  const digits = '23456789';
+  const bytes = new Uint8Array(12);
+  webCrypto.getRandomValues(bytes);
+  let b = 0;
+  function pick(arr) { return arr[bytes[b++ % bytes.length] % arr.length]; }
+  function pickDigit() { return digits.charAt(bytes[b++ % bytes.length] % digits.length); }
+  const parts = [];
+  for (let i = 0; i < 3; i++) {
+    const s = pick(syllables);
+    parts.push(s.charAt(0).toUpperCase() + s.slice(1) + pickDigit());
+  }
+  return parts.join('-');
+}
+
 async function hmacB64url(message, secret) {
   const key = await webCrypto.subtle.importKey(
     'raw',
@@ -464,38 +486,10 @@ function requireRole(account, roles) {
 /* ---------------- ДЕЙСТВИЯ ---------------- */
 
 async function register(body, deps) {
-  const name = normalizeName(body.name);
-  const className = normalizeClassName(body.className);
-  const track = normalizeTrack(body.track);
-  const password = String(body.password || '');
-
-  validateRegistration(name, className, password);
-
-  const key = loginKey(name, className);
-  if (await getAccountByLoginKey(key, deps)) {
-    fail('ACCOUNT_EXISTS', 'Аккаунт с таким именем и классом уже существует. Войдите в него.');
-  }
-
-  const salt = randomSalt();
-  const now = new Date().toISOString();
-  const account = await insertAccount({
-    id: webCrypto.randomUUID(),
-    name: name,
-    class_name: className,
-    track: track,
-    login_key: key,
-    password_salt: salt,
-    password_hash: await hashPassword(salt, password),
-    role: 'student',
-    scope: '',
-    created_at: now,
-    updated_at: now
-  }, deps);
-
-  return success({
-    token: await issueToken(account.id, deps),
-    account: accountPublic(account)
-  });
+  fail(
+    'REGISTRATION_DISABLED',
+    'Самостоятельная регистрация отключена. Обратитесь к учителю или администратору — вам создадут аккаунт и выдадут пароль.'
+  );
 }
 
 async function login(body, deps) {
@@ -840,6 +834,135 @@ async function adminResetPassword(body, deps) {
   return success({ accountId: account.id });
 }
 
+async function createStudentAccount(body, deps) {
+  const caller = await accountFromToken(body.token, deps);
+  const callerRole = requireRole(caller, ['teacher', 'admin']);
+
+  let items = Array.isArray(body.students) ? body.students.slice() : null;
+  if (!items) items = [{ name: body.name, className: body.className }];
+  if (!items.length) fail('BAD_REQUEST', 'Добавьте хотя бы одного ученика.');
+  if (items.length > 50) fail('BAD_REQUEST', 'За один раз можно создать не больше 50 учеников.');
+
+  const teacherClasses = callerRole === 'teacher' ? splitScope(caller.scope) : [];
+  const created = [];
+  const errors = [];
+  const seenKeys = {};
+
+  for (let i = 0; i < items.length; i++) {
+    const raw = items[i] || {};
+    const name = normalizeName(raw.name);
+    const className = normalizeClassName(raw.className);
+    try {
+      if (!name || name.length < 3) {
+        fail('BAD_REQUEST', 'Укажите фамилию и имя ученика (минимум 3 символа).');
+      }
+      if (!isValidClassName(className)) {
+        fail('BAD_REQUEST', 'Некорректный класс. Используйте например «5 класс» или «5а».');
+      }
+      if (callerRole === 'teacher' && !classListMatchesScope(teacherClasses, className)) {
+        fail('FORBIDDEN', 'Класс ' + className + ' вне вашей области доступа.');
+      }
+
+      const key = loginKey(name, className);
+      if (seenKeys[key]) fail('ACCOUNT_EXISTS', 'Этот ученик повторяется в списке.');
+      if (await getAccountByLoginKey(key, deps)) {
+        fail('ACCOUNT_EXISTS', 'Аккаунт с таким именем и классом уже существует.');
+      }
+
+      const password = generatePassword();
+      const now = new Date().toISOString();
+      const salt = randomSalt();
+      const account = await insertAccount({
+        id: webCrypto.randomUUID(),
+        name: name,
+        class_name: className,
+        track: 'standard',
+        login_key: key,
+        password_salt: salt,
+        password_hash: await hashPassword(salt, password),
+        role: 'student',
+        scope: '',
+        created_at: now,
+        updated_at: now
+      }, deps);
+      seenKeys[key] = true;
+
+      created.push({
+        account: accountPublic(account),
+        credentials: { name: name, className: className, password: password }
+      });
+    } catch (err) {
+      errors.push({
+        name: name,
+        className: className,
+        error: err.code || 'ERROR',
+        message: err.message || String(err)
+      });
+    }
+  }
+
+  return success({ created: created, errors: errors });
+}
+
+async function adminUpdateAccount(body, deps) {
+  await requireRole(await accountFromToken(body.token, deps), ['admin']);
+
+  const accountId = String(body.accountId || '').trim();
+  if (!accountId) fail('BAD_REQUEST', 'Не выбран аккаунт.');
+
+  const account = await getAccountById(accountId, deps);
+  if (!account) fail('NOT_FOUND', 'Аккаунт не найден.');
+  if (account.role !== 'student') {
+    fail('FORBIDDEN', 'Этот метод предназначен для изменения данных ученика.');
+  }
+
+  const nextName = body.name !== undefined ? normalizeName(body.name) : account.name;
+  const nextClass = body.className !== undefined ? normalizeClassName(body.className) : account.className;
+  const newPassword = body.newPassword !== undefined ? String(body.newPassword || '') : '';
+  const generatePwd = !!body.generatePassword;
+
+  if (!nextName || nextName.length < 3) fail('BAD_REQUEST', 'Укажите фамилию и имя (минимум 3 символа).');
+  if (!isValidClassName(nextClass)) {
+    fail('BAD_REQUEST', 'Некорректный класс. Используйте например «5 класс» или «5а».');
+  }
+  if (newPassword && newPassword.length < 6) {
+    fail('BAD_REQUEST', 'Пароль должен быть не короче 6 символов.');
+  }
+
+  const oldKey = loginKey(account.name, account.className);
+  const newKey = loginKey(nextName, nextClass);
+  if (oldKey !== newKey) {
+    const existing = await getAccountByLoginKey(newKey, deps);
+    if (existing && existing.id !== account.id) {
+      fail('ACCOUNT_EXISTS', 'Аккаунт с таким именем и классом уже существует.');
+    }
+  }
+
+  const patch = {
+    name: nextName,
+    class_name: nextClass,
+    login_key: newKey,
+    updated_at: new Date().toISOString()
+  };
+  let credentials = null;
+  if (generatePwd || newPassword) {
+    const pwd = generatePwd ? generatePassword() : newPassword;
+    const salt = randomSalt();
+    patch.password_salt = salt;
+    patch.password_hash = await hashPassword(salt, pwd);
+    credentials = { name: nextName, className: nextClass, password: pwd };
+  }
+
+  const updated = await updateAccount(account.id, patch, deps);
+  if (oldKey !== newKey) {
+    await updateParentScopesForClassChange(oldKey, newKey, deps);
+  }
+
+  const res = { account: accountPublic(updated) };
+  if (credentials) res.credentials = credentials;
+  return success(res);
+}
+
 async function setStudentClass(body, deps) {
   const caller = await accountFromToken(body.token, deps);
   requireRole(caller, ['teacher', 'admin']);
@@ -931,7 +1054,9 @@ const ACTIONS = {
   adminCreateAccount: adminCreateAccount,
   adminSetRole: adminSetRole,
   adminResetPassword: adminResetPassword,
-  setStudentClass: setStudentClass
+  setStudentClass: setStudentClass,
+  createStudentAccount: createStudentAccount,
+  adminUpdateAccount: adminUpdateAccount
 };
 
 async function parseBody(request) {

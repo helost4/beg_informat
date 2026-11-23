@@ -167,21 +167,13 @@ async function legacyPassword(acc, password) {
 /* ---------------- ТЕСТЫ ---------------- */
 
 const run = async () => {
-  // 1. Регистрация: роль student, формат токена с паддингом как в Apps Script.
+  // 1. Публичная регистрация отключена.
   {
     const db = createDb();
     const res = await post({ action: 'register', name: 'Петров Пётр', className: '5 класс',
       password: 'secret123', track: 'ege', role: 'admin' }, db);
-    check('register ok', res.ok === true, JSON.stringify(res));
-    eq('register role всегда student', res.account.role, 'student');
-    eq('register account fields', Object.keys(res.account).sort(),
-      ['className', 'id', 'name', 'role', 'scope', 'track']);
-    check('токен из двух частей', String(res.token).split('.').length === 2);
-    const [payload, signature] = res.token.split('.');
-    const decoded = JSON.parse(Buffer.from(payload.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString());
-    eq('payload побайтово как в Apps Script', payload, b64url(Buffer.from(JSON.stringify(decoded))));
-    eq('подпись побайтово как в Apps Script', signature, await hmacB64(payload, TEST_SECRET));
-    check('exp ~ 30 дней', decoded.exp - Date.now() > 29 * 864e5, String(decoded.exp - Date.now()));
+    eq('register отключён', res.error, 'REGISTRATION_DISABLED');
+    check('register не возвращает токен', !res.token, JSON.stringify(res));
   }
 
   // 2. Вход по старому хешу и старому токену.
@@ -382,10 +374,92 @@ const run = async () => {
       accountId: 'student', className: '5б' }, db);
     eq('учитель сменил букву', teacherChanged.account.className, '5б');
 
-    await post({ action: 'register', name: 'Иванов Иван', className: '5в', password: 'secret123' }, db);
+    legacyAccount(db, { id: 'other5v', name: 'Иванов Иван', class_name: '5в', role: 'student', login_key: 'иванов иван|5в' });
     const conflict = await post({ action: 'setStudentClass', token: adminToken,
       accountId: 'student', className: '5в' }, db);
     eq('конфликт подкласса', conflict.error, 'ACCOUNT_EXISTS');
+  }
+
+  // 9. Учитель/админ создаёт аккаунты учеников, пароль генерируется.
+  {
+    const db = createDb();
+    const admin = legacyAccount(db, { id: 'admin', name: 'Админ', class_name: 'Администрация', role: 'admin' });
+    const teacher = legacyAccount(db, { id: 'teacher', name: 'Учитель', class_name: 'Учителя', role: 'teacher', scope: '5 класс;6 класс' });
+    const student = legacyAccount(db, { id: 'student', name: 'Ученик', class_name: '5 класс', role: 'student' });
+    [admin, teacher, student].forEach(a => { a.password_hash = 'x'; });
+    const adminToken = await legacyToken('admin', Date.now() + 864e5);
+    const teacherToken = await legacyToken('teacher', Date.now() + 864e5);
+    const studentToken = await legacyToken('student', Date.now() + 864e5);
+
+    const created = await post({ action: 'createStudentAccount', token: adminToken,
+      name: 'Новый Ученик', className: '7а' }, db);
+    check('createStudentAccount ok', created.ok === true, JSON.stringify(created));
+    eq('создан 1 аккаунт', created.created.length, 1);
+    eq('ошибок нет', created.errors.length, 0);
+    eq('роль student', created.created[0].account.role, 'student');
+    eq('класс нормализован', created.created[0].account.className, '7а');
+    check('пароль выдан', typeof created.created[0].credentials.password === 'string' && created.created[0].credentials.password.length >= 8,
+      JSON.stringify(created.created[0].credentials));
+
+    const loginCreated = await post({ action: 'login', name: 'Новый Ученик', className: '7а',
+      password: created.created[0].credentials.password }, db);
+    check('вход по сгенерированному паролю', loginCreated.ok === true, JSON.stringify(loginCreated));
+
+    const byTeacher = await post({ action: 'createStudentAccount', token: teacherToken,
+      name: 'Ученик Пятый', className: '5б' }, db);
+    check('учитель создал в своём scope', byTeacher.ok === true && byTeacher.created.length === 1, JSON.stringify(byTeacher));
+
+    const outside = await post({ action: 'createStudentAccount', token: teacherToken,
+      name: 'Чужой Ученик', className: '7б' }, db);
+    eq('учитель вне scope: ошибок', outside.errors.length, 1);
+    eq('учитель вне scope: код', outside.errors[0].error, 'FORBIDDEN');
+
+    const dup = await post({ action: 'createStudentAccount', token: adminToken,
+      name: 'Новый Ученик', className: '7а' }, db);
+    eq('дубликат: ошибка', dup.errors[0] && dup.errors[0].error, 'ACCOUNT_EXISTS');
+
+    const byStudent = await post({ action: 'createStudentAccount', token: studentToken,
+      name: 'Кто-то', className: '5а' }, db);
+    eq('ученик не может создавать', byStudent.error, 'FORBIDDEN');
+  }
+
+  // 10. Админ изменяет данные ученика: ФИО/класс/пароль, loginKey и scope родителей.
+  {
+    const db = createDb();
+    const admin = legacyAccount(db, { id: 'admin', name: 'Админ', class_name: 'Администрация', role: 'admin' });
+    const teacher = legacyAccount(db, { id: 'teacher', name: 'Учитель', class_name: 'Учителя', role: 'teacher', scope: '5 класс' });
+    const parent = legacyAccount(db, { id: 'parent', name: 'Родитель', class_name: 'Родитель',
+      role: 'parent', scope: 'иванов иван|5а' });
+    const student = legacyAccount(db, { id: 'student', name: 'Иванов Иван', class_name: '5а', role: 'student' });
+    [admin, teacher, parent, student].forEach(a => { a.password_hash = 'x'; });
+    const adminToken = await legacyToken('admin', Date.now() + 864e5);
+    const teacherToken = await legacyToken('teacher', Date.now() + 864e5);
+
+    const forbidden = await post({ action: 'adminUpdateAccount', token: teacherToken,
+      accountId: 'student', name: 'Петров Пётр' }, db);
+    eq('учитель не может adminUpdateAccount', forbidden.error, 'FORBIDDEN');
+
+    const renamed = await post({ action: 'adminUpdateAccount', token: adminToken,
+      accountId: 'student', name: 'Петров Пётр', className: '5б', generatePassword: true }, db);
+    check('adminUpdateAccount ok', renamed.ok === true, JSON.stringify(renamed));
+    eq('имя обновлено', renamed.account.name, 'Петров Пётр');
+    eq('класс обновлён', renamed.account.className, '5б');
+    check('credentials возвращены', !!(renamed.credentials && renamed.credentials.password), JSON.stringify(renamed));
+    eq('login_key обновлён', db.users.find(u => u.id === 'student').login_key, 'петров пётр|5б');
+    eq('scope родителя обновлён', db.users.find(u => u.id === 'parent').scope, 'петров пётр|5б');
+
+    const loginNew = await post({ action: 'login', name: 'Петров Пётр', className: '5б',
+      password: renamed.credentials.password }, db);
+    check('вход с новым паролем', loginNew.ok === true, JSON.stringify(loginNew));
+
+    legacyAccount(db, { id: 'other', name: 'Сидоров Сидор', class_name: '5б', role: 'student', login_key: 'сидоров сидор|5б' });
+    const conflict = await post({ action: 'adminUpdateAccount', token: adminToken,
+      accountId: 'student', name: 'Сидоров Сидор', className: '5б' }, db);
+    eq('конфликт при переименовании', conflict.error, 'ACCOUNT_EXISTS');
+
+    const notStudent = await post({ action: 'adminUpdateAccount', token: adminToken,
+      accountId: 'teacher', name: 'Учитель Два' }, db);
+    eq('нельзя менять не-ученика', notStudent.error, 'FORBIDDEN');
   }
 
   const ok = failures.length === 0;
