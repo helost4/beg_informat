@@ -647,3 +647,17 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:30px;pad
   .results-table th:nth-child(2),.results-table td:nth-child(2){display:none;}
   .results-table th,.results-table td{padding:8px 6px;}
 }
+
+/* ============ ПРАКТИЧЕСКИЕ РАБОТЫ ============ */
+/* Образцы текста — картинки: выделить и скопировать их нельзя. */
+.sample-image{
+  display:block;max-width:100%;height:auto;margin:16px 0;
+  border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,.08);
+  user-select:none;-webkit-user-select:none;-webkit-user-drag:none;
+}
+.sample-image.compact{margin:8px 0;box-shadow:none;}
+
+/* Русские аналоги названий офисных приложений */
+.app-ru{font-weight:500;color:#64748b;font-size:.9em;white-space:normal;}
+.app-ru.light{color:rgba(255,255,255,.85);}
+.app-ru.mock-ru{display:block;font-size:.72em;color:#64748b;font-weight:400;}
